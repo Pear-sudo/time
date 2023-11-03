@@ -5,9 +5,6 @@ import './index.css';
 import arrowPrev from './icons/arrow-prev-small.svg';
 import arrowNext from './icons/arrow-next-small.svg';
 import Image from "next/image";
-import {start} from "repl";
-import {ClassName, id} from "postcss-selector-parser";
-import assert from "assert";
 
 function getWeek(today: Date): number {
     //TODO support different begging day
@@ -30,9 +27,12 @@ function areSameDate(d1: Date, d2: Date): boolean {
     return d1.getFullYear() === d2.getFullYear() && d1.getMonth() === d2.getMonth() && d1.getDate() === d2.getDate()
 }
 
-function DayNumber(prop: { date: Date, children?: React.ReactNode }): JSX.Element {
+function DayNumber(prop: {
+    date: Date,
+    children?: React.ReactNode
+}): JSX.Element {
     return (
-        <div className={`inline-flex flex-col items-center m-1 select-none`}>
+        <div className={`inline-flex flex-col items-center m-1 select-none w-full`}>
             <div className={`${areSameDate(prop.date, new Date()) ? 'text-sky-700' : ''}`}>
                 {getWeekDay(prop.date)}
             </div>
@@ -45,13 +45,70 @@ function DayNumber(prop: { date: Date, children?: React.ReactNode }): JSX.Elemen
     )
 }
 
-function Calendar(prop: { dates: Date[] }): JSX.Element {
-    const height = 150
-    const dateToTest = prop.dates[0]
+function TimeAxis(prop: { height: number }): JSX.Element {
+    let elements: JSX.Element[] = []
+    for (let i = 0; i < 23; i++) {
+        const s_time = padNumber(2, i + 1) + ':' + padNumber(2, 0)
+        elements.push(
+            <Slot id={i} className={'invisible'} time={s_time}/>
+        )
+    }
+
     return (
-        <div className={'flex-row inline-flex p-1 w-full px-5 h-screen overflow-y-auto'}>
-            <Column height={height} date={dateToTest} axis={true}/>
-            <Days dates={prop.dates} height={height}/>
+        <div style={{height: `${prop.height}vh`}}>
+            {elements}
+        </div>
+    )
+}
+
+function Calendar(prop: {
+    dates: Date[]
+}): JSX.Element {
+    const timeAxisRef = useRef<HTMLDivElement>()
+    const [timeAxisPadding, setTimeAxisPadding] = useState(0)
+
+    useEffect(() => {
+        setTimeAxisPadding(getElementWidth(timeAxisRef.current as HTMLDivElement))
+    }, []);
+
+    const height = 150
+
+    function mapDate2DayContent(date: Date, index: number, array: Date[]): JSX.Element {
+        return (
+            <DayContent date={date} height={height}
+                        index={{index: index, length: array.length}}
+                        width={{width: `${1 / prop.dates.length * 100}%`}}
+            />
+        )
+    }
+
+    function mapDate2DayNumber(date: Date, index: number, array: Date[]): JSX.Element {
+        return (
+            <DayNumber date={date}/>
+        )
+    }
+
+    function getRenderDates(dates: Date[]): Date[] {
+        return [...rollDates(prop.dates, -1), ...dates, ...rollDates(prop.dates, 1)]
+    }
+
+    const renderDates = getRenderDates(prop.dates)
+
+    return (
+        <div className={'mx-8'}>
+            <div className={'flex-row inline-flex align-top w-full'}>
+                <Pager dataSet={renderDates} scrollIndex={prop.dates.length} view={prop.dates.length}
+                       mapData={mapDate2DayNumber}
+                       hashData={getDayId} overScrollPixel={-timeAxisPadding - 8}/>
+            </div>
+            <div className={'flex-row inline-flex align-top w-full h-screen overflow-y-auto relative'}>
+                <div ref={timeAxisRef} className={'absolute z-10 bg-white'}>
+                    <TimeAxis height={height}/>
+                </div>
+                <Pager dataSet={renderDates} scrollIndex={prop.dates.length} view={prop.dates.length}
+                       mapData={mapDate2DayContent}
+                       hashData={getDayId} overScrollPixel={-timeAxisPadding - 8}/>
+            </div>
         </div>
     )
 }
@@ -86,78 +143,77 @@ function getPixelsBefore(elements: Map<string, HTMLDivElement>, anchorKey: strin
     return pixelsBefore
 }
 
-function Days(prop: { dates: Date[], height: number }): JSX.Element {
-    const selfDivRef = useRef<HTMLDivElement>()
-    const columnsRef = useRef<Map<string, HTMLDivElement>>(new Map())
+function Pager<DT>(prop: {
+    dataSet: DT[],
+    scrollIndex: number,
+    view: number,
+    mapData: (data: DT, index: number, array: DT[]) => JSX.Element
+    hashData: (data: DT) => string,
+    overScrollPixel?: number
+}): JSX.Element {
     const propRef = useRef(prop)
-    const renderRef = useRef<Date[]>([])
-    const lastScrollRef = useRef<Date>()
+
+    const containerRef = useRef<HTMLDivElement>()
+    const elementsRef = useRef<Map<string, HTMLDivElement>>(new Map())
 
     useEffect(() => {
-        if (!lastScrollRef.current) {
+        if (!propRef.current) {
             updateRefs()
         }
 
+        const oldAnchor = propRef.current.dataSet.at(propRef.current.scrollIndex) as DT
         // @ts-ignore
-        if (!columnsRef.current.has(getDayId(lastScrollRef.current))) {
+        if (!prop.dataSet.map((d) => prop.hashData(d)).includes(prop.hashData(oldAnchor))) {
+            console.warn(`Old anchor is not in the new data set. \nNew: ${prop.dataSet}\nOld Anchor: ${oldAnchor}`)
+            updateRefs()
             return
         }
 
         // first let's adjust the position to previous state (after inserting or removing columns)
-        let anchor: Date = lastScrollRef.current as Date
-        let pixelsBefore: number = getPixelsBefore(columnsRef.current, getDayId(anchor))
-        selfDivRef.current?.scrollTo(pixelsBefore, 0)
+        let pixelsBefore: number = getPixelsBefore(elementsRef.current, prop.hashData(oldAnchor))
+        containerRef.current?.scrollTo(pixelsBefore, 0)
 
         // second, start the animation
-        anchor = scrollToDate
-        pixelsBefore = getPixelsBefore(columnsRef.current, getDayId(anchor))
-        selfDivRef.current?.scrollTo({top: 0, left: pixelsBefore, behavior: "smooth"})
+        const currentAnchor = prop.dataSet.at(prop.scrollIndex) as DT
+        pixelsBefore = getPixelsBefore(elementsRef.current, prop.hashData(currentAnchor))
+        // @ts-ignore
+        containerRef.current?.scrollTo({top: 0, left: pixelsBefore + overScrollPixel, behavior: "smooth"})
 
         updateRefs()
     })
 
-    // @ts-ignore
-    let scrollToDate: Date = prop.dates.at(0)
-    const renderDates: Date[] = getRenderDates(prop.dates)
+    const overScrollPixel = prop.overScrollPixel || 0
 
     function updateRefs() {
         propRef.current = prop
-        renderRef.current = renderDates
-        lastScrollRef.current = scrollToDate
     }
 
-    function getRenderDates(dates: Date[]): Date[] {
-        return [...rollDates(prop.dates, -1), ...dates, ...rollDates(prop.dates, 1)]
-    }
-
-    function registerSelf(self: HTMLDivElement | null, key: string): void {
+    function registerElement(self: HTMLDivElement | null, key: string, ref: React.MutableRefObject<Map<string, HTMLDivElement>>): void {
         if (self) {
-            columnsRef.current.set(key, self)
+            ref.current.set(key, self)
         } else {
-            columnsRef.current.delete(key)
+            ref.current.delete(key)
         }
     }
 
-    function mapDate(date: Date, index: number, array: Date[]): JSX.Element {
+    function mapData(data: DT, index: number, array: DT[]): JSX.Element {
         return (
-            <div key={getDayId(date)}
-                 ref={(self) => registerSelf(self, getDayId(date))}
+            <div key={prop.hashData(data)}
+                 ref={(self) => registerElement(self, prop.hashData(data), elementsRef)}
                  className={'flex-shrink-0'}
-                 style={{flexBasis: `${1 / prop.dates.length * 100}%`}}
+                 style={{flexBasis: `${1 / prop.view * 100}%`}}
             >
-                <Column date={date} height={prop.height}
-                        index={{index: index, length: array.length}}
-                        width={{width: `${1 / prop.dates.length * 100}%`}}
-                />
+                {prop.mapData(data, index, array)}
             </div>
         )
     }
 
     return (
-        <div className={'flex-row inline-flex py-1 px-0 w-full flex-nowrap overflow-x-hidden overflow-y-hidden h-fit'}
-             ref={selfDivRef}
+        <div
+            className={'flex-row inline-flex py-0 px-0 w-full flex-nowrap overflow-x-hidden overflow-y-hidden h-fit'}
+            ref={containerRef}
         >
-            {renderDates.map(mapDate)}
+            {prop.dataSet.map(mapData)}
         </div>
     )
 }
@@ -218,15 +274,6 @@ function padNumber(length: number, number: number): string {
     return s_number
 }
 
-function repeatTimeline(): JSX.Element[] {
-    let elements: JSX.Element[] = []
-    for (let i = 0; i < 23; i++) {
-        const s_time = padNumber(2, i + 1) + ':' + padNumber(2, 0)
-        elements.push(<Slot className={'invisible'}><TimeLine time={s_time}/></Slot>)
-    }
-    return elements
-}
-
 function isHead(index: number, length: number): boolean {
     return index === 0
 }
@@ -239,41 +286,29 @@ function isMiddle(index: number, length: number): boolean {
     return !isHead(index, length) && !isTail(index, length)
 }
 
-function Column(prop: {
+function DayContent(prop: {
     height: number,
     date: Date,
-    axis?: boolean,
-    index?: { index: number, length: number }
-    width?: CSSProperties
+    index: {
+        index: number,
+        length: number
+    }
 }): JSX.Element {
 
     let slots: JSX.Element[] = []
-    let head: JSX.Element
-    if (!prop.axis) {
-        if (prop.index) {
-            // @ts-ignore
-            slots = repeatElements(24, (index) => <Slot id={index}
-                                                        className={isTail(prop.index.index, prop.index.length) ? 'border-x' : 'border-l'}/>)
-        }
-        head = <DayNumber date={prop.date}/>
-    } else {
-        slots = repeatTimeline()
-        head = <DayNumber date={prop.date}>{<WeekNumber date={prop.date}/>}</DayNumber>
-    }
+    slots = repeatElements(24, (index) => <Slot id={index}
+                                                className={isTail(prop.index.index, prop.index.length) ? 'border-x' : 'border-l'}/>)
 
     return (
-        <div className={`shrink -mr-px ${prop.axis ? 'w-fit' : 'w-full'}`}>
-            <div className={`inline-flex flex-row justify-center w-full ${prop.axis ? 'invisible' : ''}`}>
-                {head}
-            </div>
-            <div style={{height: `${prop.height}vh`}}>
-                {slots}
-            </div>
+        <div style={{height: `${prop.height}vh`}}>
+            {slots}
         </div>
     )
 }
 
-function WeekNumber(prop: { date: Date }): JSX.Element {
+function WeekNumber(prop: {
+    date: Date
+}): JSX.Element {
     return (
         <div className={'text-black rounded bg-gray-400 py-1 px-2 -translate-x-3'}>
             {getWeek(prop.date)}
@@ -281,33 +316,40 @@ function WeekNumber(prop: { date: Date }): JSX.Element {
     )
 }
 
-function TimeLine(prop: { time: string }): JSX.Element {
-    return (
-        <div
-            className={'absolute visible inline top-full left-full -translate-x-full -translate-y-1/2 pr-1 text-sm'}>{prop.time}</div>
-    )
-}
+function Slot(prop: { className?: string, id: number, time?: string }): JSX.Element {
+    const timeDivRef = useRef<HTMLDivElement>()
+    const containerRef = useRef<HTMLDivElement>()
+    useEffect(() => {
+        if (prop.time) {
+            // @ts-ignore
+            containerRef.current.style.width = `${getElementWidth(timeDivRef.current)}px`
+        }
+    }, []);
 
-function Slot(prop: { className?: string, id?: number, children?: React.ReactNode }): JSX.Element {
     let isHead = false
     let isTail = false
-    if (prop.id !== undefined && prop.id !== null) {
-        if (prop.id === 0)
-            isHead = true
-        if (prop.id === 23)
-            isTail = true
-    }
-    const baseStyle: CSSProperties = {height: `${1 / 24 * 100}%`, marginTop: '-1px'}
+    if (prop.id === 0)
+        isHead = true
+    if (prop.id === 23)
+        isTail = true
+
+    const baseStyle: CSSProperties = {height: `${1 / 24 * 100}%`}
     return (
-        <div
-            className={`w-full border-neutral-400 relative ${prop.className} ${isHead ? '' : 'border-t'} ${isTail ? '' : 'border-b'}`}
-            style={baseStyle}>
-            {prop.children}
+        <div ref={containerRef}
+             className={`w-full border-neutral-400 relative ${prop.className} ${isTail ? '' : 'border-b'}`}
+             style={baseStyle}>
+            <div
+                ref={timeDivRef}
+                className={'absolute visible inline top-full left-full -translate-x-full -translate-y-1/2 pr-1 text-sm'}>
+                {prop.time}
+            </div>
         </div>
     )
 }
 
-function NavigationButtons(prop: { onClick: (nextPeriod: boolean) => void }): JSX.Element {
+function NavigationButtons(prop: {
+    onClick: (nextPeriod: boolean) => void
+}): JSX.Element {
 
     return (
         <div className={'inline-flex flex-row'}>
