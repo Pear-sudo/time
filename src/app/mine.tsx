@@ -89,14 +89,14 @@ function Calendar(prop: {
     const renderDates = getRenderDates(prop.dates)
 
     return (
-        <div className={'mx-8'}>
-            <div className={'flex-row inline-flex align-top w-full'}>
+        <div className={'mx-8 h-full overflow-y-hidden flex-col inline-flex'}>
+            <div className={'flex-row inline-flex align-top w-full grow-0'}>
                 <div className={'text-sm invisible'}>00:00</div>
                 <Pager dataSet={renderDates} scrollIndex={prop.dates.length} view={prop.dates.length}
                        mapData={mapDate2DayNumber}
                        hashData={getDayId} overScrollPixel={-8}/>
             </div>
-            <div className={'flex-row inline-flex align-top w-full h-screen overflow-y-auto'}>
+            <div className={'flex-row inline-flex align-top w-full h-full overflow-y-auto grow'}>
                 <div>
                     <TimeAxis height={height}/>
                 </div>
@@ -409,9 +409,11 @@ function Display(): JSX.Element {
     }
 
     return (
-        <div className={'w-full'}>
-            <DayCount/>
-            <NavigationButtons onClick={onNavigationButtonClick}/>
+        <div className={'w-full h-screen'} style={{display: 'grid', gridTemplateRows: 'auto 1fr'}}>
+            <div>
+                <DayCount/>
+                <NavigationButtons onClick={onNavigationButtonClick}/>
+            </div>
             <Calendar dates={displayedDates}/>
         </div>
     )
