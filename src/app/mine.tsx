@@ -6,7 +6,7 @@ import arrowPrev from './icons/arrow-prev-small.svg';
 import arrowNext from './icons/arrow-next-small.svg';
 import Image from "next/image";
 import {start} from "repl";
-import {id} from "postcss-selector-parser";
+import {ClassName, id} from "postcss-selector-parser";
 import assert from "assert";
 
 function getWeek(today: Date): number {
@@ -49,7 +49,7 @@ function Calendar(prop: { dates: Date[] }): JSX.Element {
     const height = 150
     const dateToTest = prop.dates[0]
     return (
-        <div className={'flex-row inline-flex p-1'} style={{width: '50vw'}}>
+        <div className={'flex-row inline-flex p-1 w-full px-5 h-screen overflow-y-auto'}>
             <Column height={height} date={dateToTest} axis={true}/>
             <Days dates={prop.dates} height={height}/>
         </div>
@@ -58,7 +58,7 @@ function Calendar(prop: { dates: Date[] }): JSX.Element {
 
 function getDayId(date: Date): string {
     let id = padNumber(4, date.getFullYear()) + padNumber(2, date.getMonth()) + padNumber(2, date.getDate())
-    console.log(id)
+    // console.log(id)
     return id
 }
 
@@ -67,45 +67,63 @@ function includeDate(date: Date, dates: Date[]): boolean {
     return ids.includes(getDayId(date))
 }
 
+function getElementWidth(element: HTMLDivElement): number {
+    let width = 0
+    const style = window.getComputedStyle(element)
+    width = parseFloat(style.width)
+    return width
+}
+
+function getPixelsBefore(elements: Map<string, HTMLDivElement>, anchorKey: string): number {
+    let pixelsBefore: number = 0
+    for (const [k, v] of elements) {
+        if (k !== anchorKey) {
+            pixelsBefore += getElementWidth(v)
+        } else {
+            return pixelsBefore
+        }
+    }
+    return pixelsBefore
+}
+
 function Days(prop: { dates: Date[], height: number }): JSX.Element {
+    const selfDivRef = useRef<HTMLDivElement>()
     const columnsRef = useRef<Map<string, HTMLDivElement>>(new Map())
     const propRef = useRef(prop)
     const renderRef = useRef<Date[]>([])
-    const scrollHistoryRef = useRef<Date[]>([])
+    const lastScrollRef = useRef<Date>()
 
     useEffect(() => {
+        if (!lastScrollRef.current) {
+            updateRefs()
+        }
+
+        // @ts-ignore
+        if (!columnsRef.current.has(getDayId(lastScrollRef.current))) {
+            return
+        }
+
         // first let's adjust the position to previous state (after inserting or removing columns)
-        // @ts-ignore
-        columnsRef.current.get(getDayId(scrollHistoryRef.current.at(0)))?.scrollIntoView({
-            inline: 'start',
-            block: 'start',
-            behavior: 'instant'
-        })
+        let anchor: Date = lastScrollRef.current as Date
+        let pixelsBefore: number = getPixelsBefore(columnsRef.current, getDayId(anchor))
+        selfDivRef.current?.scrollTo(pixelsBefore, 0)
+
         // second, start the animation
-        // @ts-ignore
-        columnsRef.current.get(getDayId(propRef.current.dates.at(0)))?.scrollIntoView({
-            inline: 'start',
-            block: 'start',
-            behavior: 'smooth'
-        })
+        anchor = scrollToDate
+        pixelsBefore = getPixelsBefore(columnsRef.current, getDayId(anchor))
+        selfDivRef.current?.scrollTo({top: 0, left: pixelsBefore, behavior: "smooth"})
+
+        updateRefs()
     })
 
     // @ts-ignore
     let scrollToDate: Date = prop.dates.at(0)
     const renderDates: Date[] = getRenderDates(prop.dates)
 
-    updateRefs()
-
     function updateRefs() {
         propRef.current = prop
         renderRef.current = renderDates
-
-        if (scrollHistoryRef.current.length < 2) {
-            scrollHistoryRef.current.push(scrollToDate, scrollToDate)
-        } else {
-            scrollHistoryRef.current.splice(0, 1)
-            scrollHistoryRef.current.push(scrollToDate)
-        }
+        lastScrollRef.current = scrollToDate
     }
 
     function getRenderDates(dates: Date[]): Date[] {
@@ -122,18 +140,24 @@ function Days(prop: { dates: Date[], height: number }): JSX.Element {
 
     function mapDate(date: Date, index: number, array: Date[]): JSX.Element {
         return (
-            <div key={getDayId(date)} ref={(self) => registerSelf(self, getDayId(date))}>
+            <div key={getDayId(date)}
+                 ref={(self) => registerSelf(self, getDayId(date))}
+                 className={'flex-shrink-0'}
+                 style={{flexBasis: `${1 / prop.dates.length * 100}%`}}
+            >
                 <Column date={date} height={prop.height}
-                        index={{index: index, length: array.length}}/>
+                        index={{index: index, length: array.length}}
+                        width={{width: `${1 / prop.dates.length * 100}%`}}
+                />
             </div>
         )
     }
 
     return (
-        <div className={'w-1/2'}>
-            <div className={'flex-row inline-flex py-1 px-0 w-full flex-nowrap overflow-x-hidden    '}>
-                {renderDates.map(mapDate)}
-            </div>
+        <div className={'flex-row inline-flex py-1 px-0 w-full flex-nowrap overflow-x-hidden overflow-y-hidden h-fit'}
+             ref={selfDivRef}
+        >
+            {renderDates.map(mapDate)}
         </div>
     )
 }
@@ -220,6 +244,7 @@ function Column(prop: {
     date: Date,
     axis?: boolean,
     index?: { index: number, length: number }
+    width?: CSSProperties
 }): JSX.Element {
 
     let slots: JSX.Element[] = []
@@ -355,9 +380,25 @@ function Display(): JSX.Element {
     }
 
     return (
-        <div className={''}>
+        <div className={'w-full'}>
+            <DayCount/>
             <NavigationButtons onClick={onNavigationButtonClick}/>
             <Calendar dates={displayedDates}/>
+        </div>
+    )
+}
+
+function DayCount(): JSX.Element {
+    return (
+        <div>
+        </div>
+    )
+}
+
+function DropDown(): JSX.Element {
+    return (
+        <div>
+
         </div>
     )
 }
