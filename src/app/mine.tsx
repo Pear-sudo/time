@@ -64,12 +64,6 @@ function TimeAxis(prop: { height: number }): JSX.Element {
 function Calendar(prop: {
     dates: Date[]
 }): JSX.Element {
-    const timeAxisRef = useRef<HTMLDivElement>()
-    const [timeAxisPadding, setTimeAxisPadding] = useState(0)
-
-    useEffect(() => {
-        setTimeAxisPadding(getElementWidth(timeAxisRef.current as HTMLDivElement))
-    }, []);
 
     const height = 150
 
@@ -97,17 +91,18 @@ function Calendar(prop: {
     return (
         <div className={'mx-8'}>
             <div className={'flex-row inline-flex align-top w-full'}>
+                <div className={'text-sm invisible'}>00:00</div>
                 <Pager dataSet={renderDates} scrollIndex={prop.dates.length} view={prop.dates.length}
                        mapData={mapDate2DayNumber}
-                       hashData={getDayId} overScrollPixel={-timeAxisPadding - 8}/>
+                       hashData={getDayId} overScrollPixel={-8}/>
             </div>
-            <div className={'flex-row inline-flex align-top w-full h-screen overflow-y-auto relative'}>
-                <div ref={timeAxisRef} className={'absolute z-10 bg-white'}>
+            <div className={'flex-row inline-flex align-top w-full h-screen overflow-y-auto'}>
+                <div>
                     <TimeAxis height={height}/>
                 </div>
                 <Pager dataSet={renderDates} scrollIndex={prop.dates.length} view={prop.dates.length}
                        mapData={mapDate2DayContent}
-                       hashData={getDayId} overScrollPixel={-timeAxisPadding - 8}/>
+                       hashData={getDayId} overScrollPixel={-8}/>
             </div>
         </div>
     )
@@ -317,15 +312,6 @@ function WeekNumber(prop: {
 }
 
 function Slot(prop: { className?: string, id: number, time?: string }): JSX.Element {
-    const timeDivRef = useRef<HTMLDivElement>()
-    const containerRef = useRef<HTMLDivElement>()
-    useEffect(() => {
-        if (prop.time) {
-            // @ts-ignore
-            containerRef.current.style.width = `${getElementWidth(timeDivRef.current)}px`
-        }
-    }, []);
-
     let isHead = false
     let isTail = false
     if (prop.id === 0)
@@ -335,12 +321,13 @@ function Slot(prop: { className?: string, id: number, time?: string }): JSX.Elem
 
     const baseStyle: CSSProperties = {height: `${1 / 24 * 100}%`}
     return (
-        <div ref={containerRef}
-             className={`w-full border-neutral-400 relative ${prop.className} ${isTail ? '' : 'border-b'}`}
-             style={baseStyle}>
+        <div
+            className={`w-full border-neutral-400 relative ${prop.className} ${isTail ? '' : 'border-b'}`}
+            style={baseStyle}>
+            <div className={`${prop.time ? 'invisible' : 'hidden'}`}>00:00</div>
             <div
-                ref={timeDivRef}
-                className={'absolute visible inline top-full left-full -translate-x-full -translate-y-1/2 pr-1 text-sm'}>
+                className={'absolute visible inline top-full left-full -translate-x-full -translate-y-1/2 pr-1 text-sm'}
+            >
                 {prop.time}
             </div>
         </div>
