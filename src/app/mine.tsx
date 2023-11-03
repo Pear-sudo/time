@@ -92,7 +92,7 @@ function Days(prop: { dates: Date[], height: number }): JSX.Element {
 
     // @ts-ignore
     let scrollToDate: Date = prop.dates.at(0)
-    const renderDates: Date[] = [...rollDates(prop.dates, -1), ...prop.dates, ...rollDates(prop.dates, 1)]
+    const renderDates: Date[] = getRenderDates(prop.dates)
 
     updateRefs()
 
@@ -131,7 +131,7 @@ function Days(prop: { dates: Date[], height: number }): JSX.Element {
 
     return (
         <div className={'w-1/2'}>
-            <div className={'flex-row inline-flex py-1 px-0 w-full flex-nowrap overflow-x-auto'}>
+            <div className={'flex-row inline-flex py-1 px-0 w-full flex-nowrap overflow-x-hidden    '}>
                 {renderDates.map(mapDate)}
             </div>
         </div>
