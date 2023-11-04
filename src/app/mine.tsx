@@ -6,6 +6,7 @@ import arrowPrev from './icons/arrow-prev-small.svg';
 import arrowNext from './icons/arrow-next-small.svg';
 import Image from "next/image";
 import {throttle} from "lodash";
+import {date} from "zod";
 
 function getWeek(today: Date): number {
     //TODO support different begging day
@@ -513,6 +514,7 @@ function Display(): JSX.Element {
                 <DayCount onChange={onDayCountChange}/>
                 <TodayButton onClick={onTodayButtonClick}/>
                 <NavigationButtons onClick={onNavigationButtonClick}/>
+                <YearHint dates={displayedDates}/>
             </div>
             <div className={'mx-8 overflow-y-hidden'}>
                 <Calendar dates={displayedDates}/>
@@ -627,6 +629,34 @@ function ControlButton(): JSX.Element {
             <div className={'fixed right-2 bottom-2 rounded-full bg-fuchsia-300'}
                  style={{width: '6vmin', height: '6vmin'}}>
             </div>
+        </div>
+    )
+}
+
+function YearHint(prop: {
+    dates: Date[]
+}): JSX.Element {
+    let hint: string = ''
+
+    const firstDate = prop.dates[0]
+    const lastDate = prop.dates[prop.dates.length - 1]
+
+    const firstYearStr = new Intl.DateTimeFormat("en-US", {year: 'numeric'}).format(firstDate)
+    const firstMonthStrS = new Intl.DateTimeFormat("en-US", {month: 'short'}).format(firstDate)
+    const lastMonthStrS = new Intl.DateTimeFormat("en-US", {month: 'short'}).format(lastDate)
+    const firstMonthStrL = new Intl.DateTimeFormat("en-US", {month: 'long'}).format(firstDate)
+
+    if (firstDate.getMonth() !== lastDate.getMonth()) {
+        hint = firstMonthStrS + ' - ' + lastMonthStrS + ' ' + firstYearStr
+    } else {
+        hint = firstMonthStrL + ' ' + firstYearStr
+    }
+
+    return (
+        <div>
+            <button className={`h-full ${Theme.button}`}>
+                {hint}
+            </button>
         </div>
     )
 }
