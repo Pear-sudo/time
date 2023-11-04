@@ -46,7 +46,9 @@ function DayNumber(prop: {
     )
 }
 
-function TimeAxis(prop: { height: number }): JSX.Element {
+function TimeAxis(prop: {
+    height: number
+}): JSX.Element {
     let elements: JSX.Element[] = []
     for (let i = 0; i < 23; i++) {
         const s_time = padNumber(2, i + 1) + ':' + padNumber(2, 0)
@@ -95,6 +97,7 @@ function Calendar(prop: {
     }
 
     const renderDates = getRenderDates(prop.dates)
+    const overScrollPercentage: number = -5
 
     return (
         <div className={'flex-col inline-flex w-full h-full'}>
@@ -108,7 +111,7 @@ function Calendar(prop: {
                 </div>
                 <Pager dataSet={renderDates} scrollIndex={prop.dates.length} view={prop.dates.length}
                        mapData={mapDate2DayNumber}
-                       hashData={getDayId} overScrollPixel={-8}/>
+                       hashData={getDayId} overScrollPercentage={overScrollPercentage}/>
             </div>
             <div className={'flex-row inline-flex w-full overflow-y-auto grow'}
                  onScroll={handleOnScroll}>
@@ -117,7 +120,7 @@ function Calendar(prop: {
                 </div>
                 <Pager dataSet={renderDates} scrollIndex={prop.dates.length} view={prop.dates.length}
                        mapData={mapDate2DayContent}
-                       hashData={getDayId} overScrollPixel={-8}/>
+                       hashData={getDayId} overScrollPercentage={overScrollPercentage}/>
             </div>
         </div>
     )
@@ -159,7 +162,8 @@ function Pager<DT>(prop: {
     view: number,
     mapData: (data: DT, index: number, array: DT[]) => JSX.Element
     hashData: (data: DT) => string,
-    overScrollPixel?: number
+    overScrollPixel?: number,
+    overScrollPercentage?: number
 }): JSX.Element {
     const propRef = useRef(prop)
     const scrollInfoRef = useRef({scrollLeft: 0})
@@ -167,6 +171,7 @@ function Pager<DT>(prop: {
     const containerRef = useRef<HTMLDivElement>()
     const elementsRef = useRef<Map<string, HTMLDivElement>>(new Map())
 
+    // @ts-ignore
     useEffect(() => {
         let scrollLeft: number | undefined
 
@@ -188,6 +193,14 @@ function Pager<DT>(prop: {
         const oldPixelsBefore: number = getPixelsBefore(elementsRef.current, prop.hashData(oldAnchor))
         const currentAnchor = prop.dataSet.at(prop.scrollIndex) as DT
         const newPixelsBefore: number = getPixelsBefore(elementsRef.current, prop.hashData(currentAnchor))
+
+        if (!isUN(prop.overScrollPercentage)) {
+            // let's set the overScroll based on element's percentage
+            const firstElement = elementsRef.current.get(hashData(newDataSet[0])) as HTMLDivElement
+            const firstElementWidth = getElementWidth(firstElement)
+            // @ts-ignore
+            overScrollPixel = firstElementWidth * prop.overScrollPercentage / 100
+        }
 
         scrollLeft = newPixelsBefore + overScrollPixel
 
@@ -215,7 +228,7 @@ function Pager<DT>(prop: {
         }
     })
 
-    const overScrollPixel = prop.overScrollPixel || 0
+    let overScrollPixel = prop.overScrollPixel || 0
 
     function registerElement(self: HTMLDivElement | null, key: string, ref: React.MutableRefObject<Map<string, HTMLDivElement>>): void {
         if (self) {
@@ -359,7 +372,11 @@ function WeekNumber(prop: {
     )
 }
 
-function Slot(prop: { className?: string, id: number, time?: string }): JSX.Element {
+function Slot(prop: {
+    className?: string,
+    id: number,
+    time?: string
+}): JSX.Element {
     let isHead = false
     let isTail = false
     if (prop.id === 0)
@@ -451,6 +468,20 @@ function generateFullWeekDays(aDayOfWeek: Date): Date[] {
 function Display(): JSX.Element {
     const [displayedDates, updateDisplayedDates] = useState(generateFullWeekDays(new Date()))
 
+    useEffect(() => {
+        function handleResize() {
+            resetScroll()
+        }
+
+        const handleResizeThrottled = throttle(handleResize, 100)
+
+        window.addEventListener('resize', handleResizeThrottled)
+
+        return () => {
+            window.removeEventListener('resize', handleResizeThrottled)
+        }
+    }, []);
+
     const onNavigationButtonClick = (nextPeriod: boolean): void => {
         const count = nextPeriod ? 1 : -1
         updateDisplayedDates(rollDates(displayedDates, count))
@@ -472,6 +503,10 @@ function Display(): JSX.Element {
         }
     }
 
+    const resetScroll = (): void => {
+        onDayCountChange(displayedDates.length)
+    }
+
     return (
         <div className={'w-full h-screen'} style={{display: 'grid', gridTemplateRows: 'auto 1fr'}}>
             <div className={'inline-flex flex-row justify-center'}>
@@ -482,11 +517,14 @@ function Display(): JSX.Element {
             <div className={'mx-8 overflow-y-hidden'}>
                 <Calendar dates={displayedDates}/>
             </div>
+            <ControlButton/>
         </div>
     )
 }
 
-function TodayButton(prop: { onClick?: () => void }): JSX.Element {
+function TodayButton(prop: {
+    onClick?: () => void
+}): JSX.Element {
     return (
         <button onClick={prop.onClick} className={`${Theme.button}`}>
             Today
@@ -500,7 +538,9 @@ class Theme {
     static transition: string = "transition-colors"
 }
 
-function DayCount(prop: { onChange: (count: number) => void }): JSX.Element {
+function DayCount(prop: {
+    onChange: (count: number) => void
+}): JSX.Element {
     const [index, updateIndex] = useState(0)
     const [visible, updateVisible] = useState(false)
     const choices: string[] = ["Week", 'Day', '3 Days', '5 Days']
@@ -527,14 +567,18 @@ function DayCount(prop: { onChange: (count: number) => void }): JSX.Element {
                 {choices[index]}
             </button>
             {/* don't apply transform here, it will mess up z index in Choices */}
-            <div className={'absolute top-full left-1/2 w-fit'}>
+            <div className={'absolute top-full left-0 w-fit'}>
                 <Choices elements={choices} onIndexUpdate={onIndexUpdate} visible={visible}/>
             </div>
         </div>
     )
 }
 
-function Choices(prop: { elements: string[], onIndexUpdate: (index: number) => void, visible: boolean }): JSX.Element {
+function Choices(prop: {
+    elements: string[],
+    onIndexUpdate: (index: number) => void,
+    visible: boolean
+}): JSX.Element {
     const elementsDivs: JSX.Element[] = []
     let visible = prop.visible
 
@@ -551,14 +595,16 @@ function Choices(prop: { elements: string[], onIndexUpdate: (index: number) => v
     for (let i = 0; i < prop.elements.length; i++) {
         const element = prop.elements[i]
         elementsDivs.push(
-            <button key={i + element} className={`relative z-50 w-full whitespace-nowrap ${Theme.button}`} onClick={onClick(i)}>
+            <button key={i + element} className={`relative z-50 w-full whitespace-nowrap ${Theme.button}`}
+                    onClick={onClick(i)}>
                 {element}
             </button>
         )
     }
 
     return (
-        <div className={`z-50 relative bg-cyan-50 rounded p-1 flex flex-col w-fit ${visible ? 'visible' : 'invisible'}`}>
+        <div
+            className={`z-50 relative bg-cyan-50 rounded p-1 flex flex-col w-fit ${visible ? 'visible' : 'invisible'}`}>
             {elementsDivs}
             <div className={'z-40 fixed'}
                  style={{width: '200vw', height: '200vh', left: '-100vw', top: '-100vh'}} onClick={onCancel}>
@@ -571,6 +617,16 @@ function SideBar(): JSX.Element {
     return (
         <div>
 
+        </div>
+    )
+}
+
+function ControlButton(): JSX.Element {
+    return (
+        <div className={''}>
+            <div className={'fixed right-2 bottom-2 rounded-full bg-fuchsia-300'}
+                 style={{width: '6vmin', height: '6vmin'}}>
+            </div>
         </div>
     )
 }
