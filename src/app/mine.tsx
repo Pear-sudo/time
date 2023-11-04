@@ -526,7 +526,8 @@ function DayCount(prop: { onChange: (count: number) => void }): JSX.Element {
             <button className={`${Theme.button} h-full`} onClick={onClick}>
                 {choices[index]}
             </button>
-            <div className={'absolute top-full left-0 w-fit'}>
+            {/* don't apply transform here, it will mess up z index in Choices */}
+            <div className={'absolute top-full left-1/2 w-fit'}>
                 <Choices elements={choices} onIndexUpdate={onIndexUpdate} visible={visible}/>
             </div>
         </div>
@@ -550,16 +551,17 @@ function Choices(prop: { elements: string[], onIndexUpdate: (index: number) => v
     for (let i = 0; i < prop.elements.length; i++) {
         const element = prop.elements[i]
         elementsDivs.push(
-            <button key={i + element} className={`z-50 w-full whitespace-nowrap ${Theme.button}`} onClick={onClick(i)}>
+            <button key={i + element} className={`relative z-50 w-full whitespace-nowrap ${Theme.button}`} onClick={onClick(i)}>
                 {element}
             </button>
         )
     }
 
     return (
-        <div className={`relative z-50 bg-cyan-50 rounded p-1 flex flex-col w-fit ${visible ? 'visible' : 'invisible'}`}>
+        <div className={`z-50 relative bg-cyan-50 rounded p-1 flex flex-col w-fit ${visible ? 'visible' : 'invisible'}`}>
             {elementsDivs}
-            <div className={'fixed w-screen h-screen bg-gray-400 top-0 left-0 opacity-0'} onClick={onCancel}>
+            <div className={'z-40 fixed'}
+                 style={{width: '200vw', height: '200vh', left: '-100vw', top: '-100vh'}} onClick={onCancel}>
             </div>
         </div>
     )
