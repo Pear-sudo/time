@@ -2,3 +2,22 @@ body {
     overflow-y: hidden;
     z-index: 0;
 }
+
+/* Default base font size */
+html {
+    font-size: 18px;
+}
+
+/* If the screen size is 800px or less, set the base font size to 16px */
+@media screen and (max-width: 800px) {
+    html {
+        font-size: 16px;
+    }
+}
+
+/* If the screen size is 600px or less, set the base font size to 14px */
+@media screen and (max-width: 600px) {
+    html {
+        font-size: 14px;
+    }
+}

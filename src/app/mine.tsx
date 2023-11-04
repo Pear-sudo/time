@@ -34,12 +34,12 @@ function DayNumber(prop: {
     children?: React.ReactNode
 }): JSX.Element {
     return (
-        <div className={`inline-flex flex-col items-center m-1 select-none w-full`}>
+        <div className={`inline-flex flex-col items-center m-1 select-none w-full text-xs font-medium`}>
             <div className={`${areSameDate(prop.date, new Date()) ? 'text-sky-700' : ''}`}>
                 {getWeekDay(prop.date)}
             </div>
             <div
-                className={`${areSameDate(prop.date, new Date()) ? 'rounded-full text-white bg-sky-700' : ''} h-4 w-4 p-2 box-content text-center leading-4 relative`}>
+                className={`${areSameDate(prop.date, new Date()) ? 'rounded-full text-white bg-sky-700' : ''} h-4 w-4 p-2 box-content text-center leading-4 relative text-sm font-semibold`}>
                 {prop.children ? '' : prop.date.getDate()}
                 <div className={'absolute visible'}>{prop.children}</div>
             </div>
