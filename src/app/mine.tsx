@@ -364,10 +364,10 @@ function ImageButton(prop: {
     if (isUN(height))
         height = 32
     return (
-        <div className={'inline'} onClick={prop.onClick}>
+        <button className={`inline ${Theme.button}`} onClick={prop.onClick}>
             <Image src={prop.src} alt={''} width={width} height={height}
                    className={`cursor-pointer ${prop.className}`}/>
-        </div>
+        </button>
     )
 }
 
@@ -408,20 +408,40 @@ function Display(): JSX.Element {
         updateDisplayedDates(rollDates(displayedDates, count))
     }
 
+    const onTodayButtonClick = (): void => {
+        updateDisplayedDates(generateFullWeekDays(new Date()))
+    }
+
     return (
         <div className={'w-full h-screen'} style={{display: 'grid', gridTemplateRows: 'auto 1fr'}}>
-            <div>
+            <div className={'inline-flex flex-row'}>
                 <DayCount/>
                 <NavigationButtons onClick={onNavigationButtonClick}/>
+                <TodayButton onClick={onTodayButtonClick}/>
             </div>
             <Calendar dates={displayedDates}/>
         </div>
     )
 }
 
+function TodayButton(prop: { onClick?: () => void }): JSX.Element {
+    return (
+        <button onClick={prop.onClick} className={`${Theme.button}`}>
+            Today
+        </button>
+    )
+}
+
+class Theme {
+    static button: string = "hover:bg-gray-200 focus:ring focus:ring-gray-100 rounded active:bg-gray-300 focus:outline-none"
+}
+
 function DayCount(): JSX.Element {
     return (
         <div>
+            <button>
+                Week
+            </button>
         </div>
     )
 }
