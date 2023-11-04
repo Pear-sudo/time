@@ -47,20 +47,43 @@ function DayNumber(prop: {
     )
 }
 
+function hour2String(hour: number, mode?: '24' | '12'): string {
+    if (isUN(mode)) {
+        mode = '12'
+    }
+    switch (mode) {
+        case '24':
+            return padNumber(2, hour) + ':' + padNumber(2, 0)
+        case '12':
+            const endStr = hour < 12 ? 'AM' : 'PM'
+            return hour + ' ' + endStr
+        default:
+            return ''
+    }
+}
+
 function TimeAxis(prop: {
     height: number
 }): JSX.Element {
     let elements: JSX.Element[] = []
     for (let i = 0; i < 23; i++) {
-        const s_time = padNumber(2, i + 1) + ':' + padNumber(2, 0)
+        const s_time = hour2String(i + 1)
         elements.push(
-            <Slot id={i} className={'invisible'} time={s_time}/>
+            <Slot id={i} className={'invisible'} time={<TimeAxisUnit time={s_time}/>}/>
         )
     }
 
     return (
         <div style={{height: `${prop.height}vh`}}>
             {elements}
+        </div>
+    )
+}
+
+function TimeAxisUnit(prop: {time: string}): JSX.Element {
+    return (
+        <div className={'whitespace-nowrap text-xs w-fit'}>
+            {prop.time}
         </div>
     )
 }
@@ -104,8 +127,10 @@ function Calendar(prop: {
         <div className={'flex-col inline-flex w-full h-full'}>
             <div
                 className={`flex-row inline-flex align-top grow-0 ${Theme.transition} ${changeHeaderBg ? Theme.headerBgScrolled : ''}`}>
-                <div className={'text-sm invisible relative'}>
-                    00:00
+                <div className={'invisible relative'}>
+                    <div className={`${Theme.timeAxisAddonStyle}`}>
+                        {<TimeAxisUnit time={hour2String(23)}/>}
+                    </div>
                     <div className={'absolute visible top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2'}>
                         <WeekNumber date={prop.dates.at(0) as Date}/>
                     </div>
@@ -376,7 +401,7 @@ function WeekNumber(prop: {
 function Slot(prop: {
     className?: string,
     id: number,
-    time?: string
+    time?: JSX.Element
 }): JSX.Element {
     let isHead = false
     let isTail = false
@@ -386,13 +411,15 @@ function Slot(prop: {
         isTail = true
 
     const baseStyle: CSSProperties = {height: `${1 / 24 * 100}%`}
+    const timeAxisAddonStyle: string = Theme.timeAxisAddonStyle
+
     return (
         <div
             className={`w-full border-neutral-400 relative ${prop.className} ${isTail ? '' : 'border-b'}`}
             style={baseStyle}>
-            <div className={`${prop.time ? 'invisible' : 'hidden'}`}>00:00</div>
+            <div className={`${prop.time ? 'invisible' : `hidden`}`}>{<div className={`${timeAxisAddonStyle}`}>{prop.time}</div>}</div>
             <div
-                className={'absolute visible inline top-full left-full -translate-x-full -translate-y-1/2 pr-1 text-sm'}
+                className={`absolute visible inline top-full left-full -translate-x-full -translate-y-1/2 ${timeAxisAddonStyle}`}
             >
                 {prop.time}
             </div>
@@ -538,6 +565,7 @@ class Theme {
     static button: string = "px-2 hover:bg-gray-200 focus:ring focus:ring-gray-100 rounded active:bg-gray-300 focus:outline-none"
     static headerBgScrolled: string = "bg-cyan-50"
     static transition: string = "transition-colors"
+    static timeAxisAddonStyle: string = 'pr-1'
 }
 
 function DayCount(prop: {
