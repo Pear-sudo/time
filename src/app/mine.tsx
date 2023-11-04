@@ -457,13 +457,25 @@ function Display(): JSX.Element {
     }
 
     const onTodayButtonClick = (): void => {
-        updateDisplayedDates(generateFullWeekDays(new Date()))
+        onDayCountChange(displayedDates.length, new Date())
+    }
+
+    const onDayCountChange = (count: number, anchor?: Date): void => {
+        anchor = anchor ? anchor : displayedDates[0]
+        switch (count) {
+            case 7:
+                updateDisplayedDates(generateFullWeekDays(anchor))
+                break
+            default:
+                const days = generateDates(anchor, count)
+                updateDisplayedDates(days)
+        }
     }
 
     return (
         <div className={'w-full h-screen'} style={{display: 'grid', gridTemplateRows: 'auto 1fr'}}>
             <div className={'inline-flex flex-row justify-center'}>
-                <DayCount/>
+                <DayCount onChange={onDayCountChange}/>
                 <TodayButton onClick={onTodayButtonClick}/>
                 <NavigationButtons onClick={onNavigationButtonClick}/>
             </div>
@@ -483,33 +495,72 @@ function TodayButton(prop: { onClick?: () => void }): JSX.Element {
 }
 
 class Theme {
-    static button: string = "hover:bg-gray-200 focus:ring focus:ring-gray-100 rounded active:bg-gray-300 focus:outline-none"
+    static button: string = "px-2 hover:bg-gray-200 focus:ring focus:ring-gray-100 rounded active:bg-gray-300 focus:outline-none"
     static headerBgScrolled: string = "bg-cyan-50"
     static transition: string = "transition-colors"
 }
 
-function DayCount(): JSX.Element {
+function DayCount(prop: { onChange: (count: number) => void }): JSX.Element {
+    const [index, updateIndex] = useState(0)
+    const [visible, updateVisible] = useState(false)
+    const choices: string[] = ["Week", 'Day', '3 Days', '5 Days']
+    const choicesN: number[] = [7, 1, 3, 5]
+
+    function onClick() {
+        updateVisible(!visible)
+    }
+
+    function onIndexUpdate(index: number): void {
+        // if cancelled
+        if (index === -1) {
+            updateVisible(false)
+            return
+        }
+        updateVisible(false)
+        updateIndex(index)
+        prop.onChange(choicesN[index])
+    }
+
     return (
-        <div className={'h-full'}>
-            <button className={`${Theme.button} h-full`}>
-                Week
+        <div className={'h-full relative'}>
+            <button className={`${Theme.button} h-full`} onClick={onClick}>
+                {choices[index]}
             </button>
+            <div className={'absolute top-full left-0 w-fit'}>
+                <Choices elements={choices} onIndexUpdate={onIndexUpdate} visible={visible}/>
+            </div>
         </div>
     )
 }
 
-function DropDown(): JSX.Element {
+function Choices(prop: { elements: string[], onIndexUpdate: (index: number) => void, visible: boolean }): JSX.Element {
+    const elementsDivs: JSX.Element[] = []
+    let visible = prop.visible
+
+    function onClick(index: number) {
+        return (event: React.UIEvent<HTMLButtonElement>) => {
+            prop.onIndexUpdate(index)
+        }
+    }
+
+    function onCancel() {
+        prop.onIndexUpdate(-1)
+    }
+
+    for (let i = 0; i < prop.elements.length; i++) {
+        const element = prop.elements[i]
+        elementsDivs.push(
+            <button key={i + element} className={`z-50 w-full whitespace-nowrap ${Theme.button}`} onClick={onClick(i)}>
+                {element}
+            </button>
+        )
+    }
+
     return (
-        <div>
-
-        </div>
-    )
-}
-
-function TopNavigationBar(): JSX.Element {
-    return (
-        <div>
-
+        <div className={`relative z-50 bg-cyan-50 rounded p-1 flex flex-col w-fit ${visible ? 'visible' : 'invisible'}`}>
+            {elementsDivs}
+            <div className={'fixed w-screen h-screen bg-gray-400 top-0 left-0 opacity-0'} onClick={onCancel}>
+            </div>
         </div>
     )
 }
