@@ -91,7 +91,12 @@ function Calendar(prop: {
     return (
         <div className={'mx-8 h-full overflow-y-hidden flex-col inline-flex'}>
             <div className={'flex-row inline-flex align-top w-full grow-0'}>
-                <div className={'text-sm invisible'}>00:00</div>
+                <div className={'text-sm invisible relative'}>
+                    00:00
+                    <div className={'absolute visible top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2'}>
+                        <WeekNumber date={prop.dates.at(0) as Date}/>
+                    </div>
+                </div>
                 <Pager dataSet={renderDates} scrollIndex={prop.dates.length} view={prop.dates.length}
                        mapData={mapDate2DayNumber}
                        hashData={getDayId} overScrollPixel={-8}/>
@@ -305,7 +310,7 @@ function WeekNumber(prop: {
     date: Date
 }): JSX.Element {
     return (
-        <div className={'text-black rounded bg-gray-400 py-1 px-2 -translate-x-3'}>
+        <div className={'text-black rounded bg-gray-400 py-1 px-2 select-none'}>
             {getWeek(prop.date)}
         </div>
     )
@@ -439,7 +444,7 @@ class Theme {
 function DayCount(): JSX.Element {
     return (
         <div>
-            <button>
+            <button className={`${Theme.button}`}>
                 Week
             </button>
         </div>
