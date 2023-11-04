@@ -642,14 +642,19 @@ function YearHint(prop: {
     const lastDate = prop.dates[prop.dates.length - 1]
 
     const firstYearStr = new Intl.DateTimeFormat("en-US", {year: 'numeric'}).format(firstDate)
+    const lastYearStr = new Intl.DateTimeFormat("en-US", {year: 'numeric'}).format(lastDate)
     const firstMonthStrS = new Intl.DateTimeFormat("en-US", {month: 'short'}).format(firstDate)
     const lastMonthStrS = new Intl.DateTimeFormat("en-US", {month: 'short'}).format(lastDate)
     const firstMonthStrL = new Intl.DateTimeFormat("en-US", {month: 'long'}).format(firstDate)
 
-    if (firstDate.getMonth() !== lastDate.getMonth()) {
-        hint = firstMonthStrS + ' - ' + lastMonthStrS + ' ' + firstYearStr
+    if (firstDate.getFullYear() === lastDate.getFullYear()) {
+        if (firstDate.getMonth() !== lastDate.getMonth()) {
+            hint = firstMonthStrS + ' - ' + lastMonthStrS + ' ' + firstYearStr
+        } else {
+            hint = firstMonthStrL + ' ' + firstYearStr
+        }
     } else {
-        hint = firstMonthStrL + ' ' + firstYearStr
+        hint = firstMonthStrS + ' ' + firstYearStr + ' - ' + lastMonthStrS + ' ' + lastYearStr
     }
 
     return (
