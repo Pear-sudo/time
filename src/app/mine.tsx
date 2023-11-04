@@ -5,6 +5,7 @@ import './index.css';
 import arrowPrev from './icons/arrow-prev-small.svg';
 import arrowNext from './icons/arrow-next-small.svg';
 import Image from "next/image";
+import {throttle} from "lodash";
 
 function getWeek(today: Date): number {
     //TODO support different begging day
@@ -64,8 +65,15 @@ function TimeAxis(prop: { height: number }): JSX.Element {
 function Calendar(prop: {
     dates: Date[]
 }): JSX.Element {
+    const [changeHeaderBg, updateChangeHeaderBg,] = useState(false)
 
     const height = 150
+
+    const handleOnScroll = throttle((event: React.UIEvent<HTMLDivElement>): void => {
+        const target = event.target as HTMLDivElement
+        const scrollTop = target.scrollTop
+        updateChangeHeaderBg(scrollTop > 10)
+    }, 200)
 
     function mapDate2DayContent(date: Date, index: number, array: Date[]): JSX.Element {
         return (
@@ -89,8 +97,9 @@ function Calendar(prop: {
     const renderDates = getRenderDates(prop.dates)
 
     return (
-        <div className={'mx-8 h-full overflow-y-hidden flex-col inline-flex'}>
-            <div className={'flex-row inline-flex align-top w-full grow-0'}>
+        <div className={'flex-col inline-flex w-full h-full'}>
+            <div
+                className={`flex-row inline-flex align-top grow-0 ${Theme.transition} ${changeHeaderBg ? Theme.headerBgScrolled : ''}`}>
                 <div className={'text-sm invisible relative'}>
                     00:00
                     <div className={'absolute visible top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2'}>
@@ -101,7 +110,8 @@ function Calendar(prop: {
                        mapData={mapDate2DayNumber}
                        hashData={getDayId} overScrollPixel={-8}/>
             </div>
-            <div className={'flex-row inline-flex align-top w-full h-full overflow-y-auto grow'}>
+            <div className={'flex-row inline-flex w-full overflow-y-auto grow'}
+                 onScroll={handleOnScroll}>
                 <div>
                     <TimeAxis height={height}/>
                 </div>
@@ -152,14 +162,20 @@ function Pager<DT>(prop: {
     overScrollPixel?: number
 }): JSX.Element {
     const propRef = useRef(prop)
+    const scrollInfoRef = useRef({scrollLeft: 0})
 
     const containerRef = useRef<HTMLDivElement>()
     const elementsRef = useRef<Map<string, HTMLDivElement>>(new Map())
 
     useEffect(() => {
+        let scrollLeft: number | undefined
+
         if (!propRef.current) {
             updateRefs()
         }
+        const hashData = prop.hashData
+        const oldDataSet = propRef.current.dataSet
+        const newDataSet = prop.dataSet
 
         const oldAnchor = propRef.current.dataSet.at(propRef.current.scrollIndex) as DT
         // @ts-ignore
@@ -169,24 +185,37 @@ function Pager<DT>(prop: {
             return
         }
 
+        const oldPixelsBefore: number = getPixelsBefore(elementsRef.current, prop.hashData(oldAnchor))
+        const currentAnchor = prop.dataSet.at(prop.scrollIndex) as DT
+        const newPixelsBefore: number = getPixelsBefore(elementsRef.current, prop.hashData(currentAnchor))
+
+        scrollLeft = newPixelsBefore + overScrollPixel
+
+        const datasetEqual: boolean = arraysEqual(oldDataSet.map(hashData), newDataSet.map(hashData))
+        const scrollLeftEqual: boolean = scrollLeft === scrollInfoRef.current.scrollLeft
+
+        // check if rerender is needed
+        if (datasetEqual && scrollLeftEqual) {
+            return;
+        }
+
         // first let's adjust the position to previous state (after inserting or removing columns)
-        let pixelsBefore: number = getPixelsBefore(elementsRef.current, prop.hashData(oldAnchor))
-        containerRef.current?.scrollTo(pixelsBefore, 0)
+        containerRef.current?.scrollTo(oldPixelsBefore, 0)
 
         // second, start the animation
-        const currentAnchor = prop.dataSet.at(prop.scrollIndex) as DT
-        pixelsBefore = getPixelsBefore(elementsRef.current, prop.hashData(currentAnchor))
         // @ts-ignore
-        containerRef.current?.scrollTo({top: 0, left: pixelsBefore + overScrollPixel, behavior: "smooth"})
+        containerRef.current?.scrollTo({top: 0, left: scrollLeft, behavior: "smooth"})
 
         updateRefs()
+
+        function updateRefs() {
+            propRef.current = prop
+            if (scrollLeft)
+                scrollInfoRef.current.scrollLeft = scrollLeft
+        }
     })
 
     const overScrollPixel = prop.overScrollPixel || 0
-
-    function updateRefs() {
-        propRef.current = prop
-    }
 
     function registerElement(self: HTMLDivElement | null, key: string, ref: React.MutableRefObject<Map<string, HTMLDivElement>>): void {
         if (self) {
@@ -216,6 +245,20 @@ function Pager<DT>(prop: {
             {prop.dataSet.map(mapData)}
         </div>
     )
+}
+
+function arraysEqual<T>(a: T[], b: T[]) {
+    if (a === b) return true;
+    if (a == null || b == null) return false;
+    if (a.length !== b.length) return false;
+
+    a.sort();
+    b.sort();
+
+    for (let i = 0; i < a.length; ++i) {
+        if (a[i] !== b[i]) return false;
+    }
+    return true;
 }
 
 function generateDates(from: Date, length: number, isFuture: boolean = true, inclusive: boolean = true): Date[] {
@@ -369,7 +412,7 @@ function ImageButton(prop: {
     if (isUN(height))
         height = 32
     return (
-        <button className={`inline ${Theme.button}`} onClick={prop.onClick}>
+        <button className={`inline ${Theme.button} rounded-full`} onClick={prop.onClick}>
             <Image src={prop.src} alt={''} width={width} height={height}
                    className={`cursor-pointer ${prop.className}`}/>
         </button>
@@ -419,12 +462,14 @@ function Display(): JSX.Element {
 
     return (
         <div className={'w-full h-screen'} style={{display: 'grid', gridTemplateRows: 'auto 1fr'}}>
-            <div className={'inline-flex flex-row'}>
+            <div className={'inline-flex flex-row justify-center'}>
                 <DayCount/>
-                <NavigationButtons onClick={onNavigationButtonClick}/>
                 <TodayButton onClick={onTodayButtonClick}/>
+                <NavigationButtons onClick={onNavigationButtonClick}/>
             </div>
-            <Calendar dates={displayedDates}/>
+            <div className={'mx-8 overflow-y-hidden'}>
+                <Calendar dates={displayedDates}/>
+            </div>
         </div>
     )
 }
@@ -439,12 +484,14 @@ function TodayButton(prop: { onClick?: () => void }): JSX.Element {
 
 class Theme {
     static button: string = "hover:bg-gray-200 focus:ring focus:ring-gray-100 rounded active:bg-gray-300 focus:outline-none"
+    static headerBgScrolled: string = "bg-cyan-50"
+    static transition: string = "transition-colors"
 }
 
 function DayCount(): JSX.Element {
     return (
-        <div>
-            <button className={`${Theme.button}`}>
+        <div className={'h-full'}>
+            <button className={`${Theme.button} h-full`}>
                 Week
             </button>
         </div>
@@ -452,6 +499,22 @@ function DayCount(): JSX.Element {
 }
 
 function DropDown(): JSX.Element {
+    return (
+        <div>
+
+        </div>
+    )
+}
+
+function TopNavigationBar(): JSX.Element {
+    return (
+        <div>
+
+        </div>
+    )
+}
+
+function SideBar(): JSX.Element {
     return (
         <div>
 
