@@ -626,24 +626,54 @@ function generateFullWeekDays(aDayOfWeek: Date): Date[] {
 }
 
 class Scheduler {
-    handles: number[] = []
+    registry: { date: Date, f: Function, handle: number }[] = []
 
-    registerTasks(tasks: Array<[Date, Function]>): void {
+    registerTasks(tasks: { date: Date, f: Function }[] | { date: Date, f: Function }): void {
+        if (!(tasks instanceof Array)) {
+            tasks = [tasks]
+        }
         for (const task of tasks) {
-            const taskDate = task[0]
-            const taskFunction = task[1]
+            const taskDate = task.date
+            const taskFunction = task.f
+
             const targetMilli: number = taskDate.valueOf()
-            const handle: number = setTimeout(taskFunction, targetMilli - new Date().valueOf())
-            this.handles.push(handle)
+            const handle: number = setTimeout(taskFunction, targetMilli - new Date().valueOf()) as unknown as number
+
+            this.registry.push({date: taskDate, f: taskFunction, handle: handle})
+
             console.log(`function: ${taskFunction.name} is scheduled at ${taskDate.toLocaleString()}.`)
         }
     }
 
     removeAllTasks(): void {
-        while (this.handles.length > 0) {
-            clearTimeout(this.handles[0]);
-            this.handles.shift();
+        while (this.registry.length > 0) {
+            clearTimeout(this.registry[0].handle)
+            this.registry.shift();
         }
+    }
+
+    removeTaskByFunction(f: Function): number {
+        // return the number of task removed
+        let count: number = 0
+        this.registry = this.registry.filter((element) => {
+            if (element.f == f) {
+                count++
+                clearTimeout(element.handle)
+                return false
+            } else {
+                return true
+            }
+        })
+        console.log(`${count} tasks related to function ${f.name} ${isOrAre(count)} removed at ${new Date().toLocaleString()}`)
+        return count
+    }
+}
+
+function isOrAre(count: number): string {
+    if (count <= 1) {
+        return 'is'
+    } else {
+        return 'are'
     }
 }
 
@@ -652,27 +682,37 @@ function Display(): JSX.Element {
     const displayedDatesRef = useRef(generateFullWeekDays(new Date()));
 
     useEffect(() => {
-        function handleResize() {
-            resetScroll()
-        }
-
-        const handleResizeThrottled = throttle(handleResize, 100)
-
         window.addEventListener('resize', handleResizeThrottled)
+        window.addEventListener('visibilitychange', handleVisibilityChange)
         scheduler.registerTasks(tasks)
 
         return () => {
             window.removeEventListener('resize', handleResizeThrottled)
+            window.removeEventListener('visibilitychange', handleVisibilityChange)
             scheduler.removeAllTasks()
         }
     }, []);
 
     const scheduler = new Scheduler()
-    const rerenderTask: [Date, Function] = [new Date(new Date().setHours(23, 59, 59, 999)), taskRerender]
+    const rerenderTask: { date: Date, f: Function } = {date: new Date(new Date().setHours(23, 59, 59, 999)), f: taskRerender}
 
-    const tasks: Array<[Date, Function]> = [
+    const tasks: { date: Date, f: Function }[] = [
         rerenderTask
     ]
+
+    function handleVisibilityChange(): void {
+        // This can also be used to detect the lock of screen
+        // this cannot detect docking to the left sidebar (macOS)
+        const isVisible: boolean = document.visibilityState === 'visible'
+        taskRerender()
+        // console.log(isVisible + ' ' + new Date().toLocaleString())
+    }
+
+    function handleResize() {
+        refreshUI()
+    }
+
+    const handleResizeThrottled = throttle(handleResize, 100)
 
     function updateDisplayedDates(dates: Date[]) {
         _updateDisplayedDates(dates)
@@ -684,8 +724,9 @@ function Display(): JSX.Element {
     }
 
     function taskRerender() {
-        resetScroll()
-        scheduler.registerTasks([rerenderTask])
+        refreshUI()
+        scheduler.removeTaskByFunction(rerenderTask.f)
+        scheduler.registerTasks(rerenderTask)
     }
 
     const onNavigationButtonClick = (nextPeriod: boolean): void => {
@@ -700,7 +741,6 @@ function Display(): JSX.Element {
 
     const onDayCountChange = (count: number, anchor?: Date): void => {
         anchor = anchor ? anchor : getDisplayedDates()[0]
-        console.log(anchor)
         switch (count) {
             case 7:
                 updateDisplayedDates(generateFullWeekDays(anchor))
@@ -711,7 +751,7 @@ function Display(): JSX.Element {
         }
     }
 
-    const resetScroll = (): void => {
+    const refreshUI = (): void => {
         onDayCountChange(getDisplayedDates().length)
     }
 
@@ -880,6 +920,14 @@ function CurrentTimeLine(): JSX.Element {
             <div className={'absolute rounded-full bg-blue-600 left-0 top-1/2  -translate-x-3/4'}
                  style={{width: '0.5rem', height: '0.5rem', transform: 'translate(-95%, -50%)'}}>
             </div>
+        </div>
+    )
+}
+
+function Record(): JSX.Element {
+    return (
+        <div>
+
         </div>
     )
 }
