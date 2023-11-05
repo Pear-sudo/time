@@ -1,6 +1,6 @@
 "use client"
 
-import React, {createRef, CSSProperties, JSX, useEffect, useRef, useState} from "react";
+import React, {createRef, CSSProperties, JSX, useContext, useEffect, useRef, useState} from "react";
 import './index.css';
 import arrowPrev from './icons/arrow-prev-small.svg';
 import arrowNext from './icons/arrow-next-small.svg';
@@ -91,29 +91,42 @@ function TimeAxisUnit(prop: {
 }
 
 function hideScrollBar(container: HTMLDivElement): void {
+    // @ts-ignore
     container.style.scrollbarWidth = 'none'; // For Firefox
+    // @ts-ignore
     container.style.msOverflowStyle = 'none'; // For Internet Explorer
     // For Chrome, Safari and Opera
+    // @ts-ignore
     container.style['&::-webkit-scrollbar'] = {
         display: 'none'
     }
 }
 
 function showScrollBar(container: HTMLDivElement): void {
+    // @ts-ignore
     container.style.scrollbarWidth = ''; // For Firefox
+    // @ts-ignore
     container.style.msOverflowStyle = ''; // For Internet Explorer
     // For Chrome, Safari and Opera
+    // @ts-ignore
     container.style['&::-webkit-scrollbar'] = {
         display: ''
     }
 }
 
 function Calendar(prop: {
-    dates: Date[]
+    dates: Date[],
+    events?: { scrollToNow: boolean }
 }): JSX.Element {
     const [changeHeaderBg, updateChangeHeaderBg,] = useState(false)
     const scrollableAreaRef = useRef<HTMLDivElement>()
     const scrollBarVisible = useRef<boolean>(true)
+    const prevProps = useRef(prop)
+    const refToChild = useRef({timeLineTop: 0})
+    const displayContextObj = useContext(DisplayContext)
+    useEffect(() => {
+        prevProps.current = prop
+    });
 
     const height = 150
 
@@ -149,6 +162,13 @@ function Calendar(prop: {
         overScrollPercentage = -0.5
     }
 
+    if (prevProps.current.events?.scrollToNow !== prop.events?.scrollToNow) {
+        // today button is clicked
+        console.log(displayContextObj.timeLineTop)
+        // @ts-ignore
+        scrollableAreaRef.current.scrollTo({top: displayContextObj.timeLineTop, left: scrollableAreaRef.current.scrollLeft, behavior: 'smooth'})
+    }
+
     return (
         <div className={'flex-col inline-flex w-full h-full'}>
             <div
@@ -172,7 +192,7 @@ function Calendar(prop: {
                 </div>
                 <Pager dataSet={renderDates} scrollIndex={prop.dates.length} view={prop.dates.length}
                        mapData={mapDate2DayContent}
-                       hashData={getDayId} overScrollPercentage={overScrollPercentage}/>
+                       hashData={getDayId} overScrollPercentage={overScrollPercentage} parentRef={refToChild}/>
             </div>
         </div>
     )
@@ -215,14 +235,15 @@ function getPixelsBefore(elements: Map<string, HTMLDivElement>, anchorKey: strin
     return pixelsBefore
 }
 
-function Pager<DT>(prop: {
+function Pager<DT, PR = any>(prop: {
     dataSet: DT[],
     scrollIndex: number,
     view: number,
-    mapData: (data: DT, index: number, array: DT[], isInView: boolean, broadCaster?: undefined, updateBroadCaster?: React.Dispatch<React.SetStateAction<undefined>>) => JSX.Element
+    mapData: (data: DT, index: number, array: DT[], isInView: boolean, parentRef?: PR, broadCaster?: undefined, updateBroadCaster?: React.Dispatch<React.SetStateAction<undefined>>) => JSX.Element
     hashData: (data: DT) => string,
     overScrollPixel?: number,
     overScrollPercentage?: number
+    parentRef?: PR
 }): JSX.Element {
     const propRef = useRef(prop)
     const scrollInfoRef = useRef({scrollLeft: 0})
@@ -312,7 +333,7 @@ function Pager<DT>(prop: {
                  className={'flex-shrink-0'}
                  style={{flexBasis: `${1 / prop.view * 100}%`}}
             >
-                {prop.mapData(data, index, array, inView, broadCaster, updateBroadCaster)}
+                {prop.mapData(data, index, array, inView, prop.parentRef, broadCaster, updateBroadCaster)}
             </div>
         )
     }
@@ -449,6 +470,7 @@ function DayContent(prop: {
     const timeLineRef = useRef<HTMLDivElement>();
     const selfRef = useRef<HTMLDivElement>()
     const timerRef = useRef<NodeJS.Timeout>()
+    const displayContextObj = useContext(DisplayContext)
     useEffect(() => {
         if (isToday(prop.date)) {
             updateTimeline()
@@ -488,7 +510,9 @@ function DayContent(prop: {
     function updateTimeline(): void {
         // We need to check the condition again in case it's 23:59 and the user does to trigger UI rerender
         if (isToday(prop.date)) {
-            const percentage = getRatioOfDay(new Date()) * 100
+            const ratio = getRatioOfDay(new Date())
+            const percentage = ratio * 100
+            displayContextObj.timeLineTop = getElementHeight(selfRef.current as HTMLDivElement) * ratio
             // @ts-ignore
             timeLineRef.current.style.top = percentage.toString() + '%'
             // console.log(new Date())
@@ -677,9 +701,35 @@ function isOrAre(count: number): string {
     }
 }
 
+class DisplayContextObj {
+    private static instance: DisplayContextObj;
+
+    constructor() {
+        if (!DisplayContextObj.instance) {
+            DisplayContextObj.instance = this
+        }
+        return DisplayContextObj.instance
+    }
+
+    get timeLineTop(): number {
+        return this._timeLineTop;
+    }
+
+    set timeLineTop(value: number) {
+        this._timeLineTop = value;
+    }
+
+    private _timeLineTop: number = 0
+}
+
+const DisplayContext = React.createContext(new DisplayContextObj());
+
 function Display(): JSX.Element {
     const [displayedDates, _updateDisplayedDates] = useState(generateFullWeekDays(new Date()))
     const displayedDatesRef = useRef(generateFullWeekDays(new Date()));
+    const selfEvents = useRef({
+        onTodayButtonClick: false
+    });
 
     useEffect(() => {
         window.addEventListener('resize', handleResizeThrottled)
@@ -693,12 +743,18 @@ function Display(): JSX.Element {
         }
     }, []);
 
+    useEffect(() => {
+        onTodayButtonClick()
+    }, []);
+
     const scheduler = new Scheduler()
     const rerenderTask: { date: Date, f: Function } = {date: new Date(new Date().setHours(23, 59, 59, 999)), f: taskRerender}
 
     const tasks: { date: Date, f: Function }[] = [
         rerenderTask
     ]
+
+    const displayContextObj = new DisplayContextObj()
 
     function handleVisibilityChange(): void {
         // This can also be used to detect the lock of screen
@@ -737,6 +793,7 @@ function Display(): JSX.Element {
 
     const onTodayButtonClick = (): void => {
         onDayCountChange(getDisplayedDates().length, new Date())
+        selfEvents.current.onTodayButtonClick = !selfEvents.current.onTodayButtonClick
     }
 
     const onDayCountChange = (count: number, anchor?: Date): void => {
@@ -756,18 +813,20 @@ function Display(): JSX.Element {
     }
 
     return (
-        <div className={'w-full h-screen'} style={{display: 'grid', gridTemplateRows: 'auto 1fr'}}>
-            <div className={'inline-flex flex-row justify-center'}>
-                <DayCount onChange={onDayCountChange}/>
-                <TodayButton onClick={onTodayButtonClick}/>
-                <NavigationButtons onClick={onNavigationButtonClick}/>
-                <YearHint dates={displayedDates}/>
+        <DisplayContext.Provider value={displayContextObj}>
+            <div className={'w-full h-screen'} style={{display: 'grid', gridTemplateRows: 'auto 1fr'}}>
+                <div className={'inline-flex flex-row justify-center'}>
+                    <DayCount onChange={onDayCountChange}/>
+                    <TodayButton onClick={onTodayButtonClick}/>
+                    <NavigationButtons onClick={onNavigationButtonClick}/>
+                    <YearHint dates={displayedDates}/>
+                </div>
+                <div className={'mx-8 overflow-y-hidden'}>
+                    <Calendar dates={displayedDates} events={{scrollToNow: selfEvents.current.onTodayButtonClick}}/>
+                </div>
+                <ControlButton/>
             </div>
-            <div className={'mx-8 overflow-y-hidden'}>
-                <Calendar dates={displayedDates}/>
-            </div>
-            <ControlButton/>
-        </div>
+        </DisplayContext.Provider>
     )
 }
 
