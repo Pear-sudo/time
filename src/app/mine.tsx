@@ -90,10 +90,30 @@ function TimeAxisUnit(prop: {
     )
 }
 
+function hideScrollBar(container: HTMLDivElement): void {
+    container.style.scrollbarWidth = 'none'; // For Firefox
+    container.style.msOverflowStyle = 'none'; // For Internet Explorer
+    // For Chrome, Safari and Opera
+    container.style['&::-webkit-scrollbar'] = {
+        display: 'none'
+    }
+}
+
+function showScrollBar(container: HTMLDivElement): void {
+    container.style.scrollbarWidth = ''; // For Firefox
+    container.style.msOverflowStyle = ''; // For Internet Explorer
+    // For Chrome, Safari and Opera
+    container.style['&::-webkit-scrollbar'] = {
+        display: ''
+    }
+}
+
 function Calendar(prop: {
     dates: Date[]
 }): JSX.Element {
     const [changeHeaderBg, updateChangeHeaderBg,] = useState(false)
+    const scrollableAreaRef = useRef<HTMLDivElement>()
+    const scrollBarVisible = useRef<boolean>(true)
 
     const height = 150
 
@@ -146,7 +166,7 @@ function Calendar(prop: {
                        hashData={getDayId} overScrollPercentage={overScrollPercentage}/>
             </div>
             <div className={'flex-row inline-flex w-full overflow-y-auto grow'}
-                 onScroll={handleOnScroll}>
+                 onScroll={handleOnScroll} ref={scrollableAreaRef}>
                 <div>
                     <TimeAxis height={height}/>
                 </div>
@@ -199,7 +219,7 @@ function Pager<DT>(prop: {
     dataSet: DT[],
     scrollIndex: number,
     view: number,
-    mapData: (data: DT, index: number, array: DT[], isInView: boolean) => JSX.Element
+    mapData: (data: DT, index: number, array: DT[], isInView: boolean, broadCaster?: undefined, updateBroadCaster?: React.Dispatch<React.SetStateAction<undefined>>) => JSX.Element
     hashData: (data: DT) => string,
     overScrollPixel?: number,
     overScrollPercentage?: number
@@ -209,6 +229,9 @@ function Pager<DT>(prop: {
 
     const containerRef = useRef<HTMLDivElement>()
     const elementsRef = useRef<Map<string, HTMLDivElement>>(new Map())
+
+    // so that each element in the pager can communicate with each other, to solve problems such as the last minute timeline problem
+    const [broadCaster, updateBroadCaster] = useState()
 
     // @ts-ignore
     useEffect(() => {
@@ -289,7 +312,7 @@ function Pager<DT>(prop: {
                  className={'flex-shrink-0'}
                  style={{flexBasis: `${1 / prop.view * 100}%`}}
             >
-                {prop.mapData(data, index, array, inView)}
+                {prop.mapData(data, index, array, inView, broadCaster, updateBroadCaster)}
             </div>
         )
     }
@@ -449,7 +472,7 @@ function DayContent(prop: {
     }, []);
 
     function registerTimer() {
-        const interval = 10000 // update every 10 seconds
+        const interval = 60000 // update every 60 seconds
         timerRef.current = setInterval(updateTimeline, interval)
         // console.log('register')
     }
@@ -463,10 +486,16 @@ function DayContent(prop: {
     }
 
     function updateTimeline(): void {
-        const percentage = getRatioOfDay(new Date()) * 100
-        // @ts-ignore
-        timeLineRef.current.style.top = percentage.toString() + '%'
-        // console.log(new Date())
+        // We need to check the condition again in case it's 23:59 and the user does to trigger UI rerender
+        if (isToday(prop.date)) {
+            const percentage = getRatioOfDay(new Date()) * 100
+            // @ts-ignore
+            timeLineRef.current.style.top = percentage.toString() + '%'
+            // console.log(new Date())
+        } else {
+            // TODO trigger a layout rerender to inform other column to display the timeline
+            clearTimer()
+        }
     }
 
     let slots: JSX.Element[] = []
@@ -596,6 +625,28 @@ function generateFullWeekDays(aDayOfWeek: Date): Date[] {
     return dates
 }
 
+class Scheduler {
+    handles: number[] = []
+
+    registerTasks(tasks: Array<[Date, Function]>): void {
+        for (const task of tasks) {
+            const taskDate = task[0]
+            const taskFunction = task[1]
+            const targetMilli: number = taskDate.valueOf()
+            const handle: number = setTimeout(taskFunction, targetMilli - new Date().valueOf())
+            this.handles.push(handle)
+            console.log(`function: ${taskFunction.name} is scheduled at ${taskDate.toLocaleString()}.`)
+        }
+    }
+
+    removeAllTasks(): void {
+        while (this.handles.length > 0) {
+            clearTimeout(this.handles[0]);
+            this.handles.shift();
+        }
+    }
+}
+
 function Display(): JSX.Element {
     const [displayedDates, updateDisplayedDates] = useState(generateFullWeekDays(new Date()))
 
@@ -607,11 +658,25 @@ function Display(): JSX.Element {
         const handleResizeThrottled = throttle(handleResize, 100)
 
         window.addEventListener('resize', handleResizeThrottled)
+        scheduler.registerTasks(tasks)
 
         return () => {
             window.removeEventListener('resize', handleResizeThrottled)
+            scheduler.removeAllTasks()
         }
     }, []);
+
+    const scheduler = new Scheduler()
+    const rerenderTask: [Date, Function] = [new Date(new Date().setHours(23, 59, 59, 999)), taskRerender]
+
+    const tasks: Array<[Date, Function]> = [
+        rerenderTask
+    ]
+
+    function taskRerender() {
+        resetScroll()
+        scheduler.registerTasks([rerenderTask])
+    }
 
     const onNavigationButtonClick = (nextPeriod: boolean): void => {
         const count = nextPeriod ? 1 : -1
