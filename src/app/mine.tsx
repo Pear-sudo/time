@@ -1,12 +1,11 @@
 "use client"
 
-import React, {CSSProperties, JSX, MutableRefObject, useEffect, useRef, useState} from "react";
+import React, {createRef, CSSProperties, JSX, useEffect, useRef, useState} from "react";
 import './index.css';
 import arrowPrev from './icons/arrow-prev-small.svg';
 import arrowNext from './icons/arrow-next-small.svg';
 import Image from "next/image";
 import {throttle} from "lodash";
-import {date} from "zod";
 
 function getWeek(today: Date): number {
     //TODO support different begging day
@@ -31,15 +30,16 @@ function areSameDate(d1: Date, d2: Date): boolean {
 
 function DayNumber(prop: {
     date: Date,
+    isInView: boolean
     children?: React.ReactNode
 }): JSX.Element {
     return (
         <div className={`inline-flex flex-col items-center m-1 select-none w-full text-xs font-medium`}>
-            <div className={`${areSameDate(prop.date, new Date()) ? 'text-sky-700' : ''}`}>
+            <div className={`${isToday(prop.date) ? 'text-sky-700' : ''}`}>
                 {getWeekDay(prop.date)}
             </div>
             <div
-                className={`${areSameDate(prop.date, new Date()) ? 'rounded-full text-white bg-sky-700' : ''} h-4 w-4 p-2 box-content text-center leading-4 relative text-sm font-semibold`}>
+                className={`${isToday(prop.date) ? 'rounded-full text-white bg-sky-700' : ''} h-4 w-4 p-2 box-content text-center leading-4 relative text-sm font-semibold`}>
                 {prop.children ? '' : prop.date.getDate()}
                 <div className={'absolute visible'}>{prop.children}</div>
             </div>
@@ -80,7 +80,9 @@ function TimeAxis(prop: {
     )
 }
 
-function TimeAxisUnit(prop: {time: string}): JSX.Element {
+function TimeAxisUnit(prop: {
+    time: string
+}): JSX.Element {
     return (
         <div className={'whitespace-nowrap text-xs w-fit'}>
             {prop.time}
@@ -101,18 +103,19 @@ function Calendar(prop: {
         updateChangeHeaderBg(scrollTop > 10)
     }, 200)
 
-    function mapDate2DayContent(date: Date, index: number, array: Date[]): JSX.Element {
+    function mapDate2DayContent(date: Date, index: number, array: Date[], isInView: boolean): JSX.Element {
         return (
             <DayContent date={date} height={height}
                         index={{index: index, length: array.length}}
                         width={{width: `${1 / prop.dates.length * 100}%`}}
+                        isInView={isInView}
             />
         )
     }
 
-    function mapDate2DayNumber(date: Date, index: number, array: Date[]): JSX.Element {
+    function mapDate2DayNumber(date: Date, index: number, array: Date[], isInView: boolean): JSX.Element {
         return (
-            <DayNumber date={date}/>
+            <DayNumber date={date} isInView={isInView}/>
         )
     }
 
@@ -121,7 +124,10 @@ function Calendar(prop: {
     }
 
     const renderDates = getRenderDates(prop.dates)
-    const overScrollPercentage: number = -5
+    let overScrollPercentage: number = -3 //-5
+    if (prop.dates.length === 1) {
+        overScrollPercentage = -0.5
+    }
 
     return (
         <div className={'flex-col inline-flex w-full h-full'}>
@@ -170,6 +176,13 @@ function getElementWidth(element: HTMLDivElement): number {
     return width
 }
 
+function getElementHeight(element: HTMLDivElement): number {
+    let height = 0
+    const style = window.getComputedStyle(element)
+    height = parseFloat(style.height)
+    return height
+}
+
 function getPixelsBefore(elements: Map<string, HTMLDivElement>, anchorKey: string): number {
     let pixelsBefore: number = 0
     for (const [k, v] of elements) {
@@ -186,7 +199,7 @@ function Pager<DT>(prop: {
     dataSet: DT[],
     scrollIndex: number,
     view: number,
-    mapData: (data: DT, index: number, array: DT[]) => JSX.Element
+    mapData: (data: DT, index: number, array: DT[], isInView: boolean) => JSX.Element
     hashData: (data: DT) => string,
     overScrollPixel?: number,
     overScrollPercentage?: number
@@ -264,14 +277,19 @@ function Pager<DT>(prop: {
         }
     }
 
+    function isInView(currentIndex: number, startIndex: number, endIndex: number): boolean {
+        return currentIndex >= startIndex && currentIndex <= endIndex
+    }
+
     function mapData(data: DT, index: number, array: DT[]): JSX.Element {
+        const inView: boolean = isInView(index, prop.scrollIndex, prop.scrollIndex + prop.view - 1)
         return (
             <div key={prop.hashData(data)}
                  ref={(self) => registerElement(self, prop.hashData(data), elementsRef)}
                  className={'flex-shrink-0'}
                  style={{flexBasis: `${1 / prop.view * 100}%`}}
             >
-                {prop.mapData(data, index, array)}
+                {prop.mapData(data, index, array, inView)}
             </div>
         )
     }
@@ -368,31 +386,115 @@ function isMiddle(index: number, length: number): boolean {
     return !isHead(index, length) && !isTail(index, length)
 }
 
+function getElapsedTime(a: Date, b: Date): number {
+    const before: Date = a.valueOf() < b.valueOf() ? a : b
+    const after: Date = a.valueOf() >= b.valueOf() ? a : b
+
+    return after.valueOf() - before.valueOf()
+}
+
+function getTimeRatio(elapsedTime: number, total: 'day'): number {
+    let denominator: number = 0
+    switch (total) {
+        case 'day':
+            denominator = 864e5 // 24 * 60 * 60 * 1000
+            break
+    }
+    return elapsedTime / denominator
+}
+
+function getBeginningOfDay(d: Date): Date {
+    const beginning = new Date(d.valueOf())
+    beginning.setHours(0, 0, 0, 0)
+    return beginning
+}
+
+function getRatioOfDay(d: Date) {
+    const elapsed = getElapsedTime(d, getBeginningOfDay(d))
+    return getTimeRatio(elapsed, 'day')
+}
+
 function DayContent(prop: {
     height: number,
     date: Date,
     index: {
         index: number,
         length: number
-    }
+    },
+    isInView: boolean
 }): JSX.Element {
+    const timeLineRef = useRef<HTMLDivElement>();
+    const selfRef = useRef<HTMLDivElement>()
+    const timerRef = useRef<NodeJS.Timeout>()
+    useEffect(() => {
+        if (isToday(prop.date)) {
+            updateTimeline()
+            if (isUN(timerRef.current) && prop.isInView) {
+                // in case it is scrolled in to invisible area and then scrolled back to the visible area without being removed from DOM in the whole process,
+                // this is possible because a key is set and React would preserve them to save computing power.
+                registerTimer()
+            }
+            if (!prop.isInView) {
+                // in case it is scrolled to invisible area but is still in the DOM (useEffect with [] won't be called at this time)
+                clearTimer()
+            }
+        }
+    });
+    useEffect(() => {
+        // will be run when the element is mounted and unmounted
+        if (isToday(prop.date) && prop.isInView && isUN(timerRef.current)) {
+            registerTimer()
+        }
+        return clearTimer
+    }, []);
+
+    function registerTimer() {
+        const interval = 10000 // update every 10 seconds
+        timerRef.current = setInterval(updateTimeline, interval)
+        // console.log('register')
+    }
+
+    function clearTimer() {
+        if (!isUN(timerRef.current)) {
+            clearInterval(timerRef.current)
+            timerRef.current = undefined
+            // console.log('unmount')
+        }
+    }
+
+    function updateTimeline(): void {
+        const percentage = getRatioOfDay(new Date()) * 100
+        // @ts-ignore
+        timeLineRef.current.style.top = percentage.toString() + '%'
+        // console.log(new Date())
+    }
 
     let slots: JSX.Element[] = []
     slots = repeatElements(24, (index) => <Slot id={index}
                                                 className={isTail(prop.index.index, prop.index.length) ? 'border-x' : 'border-l'}/>)
 
+    const timeLine: JSX.Element =
+        <div className={'absolute left-0 w-full'} style={{top: '0%'}} ref={timeLineRef}>
+            <CurrentTimeLine/>
+        </div>
+
     return (
-        <div style={{height: `${prop.height}vh`}}>
+        <div className={'relative'} style={{height: `${prop.height}vh`}} ref={selfRef}>
             {slots}
+            {isToday(prop.date) ? timeLine : ''}
         </div>
     )
+}
+
+function isToday(d: Date): boolean {
+    return areSameDate(d, new Date())
 }
 
 function WeekNumber(prop: {
     date: Date
 }): JSX.Element {
     return (
-        <div className={'text-black rounded bg-gray-400 py-1 px-2 select-none'}>
+        <div className={'text-black rounded bg-gray-400 py-1 px-2 select-none text-sm'}>
             {getWeek(prop.date)}
         </div>
     )
@@ -417,7 +519,8 @@ function Slot(prop: {
         <div
             className={`w-full border-neutral-400 relative ${prop.className} ${isTail ? '' : 'border-b'}`}
             style={baseStyle}>
-            <div className={`${prop.time ? 'invisible' : `hidden`}`}>{<div className={`${timeAxisAddonStyle}`}>{prop.time}</div>}</div>
+            <div className={`${prop.time ? 'invisible' : `hidden`}`}>{<div
+                className={`${timeAxisAddonStyle}`}>{prop.time}</div>}</div>
             <div
                 className={`absolute visible inline top-full left-full -translate-x-full -translate-y-1/2 ${timeAxisAddonStyle}`}
             >
@@ -625,7 +728,7 @@ function Choices(prop: {
     for (let i = 0; i < prop.elements.length; i++) {
         const element = prop.elements[i]
         elementsDivs.push(
-            <button key={i + element} className={`relative z-50 w-full whitespace-nowrap ${Theme.button}`}
+            <button key={i + element} className={`relative z-50 w-full whitespace-nowrap text-sm ${Theme.button}`}
                     onClick={onClick(i)}>
                 {element}
             </button>
@@ -690,6 +793,16 @@ function YearHint(prop: {
             <button className={`h-full ${Theme.button}`}>
                 {hint}
             </button>
+        </div>
+    )
+}
+
+function CurrentTimeLine(): JSX.Element {
+    return (
+        <div className={'relative w-full bg-blue-600'} style={{height: '0.1rem'}}>
+            <div className={'absolute rounded-full bg-blue-600 left-0 top-1/2  -translate-x-3/4'}
+                 style={{width: '0.5rem', height: '0.5rem', transform: 'translate(-95%, -50%)'}}>
+            </div>
         </div>
     )
 }
