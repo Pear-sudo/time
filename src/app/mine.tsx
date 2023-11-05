@@ -648,7 +648,8 @@ class Scheduler {
 }
 
 function Display(): JSX.Element {
-    const [displayedDates, updateDisplayedDates] = useState(generateFullWeekDays(new Date()))
+    const [displayedDates, _updateDisplayedDates] = useState(generateFullWeekDays(new Date()))
+    const displayedDatesRef = useRef(generateFullWeekDays(new Date()));
 
     useEffect(() => {
         function handleResize() {
@@ -673,6 +674,15 @@ function Display(): JSX.Element {
         rerenderTask
     ]
 
+    function updateDisplayedDates(dates: Date[]) {
+        _updateDisplayedDates(dates)
+        displayedDatesRef.current = dates
+    }
+
+    function getDisplayedDates(): Date[] {
+        return displayedDatesRef.current
+    }
+
     function taskRerender() {
         resetScroll()
         scheduler.registerTasks([rerenderTask])
@@ -680,15 +690,17 @@ function Display(): JSX.Element {
 
     const onNavigationButtonClick = (nextPeriod: boolean): void => {
         const count = nextPeriod ? 1 : -1
-        updateDisplayedDates(rollDates(displayedDates, count))
+        const newDisplayedDates = rollDates(getDisplayedDates(), count)
+        updateDisplayedDates(newDisplayedDates) // note that you cannot see the change immediately
     }
 
     const onTodayButtonClick = (): void => {
-        onDayCountChange(displayedDates.length, new Date())
+        onDayCountChange(getDisplayedDates().length, new Date())
     }
 
     const onDayCountChange = (count: number, anchor?: Date): void => {
-        anchor = anchor ? anchor : displayedDates[0]
+        anchor = anchor ? anchor : getDisplayedDates()[0]
+        console.log(anchor)
         switch (count) {
             case 7:
                 updateDisplayedDates(generateFullWeekDays(anchor))
@@ -700,7 +712,7 @@ function Display(): JSX.Element {
     }
 
     const resetScroll = (): void => {
-        onDayCountChange(displayedDates.length)
+        onDayCountChange(getDisplayedDates().length)
     }
 
     return (
