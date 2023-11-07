@@ -6,6 +6,8 @@ import arrowPrev from './icons/arrow-prev-small.svg';
 import arrowNext from './icons/arrow-next-small.svg';
 import Image from "next/image";
 import {throttle} from "lodash";
+import {Property} from "csstype";
+import Color = Property.Color;
 
 function getWeek(today: Date): number {
     //TODO support different begging day
@@ -164,9 +166,14 @@ function Calendar(prop: {
 
     if (prevProps.current.events?.scrollToNow !== prop.events?.scrollToNow) {
         // today button is clicked
-        console.log(displayContextObj.timeLineTop)
-        // @ts-ignore
-        scrollableAreaRef.current.scrollTo({top: displayContextObj.timeLineTop, left: scrollableAreaRef.current.scrollLeft, behavior: 'smooth'})
+        const scrollableAreaHeight = getElementHeight(scrollableAreaRef.current as HTMLDivElement)
+        const scrollableAreaHeightHalf = scrollableAreaHeight / 2
+        const timeLineTop = displayContextObj.timeLineTop
+        if (timeLineTop > scrollableAreaHeightHalf) {
+            const top = timeLineTop - scrollableAreaHeightHalf
+            // @ts-ignore
+            scrollableAreaRef.current.scrollTo({top: top, left: scrollableAreaRef.current.scrollLeft, behavior: 'smooth'})
+        }
     }
 
     return (
@@ -512,7 +519,15 @@ function DayContent(prop: {
         if (isToday(prop.date)) {
             const ratio = getRatioOfDay(new Date())
             const percentage = ratio * 100
-            displayContextObj.timeLineTop = getElementHeight(selfRef.current as HTMLDivElement) * ratio
+
+            const dayContentDiv = selfRef.current as HTMLDivElement
+            const dayContentDivHeight = getElementHeight(dayContentDiv)
+
+            const slotHeight = dayContentDivHeight / 24
+
+            displayContextObj.timeLineTop = dayContentDivHeight * ratio
+            displayContextObj.slotHeight = slotHeight
+
             // @ts-ignore
             timeLineRef.current.style.top = percentage.toString() + '%'
             // console.log(new Date())
@@ -702,6 +717,14 @@ function isOrAre(count: number): string {
 }
 
 class DisplayContextObj {
+    get slotHeight(): number {
+        return this._slotHeight;
+    }
+
+    set slotHeight(value: number) {
+        this._slotHeight = value;
+    }
+
     private static instance: DisplayContextObj;
 
     constructor() {
@@ -720,6 +743,7 @@ class DisplayContextObj {
     }
 
     private _timeLineTop: number = 0
+    private _slotHeight: number = 0
 }
 
 const DisplayContext = React.createContext(new DisplayContextObj());
@@ -977,16 +1001,47 @@ function CurrentTimeLine(): JSX.Element {
     return (
         <div className={'relative w-full bg-blue-600'} style={{height: '0.1rem'}}>
             <div className={'absolute rounded-full bg-blue-600 left-0 top-1/2  -translate-x-3/4'}
-                 style={{width: '0.5rem', height: '0.5rem', transform: 'translate(-95%, -50%)'}}>
+                 style={{width: '0.5rem', height: '0.5rem', transform: 'translate(-50%, -50%)'}}>
             </div>
         </div>
     )
 }
 
-function Record(): JSX.Element {
-    return (
-        <div>
+class CalendarEvent {
+    // the standard iCalendar File Format: https://icalendar.org/
+    summary: string = ''
+    description: string = ''
 
+    constructor() {
+
+    }
+}
+
+class CalendarEventExt extends CalendarEvent {
+    constructor() {
+        super();
+    }
+}
+
+function getPosition(element: HTMLDivElementt) {
+    let x = 0;
+    let y = 0;
+
+    while(element) {
+        x += (element.offsetLeft - element.scrollLeft + element.clientLeft);
+        y += (element.offsetTop - element.scrollTop + element.clientTop);
+        element = element.offsetParent;
+    }
+
+    return { top: y, left: x };
+}
+
+function Record(prop: { calendarEvent: CalendarEventExt, height: number, color: string }): JSX.Element {
+    const calendarEvent = prop.calendarEvent
+    return (
+        <div className={'w-full'} style={{height: `${prop.height}px`, color: prop.color}}>
+            <div className={'font-bold'}>{calendarEvent.summary}</div>
+            <div>{calendarEvent.description}</div>
         </div>
     )
 }
