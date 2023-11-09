@@ -1,13 +1,11 @@
 "use client"
 
-import React, {createRef, CSSProperties, JSX, useContext, useEffect, useRef, useState} from "react";
+import React, {CSSProperties, JSX, useContext, useEffect, useRef, useState} from "react";
 import './index.css';
 import arrowPrev from './icons/arrow-prev-small.svg';
 import arrowNext from './icons/arrow-next-small.svg';
 import Image from "next/image";
 import {throttle} from "lodash";
-import {Property} from "csstype";
-import Color = Property.Color;
 
 function getWeek(today: Date): number {
     //TODO support different begging day
@@ -121,7 +119,7 @@ function Calendar(prop: {
     events?: { scrollToNow: boolean }
 }): JSX.Element {
     const [changeHeaderBg, updateChangeHeaderBg,] = useState(false)
-    const scrollableAreaRef = useRef<HTMLDivElement>()
+    const scrollableAreaRef = useRef<HTMLDivElement>(null)
     const scrollBarVisible = useRef<boolean>(true)
     const prevProps = useRef(prop)
     const refToChild = useRef({timeLineTop: 0})
@@ -140,9 +138,9 @@ function Calendar(prop: {
 
     function mapDate2DayContent(date: Date, index: number, array: Date[], isInView: boolean): JSX.Element {
         return (
-            <DayContent date={date} height={height}
+            <DayContent date={date}
+                        height={height}
                         index={{index: index, length: array.length}}
-                        width={{width: `${1 / prop.dates.length * 100}%`}}
                         isInView={isInView}
             />
         )
@@ -255,7 +253,7 @@ function Pager<DT, PR = any>(prop: {
     const propRef = useRef(prop)
     const scrollInfoRef = useRef({scrollLeft: 0})
 
-    const containerRef = useRef<HTMLDivElement>()
+    const containerRef = useRef<HTMLDivElement>(null)
     const elementsRef = useRef<Map<string, HTMLDivElement>>(new Map())
 
     // so that each element in the pager can communicate with each other, to solve problems such as the last minute timeline problem
@@ -474,8 +472,8 @@ function DayContent(prop: {
     },
     isInView: boolean
 }): JSX.Element {
-    const timeLineRef = useRef<HTMLDivElement>();
-    const selfRef = useRef<HTMLDivElement>()
+    const timeLineRef = useRef<HTMLDivElement>(null);
+    const selfRef = useRef<HTMLDivElement>(null)
     const timerRef = useRef<NodeJS.Timeout>()
     const displayContextObj = useContext(DisplayContext)
     useEffect(() => {
@@ -754,6 +752,7 @@ function Display(): JSX.Element {
     const selfEvents = useRef({
         onTodayButtonClick: false
     });
+    const selfRef = useRef<HTMLDivElement>(null);
 
     useEffect(() => {
         window.addEventListener('resize', handleResizeThrottled)
@@ -771,6 +770,10 @@ function Display(): JSX.Element {
         onTodayButtonClick()
     }, []);
 
+    useEffect(() => {
+        // updateHeight()
+    });
+
     const scheduler = new Scheduler()
     const rerenderTask: { date: Date, f: Function } = {date: new Date(new Date().setHours(23, 59, 59, 999)), f: taskRerender}
 
@@ -779,6 +782,15 @@ function Display(): JSX.Element {
     ]
 
     const displayContextObj = new DisplayContextObj()
+
+    function updateHeight(): void {
+        const selfDiv = selfRef.current
+        if (selfDiv) {
+            const windowHeight = window.innerHeight
+            let targetHeight = windowHeight
+            selfDiv.style.height = targetHeight + 'px'
+        }
+    }
 
     function handleVisibilityChange(): void {
         // This can also be used to detect the lock of screen
@@ -838,7 +850,7 @@ function Display(): JSX.Element {
 
     return (
         <DisplayContext.Provider value={displayContextObj}>
-            <div className={'w-full h-screen'} style={{display: 'grid', gridTemplateRows: 'auto 1fr'}}>
+            <div className={'w-full relative'} style={{display: 'grid', gridTemplateRows: 'auto 1fr', height: '100dvh'}} ref={selfRef}>
                 <div className={'inline-flex flex-row justify-center'}>
                     <DayCount onChange={onDayCountChange}/>
                     <TodayButton onClick={onTodayButtonClick}/>
@@ -852,6 +864,10 @@ function Display(): JSX.Element {
             </div>
         </DisplayContext.Provider>
     )
+}
+
+function isMobileDevice() {
+    return (navigator.userAgent.indexOf('IEMobile') !== -1);
 }
 
 function TodayButton(prop: {
@@ -956,10 +972,8 @@ function SideBar(): JSX.Element {
 
 function ControlButton(): JSX.Element {
     return (
-        <div className={''}>
-            <div className={'fixed right-2 bottom-2 rounded-full bg-fuchsia-300'}
-                 style={{width: '6vmin', height: '6vmin'}}>
-            </div>
+        <div className={'fixed right-2 bottom-2 rounded-full bg-fuchsia-300'}
+             style={{width: '6vmin', height: '6vmin'}}>
         </div>
     )
 }
@@ -1023,17 +1037,17 @@ class CalendarEventExt extends CalendarEvent {
     }
 }
 
-function getPosition(element: HTMLDivElementt) {
+function getPosition(element: HTMLDivElement) {
     let x = 0;
     let y = 0;
 
-    while(element) {
+    while (element) {
         x += (element.offsetLeft - element.scrollLeft + element.clientLeft);
         y += (element.offsetTop - element.scrollTop + element.clientTop);
-        element = element.offsetParent;
+        element = element.offsetParent as HTMLDivElement;
     }
 
-    return { top: y, left: x };
+    return {top: y, left: x};
 }
 
 function Record(prop: { calendarEvent: CalendarEventExt, height: number, color: string }): JSX.Element {
