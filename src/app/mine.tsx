@@ -1066,7 +1066,23 @@ function Record(prop: { calendarEvent: CalendarEventExt, height: number, color: 
     )
 }
 
+// @ts-ignore
+class CDate extends Date {
+    constructor(...args: any[]) {
+        if (args.length === 0) {
+            // @ts-ignore
+            super(...args)
+            this.setHours(1)
+        } else {
+            // @ts-ignore
+            super(...args)
+        }
+    }
+}
+
 export default function Layout(): JSX.Element {
+    // @ts-ignore
+    // global.Date = CDate
     return (
         <div className={'flex-row inline-flex justify-center w-full'}>
             <Display/>
