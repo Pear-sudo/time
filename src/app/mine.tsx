@@ -4,6 +4,7 @@ import React, {CSSProperties, JSX, useContext, useEffect, useRef, useState} from
 import './index.css';
 import arrowPrev from './icons/arrow-prev-small.svg';
 import arrowNext from './icons/arrow-next-small.svg';
+import plusIcon from './icons/plus.svg'
 import Image from "next/image";
 import {throttle} from "lodash";
 
@@ -978,6 +979,7 @@ function ControlButton(): JSX.Element {
     return (
         <div className={'fixed right-2 bottom-2 rounded-full bg-fuchsia-300'}
              style={{width: '6vmin', height: '6vmin'}}>
+            <Image src={plusIcon} alt={''}/>
         </div>
     )
 }
