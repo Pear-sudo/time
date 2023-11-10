@@ -162,14 +162,18 @@ function Calendar(prop: {
         overScrollPercentage = -0.5
     }
 
-    if (prevProps.current.events?.scrollToNow !== prop.events?.scrollToNow) {
+    if (prevProps.current.events?.scrollToNow !== prop.events?.scrollToNow && scrollableAreaRef.current) {
         // today button is clicked
-        const scrollableAreaHeight = getElementHeight(scrollableAreaRef.current as HTMLDivElement)
+        const scrollableAreaHeight = getElementHeight(scrollableAreaRef.current)
         const scrollableAreaHeightHalf = scrollableAreaHeight / 2
         const timeLineTop = displayContextObj.timeLineTop
         if (timeLineTop > scrollableAreaHeightHalf) {
             const top = timeLineTop - scrollableAreaHeightHalf
             // @ts-ignore
+            scrollableAreaRef.current.scrollTo({top: top, left: scrollableAreaRef.current.scrollLeft, behavior: 'smooth'})
+        } else {
+            // in case the user is at the bottom
+            const top = 0
             scrollableAreaRef.current.scrollTo({top: top, left: scrollableAreaRef.current.scrollLeft, behavior: 'smooth'})
         }
     }
