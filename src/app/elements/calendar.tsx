@@ -23,6 +23,9 @@ export function Calendar(prop: {
     useEffect(() => {
         prevProps.current = prop
     });
+    useEffect(() => {
+        scrollToTimeline()
+    }, []);
 
     const height = 150
 
@@ -52,26 +55,33 @@ export function Calendar(prop: {
         return [...rollDates(prop.dates, -1), ...dates, ...rollDates(prop.dates, 1)]
     }
 
+    function scrollToTimeline() {
+        if (scrollableAreaRef.current) {
+            console.log('today')
+            const scrollableAreaHeight = getElementHeight(scrollableAreaRef.current)
+            const scrollableAreaHeightHalf = scrollableAreaHeight / 2
+            const timeLineTop = displayContextObj.timeLineTop
+            if (timeLineTop > scrollableAreaHeightHalf) {
+                const top = timeLineTop - scrollableAreaHeightHalf
+                // @ts-ignore
+                scrollableAreaRef.current.scrollTo({top: top, left: scrollableAreaRef.current.scrollLeft, behavior: 'smooth'})
+            } else {
+                // in case the user is at the bottom
+                const top = 0
+                scrollableAreaRef.current.scrollTo({top: top, left: scrollableAreaRef.current.scrollLeft, behavior: 'smooth'})
+            }
+        }
+    }
+
     const renderDates = getRenderDates(prop.dates)
     let overScrollPercentage: number = -3 //-5
     if (prop.dates.length === 1) {
         overScrollPercentage = -0.5
     }
 
-    if (prevProps.current.events?.scrollToNow !== prop.events?.scrollToNow && scrollableAreaRef.current) {
+    if (prevProps.current.events?.scrollToNow !== prop.events?.scrollToNow) {
         // today button is clicked
-        const scrollableAreaHeight = getElementHeight(scrollableAreaRef.current)
-        const scrollableAreaHeightHalf = scrollableAreaHeight / 2
-        const timeLineTop = displayContextObj.timeLineTop
-        if (timeLineTop > scrollableAreaHeightHalf) {
-            const top = timeLineTop - scrollableAreaHeightHalf
-            // @ts-ignore
-            scrollableAreaRef.current.scrollTo({top: top, left: scrollableAreaRef.current.scrollLeft, behavior: 'smooth'})
-        } else {
-            // in case the user is at the bottom
-            const top = 0
-            scrollableAreaRef.current.scrollTo({top: top, left: scrollableAreaRef.current.scrollLeft, behavior: 'smooth'})
-        }
+        scrollToTimeline()
     }
 
     return (

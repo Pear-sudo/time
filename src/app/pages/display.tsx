@@ -36,7 +36,7 @@ function Display(): JSX.Element {
     }, []);
 
     useEffect(() => {
-        onTodayButtonClick()
+
     }, []);
 
     useEffect(() => {
