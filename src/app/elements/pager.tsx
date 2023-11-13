@@ -35,7 +35,7 @@ export function Pager<DT, PR = any>(prop: {
         const oldAnchor = propRef.current.dataSet.at(propRef.current.scrollIndex) as DT
         // @ts-ignore
         if (!prop.dataSet.map((d) => prop.hashData(d)).includes(prop.hashData(oldAnchor))) {
-            console.warn(`Old anchor is not in the new data set. \nNew: ${prop.dataSet}\nOld Anchor: ${oldAnchor}`)
+            // console.warn(`Old anchor is not in the new data set. \nNew: ${prop.dataSet}\nOld Anchor: ${oldAnchor}`)
             updateRefs()
             return
         }

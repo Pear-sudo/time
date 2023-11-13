@@ -19,7 +19,7 @@ export function Calendar(prop: {
     const scrollBarVisible = useRef<boolean>(true)
     const prevProps = useRef(prop)
     const refToChild = useRef({timeLineTop: 0})
-    const displayContextObj = useContext(DisplayContext)
+    const {displayContextObj, updateContext} = useContext(DisplayContext)
     useEffect(() => {
         prevProps.current = prop
     });
@@ -57,7 +57,6 @@ export function Calendar(prop: {
 
     function scrollToTimeline() {
         if (scrollableAreaRef.current) {
-            console.log('today')
             const scrollableAreaHeight = getElementHeight(scrollableAreaRef.current)
             const scrollableAreaHeightHalf = scrollableAreaHeight / 2
             const timeLineTop = displayContextObj.timeLineTop

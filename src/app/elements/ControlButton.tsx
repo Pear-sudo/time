@@ -1,9 +1,12 @@
-import React, {JSX, useRef, useState} from "react";
+import React, {JSX, useContext, useRef, useState} from "react";
 import Image from "next/image";
 import plusIcon from "@/app/icons/plus.svg";
-import {is} from "@babel/types";
 import {isUN} from "@/app/utility/lanUtil";
 import {toNumber} from "lodash";
+import {Time} from "@/app/utility/timeUtil";
+import {Theme} from "@/app/theme";
+import {DisplayContext} from "@/app/pages/display";
+import {CalendarEvent} from "@/app/model/eventData";
 
 export function ControlButton(): JSX.Element {
     const [showCreator, updateShowCreator] = useState(false);
@@ -14,6 +17,8 @@ export function ControlButton(): JSX.Element {
 
     function handleCallback(result: PopupResult, data: any) {
         if (result == PopupResult.Cancelled) {
+            updateShowCreator(false)
+        } else if (result == PopupResult.Success) {
             updateShowCreator(false)
         }
     }
@@ -29,7 +34,13 @@ export function ControlButton(): JSX.Element {
     )
 }
 
-function NumberInput(prop: { len?: number, allowLeadingZero?: boolean, min?: number, max?: number }): JSX.Element {
+function NumberInput(prop: {
+    callback: (num: number | undefined) => void,
+    len?: number,
+    allowLeadingZero?: boolean,
+    min?: number,
+    max?: number
+}): JSX.Element {
     const oldValueRef = useRef("");
 
     let len = prop.len ? prop.len : 2
@@ -54,7 +65,6 @@ function NumberInput(prop: { len?: number, allowLeadingZero?: boolean, min?: num
         let signViolation = false
         const hasSign = /^-/.test(newValue)
         signViolation = min >= 0 ? hasSign : !hasSign
-        console.log(signViolation)
 
         let rangeViolation = false
         if (num != undefined) {
@@ -85,23 +95,57 @@ function NumberInput(prop: { len?: number, allowLeadingZero?: boolean, min?: num
         }
     }
 
+    function handleOnBlur() {
+        prop.callback(toNumber(oldValueRef.current))
+    }
+
     return (
         <span className={'w-fit'}>
-            <input type={'text'} inputMode={"numeric"} className={'w-10 text-center'}
+            <input type={'text'}
+                   inputMode={"numeric"}
+                   className={'w-10 text-center'}
                    style={{
                        WebkitAppearance: 'none',
                        MozAppearance: 'textfield'
                    }}
-                   placeholder={'0'.repeat(len)} onChange={handleOnChange}/>
+                   placeholder={'0'.repeat(len)} onChange={handleOnChange}
+                   onBlur={handleOnBlur}
+            />
         </span>
     )
 }
 
 
 function LogCreator(prop: { callback: (result: PopupResult, data: any) => void }): JSX.Element {
+    const {displayContextObj, updateContext} = useContext(DisplayContext)
+    const beginTimeRef = useRef<Time>();
+    const endTimeRef = useRef<Time>();
+
     function handleOutsideClick(event: React.MouseEvent) {
         event.stopPropagation()
         prop.callback(PopupResult.Cancelled, undefined)
+    }
+
+    function handleTimeSelectorCallback(ref: React.MutableRefObject<Time | undefined>) {
+        return (
+            (time: Time) => {
+                ref.current = time
+            }
+        )
+    }
+
+    function handleCreate(event: React.MouseEvent) {
+        const reportingBeginTime = beginTimeRef.current ? beginTimeRef.current : {hour: 0, minute: 0}
+        const reportingEndTime = endTimeRef.current ? endTimeRef.current : {hour: 0, minute: 0}
+        displayContextObj.dataStore.put(
+            new CalendarEvent(
+                new Date(new Date().setHours(reportingBeginTime?.hour, reportingBeginTime?.minute, 0, 0)),
+                new Date(new Date().setHours(reportingEndTime?.hour, reportingEndTime?.minute, 0, 0))
+            )
+        )
+        displayContextObj.dataStoreUpdatedTime = new Date()
+        event.stopPropagation()
+        prop.callback(PopupResult.Success, null)
     }
 
     return (
@@ -109,26 +153,50 @@ function LogCreator(prop: { callback: (result: PopupResult, data: any) => void }
             <div className={'fixed bg-black top-0 left-0 cursor-default opacity-50'}
                  style={{width: '100dvw', height: '100dvh'}}
                  onClick={handleOutsideClick}></div>
-            <div className={'fixed bg-cyan-50 top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 cursor-default'}
-                 style={{width: '50dvw', height: '50dvh'}}>
+            <div
+                className={'fixed rounded bg-cyan-50 top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 cursor-default'}
+                style={{width: '50dvw', height: '50dvh'}}>
                 <span>
-                    Begin: <TimeSelector/>
+                    Begin: <TimeSelector callback={handleTimeSelectorCallback(beginTimeRef)}/>
                 </span>
                 <br/>
                 <span>
-                    End: <TimeSelector/>
+                    End: <TimeSelector callback={handleTimeSelectorCallback(endTimeRef)}/>
                 </span>
+                <button className={`${Theme.button}`} onClick={handleCreate}>Create</button>
             </div>
         </div>
     )
 }
 
-function TimeSelector(): JSX.Element {
+function TimeSelector(prop: { callback: (time: Time) => void }): JSX.Element {
+    const hour = useRef();
+    const minute = useRef();
+
+    function handleCallback(ref: React.MutableRefObject<number | undefined>) {
+        return (
+            (num: number | undefined) => {
+                ref.current = num
+                activateCallback()
+            }
+        )
+    }
+
+    function activateCallback() {
+        const reportingHour = hour.current != undefined ? hour.current : 0
+        const reportingMinute = minute.current != undefined ? minute.current : 0
+        const time: Time = {
+            hour: reportingHour,
+            minute: reportingMinute
+        }
+        prop.callback(time)
+    }
+
     return (
         <span>
-            <NumberInput max={23} min={0} allowLeadingZero={true}/>
+            <NumberInput callback={handleCallback(hour)} max={23} min={0} allowLeadingZero={true}/>
             :
-            <NumberInput max={59} min={0} allowLeadingZero={true}/>
+            <NumberInput callback={handleCallback(minute)} max={59} min={0} allowLeadingZero={true}/>
         </span>
     )
 }

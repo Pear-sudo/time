@@ -1,5 +1,6 @@
 import {isUN} from "@/app/utility/lanUtil";
 import {padNumber} from "@/app/utility/numberUtil";
+import * as math from 'mathjs';
 
 export function areSameDate(d1: Date, d2: Date): boolean {
     return d1.getFullYear() === d2.getFullYear() && d1.getMonth() === d2.getMonth() && d1.getDate() === d2.getDate()
@@ -67,10 +68,10 @@ function getTimeRatio(elapsedTime: number, total: 'day'): number {
     let denominator: number = 0
     switch (total) {
         case 'day':
-            denominator = 864e5 // 24 * 60 * 60 * 1000
+            denominator = 86400000 // 24 * 60 * 60 * 1000
             break
     }
-    return elapsedTime / denominator
+    return math.divide(elapsedTime, denominator)
 }
 
 function getBeginningOfDay(d: Date): Date {
@@ -142,3 +143,5 @@ function includeDate(date: Date, dates: Date[]): boolean {
     const ids = dates.map((d) => getDayId(d))
     return ids.includes(getDayId(date))
 }
+
+export type Time = { hour: number, minute: number }

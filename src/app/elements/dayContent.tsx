@@ -1,11 +1,12 @@
-import React, {JSX, useContext, useEffect, useRef} from "react";
-import {getRatioOfDay, isToday} from "@/app/utility/timeUtil";
+import React, {JSX, useContext, useEffect, useRef, useState} from "react";
+import {getDayId, getRatioOfDay, isToday} from "@/app/utility/timeUtil";
 import {isUN} from "@/app/utility/lanUtil";
 import {getElementHeight, repeatElements} from "@/app/utility/domUtil";
 import {Slot} from "@/app/elements/slot";
 import {isTail} from "@/app/utility/numberUtil";
 import {CurrentTimeLine} from "@/app/elements/currentTimeLine";
 import {DisplayContext} from "@/app/pages/display";
+import {CalendarEvent} from "@/app/model/eventData";
 
 export function DayContent(prop: {
     height: number,
@@ -19,7 +20,7 @@ export function DayContent(prop: {
     const timeLineRef = useRef<HTMLDivElement>(null);
     const selfRef = useRef<HTMLDivElement>(null)
     const timerRef = useRef<NodeJS.Timeout>()
-    const displayContextObj = useContext(DisplayContext)
+    const {displayContextObj, updateContext} = useContext(DisplayContext)
     useEffect(() => {
         if (isToday(prop.date)) {
             updateTimeline()
@@ -41,6 +42,9 @@ export function DayContent(prop: {
         }
         return clearTimer
     }, []);
+    useEffect(() => {
+
+    });
 
     function registerTimer() {
         const interval = 60000 // update every 60 seconds
@@ -79,6 +83,45 @@ export function DayContent(prop: {
         }
     }
 
+    function getEventHeight(event: CalendarEvent): number | undefined {
+        const begin = event.begin
+        const end = event.end
+        if (begin && end) {
+            const beginRatio = getRatioOfDay(begin)
+            const endRatio = getRatioOfDay(end)
+            const ratioDelta = endRatio - beginRatio
+            if (ratioDelta > 0) {
+                return ratioDelta * 100
+            } else {
+                console.log(begin)
+                console.log(end)
+                throw new Error("end is earlier than begin")
+            }
+        } else {
+            console.log('begin || end not found')
+        }
+    }
+
+    function events2elements(events: CalendarEvent[]): JSX.Element[] {
+        const elements: JSX.Element[] = []
+        for (const event of events) {
+            const height = getEventHeight(event)
+            const topP = getRatioOfDay(event.begin as Date) * 100
+            const element: JSX.Element = (
+                <div className={'absolute w-full bg-blue-600'} style={{height: `${height}%`, top: `${topP}%`}}>
+                </div>
+            )
+            elements.push(element)
+        }
+        return elements
+    }
+
+    let eventElements: JSX.Element[] = []
+    const events = displayContextObj.dataStore.getEvents(prop.date)
+    if (events.length > 0) {
+        eventElements = events2elements(events)
+    }
+
     let slots: JSX.Element[] = []
     slots = repeatElements(24, (index) => <Slot id={index}
                                                 className={isTail(prop.index.index, prop.index.length) ? 'border-x' : 'border-l'}/>)
@@ -92,6 +135,7 @@ export function DayContent(prop: {
         <div className={'relative'} style={{height: `${prop.height}vh`}} ref={selfRef}>
             {slots}
             {isToday(prop.date) ? timeLine : ''}
+            {eventElements}
         </div>
     )
 }

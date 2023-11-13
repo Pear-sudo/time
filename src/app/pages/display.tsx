@@ -12,8 +12,10 @@ import {NavigationButtons} from "@/app/elements/navigationButtons";
 import {DisplayContextObj} from "@/app/model/displayContextObj";
 import {Calendar} from "@/app/elements/calendar";
 import {Scheduler} from "@/app/utility/scheduler";
+import {CalendarEventExt} from "@/app/model/eventData";
 
-export const DisplayContext = React.createContext(new DisplayContextObj());
+// @ts-ignore
+export const DisplayContext = React.createContext<{ displayContextObj: DisplayContextObj, updateContext: React.Dispatch<React.SetStateAction<DisplayContextObj>> } >(undefined)
 
 function Display(): JSX.Element {
     const [displayedDates, _updateDisplayedDates] = useState(generateFullWeekDays(new Date()))
@@ -22,6 +24,7 @@ function Display(): JSX.Element {
         onTodayButtonClick: false
     });
     const selfRef = useRef<HTMLDivElement>(null);
+    const [displayContextObjState, setDisplayContextObjState] = useState(new DisplayContextObj())
 
     useEffect(() => {
         window.addEventListener('resize', handleResizeThrottled)
@@ -49,8 +52,6 @@ function Display(): JSX.Element {
     const tasks: { date: Date, f: Function }[] = [
         rerenderTask
     ]
-
-    const displayContextObj = new DisplayContextObj()
 
     function updateHeight(): void {
         const selfDiv = selfRef.current
@@ -117,9 +118,13 @@ function Display(): JSX.Element {
         onDayCountChange(getDisplayedDates().length)
     }
 
+    displayContextObjState.setter = setDisplayContextObjState
+
     return (
-        <DisplayContext.Provider value={displayContextObj}>
-            <div className={'w-full relative'} style={{display: 'grid', gridTemplateRows: 'auto 1fr', height: '100dvh'}} ref={selfRef}>
+        <DisplayContext.Provider
+            value={{displayContextObj: displayContextObjState, updateContext: setDisplayContextObjState}}>
+            <div className={'w-full relative'} style={{display: 'grid', gridTemplateRows: 'auto 1fr', height: '100dvh'}}
+                 ref={selfRef}>
                 <div className={'inline-flex flex-row justify-center'}>
                     <DayCount onChange={onDayCountChange}/>
                     <TodayButton onClick={onTodayButtonClick}/>
@@ -145,22 +150,6 @@ function SideBar(): JSX.Element {
 
         </div>
     )
-}
-
-class CalendarEvent {
-    // the standard iCalendar File Format: https://icalendar.org/
-    summary: string = ''
-    description: string = ''
-
-    constructor() {
-
-    }
-}
-
-class CalendarEventExt extends CalendarEvent {
-    constructor() {
-        super();
-    }
 }
 
 function Record(prop: { calendarEvent: CalendarEventExt, height: number, color: string }): JSX.Element {
