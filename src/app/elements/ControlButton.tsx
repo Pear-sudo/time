@@ -66,6 +66,8 @@ function NumberInput(prop: {
         const hasSign = /^-/.test(newValue)
         signViolation = min >= 0 ? hasSign : !hasSign
 
+        // TODO this is wrong
+        // If min is 2000, the first input 2 should be accepted
         let rangeViolation = false
         if (num != undefined) {
             rangeViolation = num > max || num < min
@@ -157,11 +159,15 @@ function LogCreator(prop: { callback: (result: PopupResult, data: any) => void }
                 className={'fixed rounded bg-cyan-50 top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 cursor-default'}
                 style={{width: '50dvw', height: '50dvh'}}>
                 <span>
-                    Begin: <TimeSelector callback={handleTimeSelectorCallback(beginTimeRef)}/>
+                    Begin:
+                    <DateSelector/> &nbsp;
+                    <TimeSelector callback={handleTimeSelectorCallback(beginTimeRef)}/>
                 </span>
                 <br/>
                 <span>
-                    End: <TimeSelector callback={handleTimeSelectorCallback(endTimeRef)}/>
+                    End:
+                    <DateSelector/> &nbsp;
+                    <TimeSelector callback={handleTimeSelectorCallback(endTimeRef)}/>
                 </span>
                 <button className={`${Theme.button}`} onClick={handleCreate}>Create</button>
             </div>
@@ -197,6 +203,28 @@ function TimeSelector(prop: { callback: (time: Time) => void }): JSX.Element {
             <NumberInput callback={handleCallback(hour)} max={23} min={0} allowLeadingZero={true}/>
             :
             <NumberInput callback={handleCallback(minute)} max={59} min={0} allowLeadingZero={true}/>
+        </span>
+    )
+}
+
+function DateSelector(): JSX.Element {
+    const year = useRef();
+    const month = useRef();
+    const day = useRef();
+
+    function handleCallback(ref: React.MutableRefObject<number | undefined>) {
+        return (
+            (num: number | undefined) => {
+                ref.current = num
+            }
+        )
+    }
+
+    return (
+        <span>
+            <NumberInput len={4} callback={handleCallback(year)} allowLeadingZero={false} min={2000} max={3000}/>/
+            <NumberInput callback={handleCallback(month)} allowLeadingZero={true} min={1} max={12}/>/
+            <NumberInput callback={handleCallback(day)} allowLeadingZero={true} min={1} max={31}/>
         </span>
     )
 }
