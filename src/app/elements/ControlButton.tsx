@@ -42,6 +42,7 @@ function NumberInput(prop: {
     max?: number
 }): JSX.Element {
     const oldValueRef = useRef("");
+    const hintRef = useRef<HTMLSpanElement>(null);
 
     let len = prop.len ? prop.len : 2
     let allowLeadingZero: boolean = isUN(prop.allowLeadingZero) ? true : prop.allowLeadingZero as boolean
@@ -66,14 +67,13 @@ function NumberInput(prop: {
         const hasSign = /^-/.test(newValue)
         signViolation = min >= 0 ? hasSign : !hasSign
 
-        // TODO this is wrong
         // If min is 2000, the first input 2 should be accepted
-        let rangeViolation = false
-        if (num != undefined) {
-            rangeViolation = num > max || num < min
-        }
+        // let rangeViolation = false
+        // if (num != undefined) {
+        //     rangeViolation = num > max || num < min
+        // }
 
-        if (!isNumber || isOverflow || leadingZeroViolation || rangeViolation || signViolation) {
+        if (!isNumber || isOverflow || leadingZeroViolation || signViolation) {
             reject()
             return
         }
@@ -97,12 +97,23 @@ function NumberInput(prop: {
         }
     }
 
-    function handleOnBlur() {
-        prop.callback(toNumber(oldValueRef.current))
+    function handleOnBlur(event:  React.FocusEvent<HTMLInputElement>) {
+        const targetValue = event.target.value
+        const targetNum = toNumber(targetValue)
+        if (targetNum < min || targetNum > max) {
+            if (hintRef.current) {
+                hintRef.current.innerText = `${targetValue} is not within the range ${min} to ${max}`
+            }
+        } else {
+            if (hintRef.current && hintRef.current.innerText !== "") {
+                hintRef.current.innerText = ""
+            }
+            prop.callback(toNumber(oldValueRef.current))
+        }
     }
 
     return (
-        <span className={'w-fit'}>
+        <span className={'w-fit flex-col inline-flex items-center'}>
             <input type={'text'}
                    inputMode={"numeric"}
                    className={'w-10 text-center'}
@@ -113,6 +124,7 @@ function NumberInput(prop: {
                    placeholder={'0'.repeat(len)} onChange={handleOnChange}
                    onBlur={handleOnBlur}
             />
+            <span className={'text-red-600 text-sm'} ref={hintRef}></span>
         </span>
     )
 }
