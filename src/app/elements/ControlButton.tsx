@@ -3,7 +3,7 @@ import Image from "next/image";
 import plusIcon from "@/app/icons/plus.svg";
 import {isUN} from "@/app/utility/lanUtil";
 import {toNumber} from "lodash";
-import {Time} from "@/app/utility/timeUtil";
+import {Day, DayTime, getDay, Time} from "@/app/utility/timeUtil";
 import {Theme} from "@/app/theme";
 import {DisplayContext} from "@/app/pages/display";
 import {CalendarEvent} from "@/app/model/eventData";
@@ -36,12 +36,14 @@ export function ControlButton(): JSX.Element {
 
 function NumberInput(prop: {
     callback: (num: number | undefined) => void,
+    value?: number,
     len?: number,
     allowLeadingZero?: boolean,
     min?: number,
     max?: number
 }): JSX.Element {
-    const oldValueRef = useRef("");
+    const oldValueRef = useRef(prop.value == undefined ? "" : prop.value.toString());
+    const [value, setValue] = useState(oldValueRef.current)
     const hintRef = useRef<HTMLSpanElement>(null);
 
     let len = prop.len ? prop.len : 2
@@ -91,16 +93,16 @@ function NumberInput(prop: {
         }
 
         function finishUp() {
-            target.value = targetValue
             oldValueRef.current = targetValue
+            setValue(targetValue)
             event.preventDefault()
         }
     }
 
-    function handleOnBlur(event:  React.FocusEvent<HTMLInputElement>) {
+    function handleOnBlur(event: React.FocusEvent<HTMLInputElement>) {
         const targetValue = event.target.value
         const targetNum = toNumber(targetValue)
-        if (targetNum < min || targetNum > max) {
+        if (targetValue !== "" && (targetNum < min || targetNum > max)) {
             if (hintRef.current) {
                 hintRef.current.innerText = `${targetValue} is not within the range ${min} to ${max}`
             }
@@ -123,6 +125,7 @@ function NumberInput(prop: {
                    }}
                    placeholder={'0'.repeat(len)} onChange={handleOnChange}
                    onBlur={handleOnBlur}
+                   value={value}
             />
             <span className={'text-red-600 text-sm'} ref={hintRef}></span>
         </span>
@@ -132,8 +135,13 @@ function NumberInput(prop: {
 
 function LogCreator(prop: { callback: (result: PopupResult, data: any) => void }): JSX.Element {
     const {displayContextObj, updateContext} = useContext(DisplayContext)
+    const hintRef = useRef<HTMLSpanElement>(null);
+
     const beginTimeRef = useRef<Time>();
     const endTimeRef = useRef<Time>();
+
+    const beginDayRef = useRef<Day>();
+    const endDayRef = useRef<Day>();
 
     function handleOutsideClick(event: React.MouseEvent) {
         event.stopPropagation()
@@ -148,18 +156,51 @@ function LogCreator(prop: { callback: (result: PopupResult, data: any) => void }
         )
     }
 
+    function handleDaySelectorCallback(ref: React.MutableRefObject<Day | undefined>) {
+        return (
+            (day: Day) => {
+                ref.current = day
+            }
+        )
+    }
+
     function handleCreate(event: React.MouseEvent) {
         const reportingBeginTime = beginTimeRef.current ? beginTimeRef.current : {hour: 0, minute: 0}
         const reportingEndTime = endTimeRef.current ? endTimeRef.current : {hour: 0, minute: 0}
-        displayContextObj.dataStore.put(
-            new CalendarEvent(
-                new Date(new Date().setHours(reportingBeginTime?.hour, reportingBeginTime?.minute, 0, 0)),
-                new Date(new Date().setHours(reportingEndTime?.hour, reportingEndTime?.minute, 0, 0))
-            )
-        )
+
+        const reportingBeginDate = new Date(new Date().setHours(reportingBeginTime?.hour, reportingBeginTime?.minute, 0, 0))
+        const reportingEndDate = new Date(new Date().setHours(reportingEndTime?.hour, reportingEndTime?.minute, 0, 0))
+
+        if (beginDayRef.current && endDayRef.current) {
+            const beginDay = beginDayRef.current
+            const endDay = endDayRef.current
+            reportingBeginDate.setFullYear(beginDay?.year, beginDay?.month, beginDay?.date)
+            reportingEndDate.setFullYear(endDay?.year, endDay?.month, endDay?.date)
+        }
+
+        if (reportingBeginDate.valueOf() >= reportingEndDate.valueOf() && hintRef.current) {
+            hintRef.current.innerText = "End time is earlier than begin time."
+            return
+        } else if (hintRef.current && hintRef.current.innerText != "") {
+            hintRef.current.innerText = ""
+        }
+
+        displayContextObj.dataStore.put(new CalendarEvent(reportingBeginDate, reportingEndDate))
         displayContextObj.dataStoreUpdatedTime = new Date()
+
         event.stopPropagation()
         prop.callback(PopupResult.Success, null)
+    }
+
+    class RefDay extends Ref<Day> {
+        getData(): Day | undefined {
+            return this.ref.current;
+        }
+
+        setData(data: Day | undefined): void {
+            this.ref.current = data
+        }
+
     }
 
     return (
@@ -172,15 +213,18 @@ function LogCreator(prop: { callback: (result: PopupResult, data: any) => void }
                 style={{width: '50dvw', height: '50dvh'}}>
                 <span>
                     Begin:
-                    <DateSelector/> &nbsp;
+                    <DaySelector callback={handleDaySelectorCallback(beginDayRef)}
+                                 parentRef={new RefDay(beginDayRef)}/> &nbsp;
                     <TimeSelector callback={handleTimeSelectorCallback(beginTimeRef)}/>
                 </span>
                 <br/>
                 <span>
                     End:
-                    <DateSelector/> &nbsp;
+                    <DaySelector callback={handleDaySelectorCallback(endDayRef)}
+                                 parentRef={new RefDay(endDayRef)}/> &nbsp;
                     <TimeSelector callback={handleTimeSelectorCallback(endTimeRef)}/>
                 </span>
+                <span ref={hintRef} className={'text-red-600 text-sm'}></span>
                 <button className={`${Theme.button}`} onClick={handleCreate}>Create</button>
             </div>
         </div>
@@ -219,26 +263,51 @@ function TimeSelector(prop: { callback: (time: Time) => void }): JSX.Element {
     )
 }
 
-function DateSelector(): JSX.Element {
-    const year = useRef();
-    const month = useRef();
-    const day = useRef();
+function DaySelector(prop: { callback: (day: Day) => void, defaultDay?: Day, parentRef?: Ref<Day> }): JSX.Element {
+    const d = useRef<Day>(prop.defaultDay ? prop.defaultDay : getDay())
 
-    function handleCallback(ref: React.MutableRefObject<number | undefined>) {
+    function handleCallback(t: keyof Day) {
         return (
             (num: number | undefined) => {
-                ref.current = num
+                if (num != undefined) {
+                    // in js, month starts from 0.
+                    d.current[t] = t == "month" ? num - 1 : num
+
+                    if (prop.parentRef) {
+                        const ref = prop.parentRef
+                        ref.setData(d.current)
+                    }
+                }
             }
         )
     }
 
+    if (prop.parentRef) {
+        prop.parentRef.setData(d.current)
+    }
+
     return (
         <span>
-            <NumberInput len={4} callback={handleCallback(year)} allowLeadingZero={false} min={2000} max={3000}/>/
-            <NumberInput callback={handleCallback(month)} allowLeadingZero={true} min={1} max={12}/>/
-            <NumberInput callback={handleCallback(day)} allowLeadingZero={true} min={1} max={31}/>
+            <NumberInput len={4} callback={handleCallback("year")} allowLeadingZero={false} min={2000} max={3000}
+                         value={d.current.year}/>/
+            <NumberInput callback={handleCallback("month")} allowLeadingZero={true} min={1} max={12}
+                         value={d.current.month + 1}/>/
+            <NumberInput callback={handleCallback("date")} allowLeadingZero={true} min={1} max={31}
+                         value={d.current.date}/>
         </span>
     )
+}
+
+abstract class Ref<T> {
+    protected ref: React.MutableRefObject<T | undefined>;
+
+    constructor(ref: React.MutableRefObject<T | undefined>) {
+        this.ref = ref;
+    }
+
+    abstract getData(): T | undefined
+
+    abstract setData(data: T | undefined): void
 }
 
 enum PopupResult {

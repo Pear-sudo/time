@@ -145,3 +145,18 @@ function includeDate(date: Date, dates: Date[]): boolean {
 }
 
 export type Time = { hour: number, minute: number }
+
+export type Day = { year: number, month: number, date: number }
+
+export function getDay(date?: Date): Day {
+    let d: Date = date ? date : new Date()
+    return {year: d.getFullYear(), month: d.getMonth(), date: d.getDate()}
+}
+
+export enum DayTime {
+    year,
+    month,
+    date,
+    hour,
+    minute
+}
