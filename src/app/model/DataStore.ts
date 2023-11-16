@@ -1,24 +1,39 @@
 import {CalendarEvent} from "@/app/model/eventData";
-import {getDayId} from "@/app/utility/timeUtil";
+import {getDayId, getNextDate} from "@/app/utility/timeUtil";
 
 export class DataStore {
     put(e: CalendarEvent) {
-        if (!(e.begin || e.end)) {
-            throw new Error("Begin and End date must be set.")
-        }
-        this.data.push(e)
+        this.mapInsert(e)
     }
 
     getEvents(d: Date): CalendarEvent[] {
-        const matches: CalendarEvent[] = []
-        for (const event of this.data) {
-            const targetId = getDayId(d)
-            if (event.begin && getDayId(event.begin) === targetId) {
-                matches.push(event)
-            }
-        }
-        return matches
+        const key = getDayId(d)
+        const data = this.dataMap.get(key)
+        return data ? data : []
     }
 
-    private data: CalendarEvent[] = []
+    private mapInsert(e: CalendarEvent): void {
+        const beginDate = e.begin
+        const endDate = e.end
+
+        if (beginDate && endDate) {
+            const beginTime = beginDate.getTime()
+            const endTime = endDate.getTime()
+            let intermediateDate = beginDate
+            for (let time = beginTime; time <= endTime; intermediateDate = getNextDate(intermediateDate, false, 0, true), time = intermediateDate.getTime()) {
+                const date = new Date(time)
+                const key = getDayId(date)
+
+                if (!this.dataMap.has(key)) {
+                    this.dataMap.set(key, [])
+                }
+
+                this.dataMap.get(key)!.push(e)
+            }
+        } else {
+            throw new Error("Begin and End date must be set.")
+        }
+    }
+
+    private dataMap: Map<string, CalendarEvent[]> = new Map()
 }

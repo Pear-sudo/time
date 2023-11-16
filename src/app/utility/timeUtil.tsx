@@ -46,7 +46,7 @@ export function generateDates(from: Date, length: number, isFuture: boolean = tr
     return dates
 }
 
-function getNextDate(today: Date, inverse: boolean = false, skip: number = 0): Date {
+export function getNextDate(today: Date, inverse: boolean = false, skip: number = 0, resetTime: boolean = false): Date {
     // This function works mysteriously well even if it's the last day of a month.
     let directionSign: number = inverse ? -1 : 1
     let increment: number = (skip + 1) * directionSign
@@ -54,6 +54,9 @@ function getNextDate(today: Date, inverse: boolean = false, skip: number = 0): D
     const nextDate = new Date(today.valueOf())
     nextDate.setDate(nextDate.getDate() + increment)
     // console.log(`Increment: ${increment}, previous: ${today.toString()}, next: ${nextDate.toString()}`)
+    if (resetTime) {
+        return getBeginningOfDay(nextDate)
+    }
     return nextDate
 }
 

@@ -1,5 +1,5 @@
 import React, {JSX, useContext, useEffect, useRef, useState} from "react";
-import {getDayId, getRatioOfDay, isToday} from "@/app/utility/timeUtil";
+import {areSameDate, getDayId, getRatioOfDay, isToday} from "@/app/utility/timeUtil";
 import {isUN} from "@/app/utility/lanUtil";
 import {getElementHeight, repeatElements} from "@/app/utility/domUtil";
 import {Slot} from "@/app/elements/slot";
@@ -87,18 +87,34 @@ export function DayContent(prop: {
         const begin = event.begin
         const end = event.end
         if (begin && end) {
-            const beginRatio = getRatioOfDay(begin)
-            const endRatio = getRatioOfDay(end)
-            const ratioDelta = endRatio - beginRatio
-            if (ratioDelta > 0) {
-                return ratioDelta * 100
-            } else {
+            if (begin.valueOf() >= end.valueOf()) {
                 console.log(begin)
                 console.log(end)
                 throw new Error("end is earlier than begin")
             }
+
+            const beginRatio = areSameDate(prop.date, begin) ? getRatioOfDay(begin) : 0
+            const endRatio = areSameDate(prop.date, end) ? getRatioOfDay(end) : 1
+            const ratioDelta = endRatio - beginRatio
+
+            if (ratioDelta > 0) {
+                return ratioDelta * 100
+            } else {
+                throw new Error("ratio delta <= 0")
+            }
         } else {
             console.log('begin || end not found')
+        }
+    }
+
+    function getElementTop(event: CalendarEvent): number | undefined {
+        if (event.begin) {
+            const begin = event.begin
+            if (areSameDate(begin, prop.date)) {
+                return getRatioOfDay(begin) * 100
+            } else {
+                return 0
+            }
         }
     }
 
@@ -106,7 +122,7 @@ export function DayContent(prop: {
         const elements: JSX.Element[] = []
         for (const event of events) {
             const height = getEventHeight(event)
-            const topP = getRatioOfDay(event.begin as Date) * 100
+            const topP = getElementTop(event)
             const element: JSX.Element = (
                 <div className={'absolute w-full bg-blue-600'} style={{height: `${height}%`, top: `${topP}%`}}>
                 </div>
