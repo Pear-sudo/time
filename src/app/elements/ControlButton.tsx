@@ -209,8 +209,8 @@ function LogCreator(prop: { callback: (result: PopupResult, data: any) => void }
                  style={{width: '100dvw', height: '100dvh'}}
                  onClick={handleOutsideClick}></div>
             <div
-                className={'fixed rounded bg-cyan-50 top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 cursor-default'}
-                style={{width: '50dvw', height: '50dvh'}}>
+                className={'w-fit p-3 fixed rounded bg-cyan-50 top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 cursor-default flex-col inline-flex gap-3'}
+                style={{height: '50dvh'}}>
                 <span>
                     Begin:
                     <DaySelector callback={handleDaySelectorCallback(beginDayRef)}
@@ -225,7 +225,7 @@ function LogCreator(prop: { callback: (result: PopupResult, data: any) => void }
                     <TimeSelector callback={handleTimeSelectorCallback(endTimeRef)}/>
                 </span>
                 <span ref={hintRef} className={'text-red-600 text-sm'}></span>
-                <button className={`${Theme.button}`} onClick={handleCreate}>Create</button>
+                <button className={`${Theme.button} w-fit self-end mt-auto`} onClick={handleCreate}>Create</button>
             </div>
         </div>
     )
