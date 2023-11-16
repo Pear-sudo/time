@@ -211,14 +211,14 @@ function LogCreator(prop: { callback: (result: PopupResult, data: any) => void }
             <div
                 className={'w-fit p-3 fixed rounded bg-cyan-50 top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 cursor-default flex-col inline-flex gap-3'}
                 style={{height: '50dvh'}}>
-                <span>
+                <span className={'whitespace-nowrap'}>
                     Begin:
                     <DaySelector callback={handleDaySelectorCallback(beginDayRef)}
                                  parentRef={new RefDay(beginDayRef)}/> &nbsp;
                     <TimeSelector callback={handleTimeSelectorCallback(beginTimeRef)}/>
                 </span>
                 <br/>
-                <span>
+                <span className={'whitespace-nowrap'}>
                     End:
                     <DaySelector callback={handleDaySelectorCallback(endDayRef)}
                                  parentRef={new RefDay(endDayRef)}/> &nbsp;
