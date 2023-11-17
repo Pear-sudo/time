@@ -4,13 +4,43 @@ import * as localforage from "localforage";
 
 export class DataStore {
     put(e: CalendarEvent) {
+        if (this.lock) {
+            return
+        }
         this.mapInsert(e)
     }
 
     getEvents(d: Date): CalendarEvent[] {
+        if (this.lock) {
+            return []
+        }
         const key = getDayId(d)
         const data = this.dataMap.get(key)
         return data ? data : []
+    }
+
+    update(e: CalendarEvent) {
+        if (this.lock) {
+            return
+        }
+        this.deleteCe(e)
+        this.put(e)
+    }
+
+    deleteCe(e: CalendarEvent) {
+        let objStr = JSON.stringify(e);
+
+        for(let [key, value] of this.dataMap) {
+            let newValue = value.filter(item => JSON.stringify(item) !== objStr);
+
+            if(newValue.length === 0) {
+                this.dataMap.delete(key);
+            } else {
+                this.dataMap.set(key, newValue);
+            }
+        }
+
+        saveData(DataStore.key, this.dataMap)
     }
 
     private mapInsert(e: CalendarEvent): void {
@@ -37,16 +67,29 @@ export class DataStore {
         }
     }
 
-    private async loadData() {
-        const dm = await getDate(DataStore.key)
-        this.dataMap = dm ? dm : new Map()
+    public async loadData() {
+        return getData(DataStore.key).then(
+            value => {
+                if (value) {
+                    this.dataMap = value
+                }
+                console.log(value)
+                this.lock = false
+                console.log("Load data successfully.")
+            }
+        ).catch(
+            reason => {
+                console.log("Data failed to load.")
+                console.log(reason)
+            }
+        )
     }
 
     private dataMap: Map<string, CalendarEvent[]> = new Map()
     private static readonly key: string = "dataMapKey"
+    private lock: boolean = true
 
     constructor() {
-        this.loadData()
     }
 }
 
@@ -54,7 +97,7 @@ function saveData(key: string, data: any) {
     localforage.setItem(key, data)
 }
 
-async function getDate(key: string): Promise<any> {
+async function getData(key: string): Promise<any> {
     const s = await localforage.getItem(key)
     if (s) {
         return s

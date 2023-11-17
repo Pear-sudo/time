@@ -58,7 +58,13 @@ export class DisplayContextObj {
         if (!DisplayContextObj.instance) {
             DisplayContextObj.instance = this
         }
+        this.loadDataStore()
         return DisplayContextObj.instance
+    }
+
+    private async loadDataStore() {
+        await this.dataStore.loadData()
+        this.dataStoreUpdatedTime = new Date()
     }
 
 

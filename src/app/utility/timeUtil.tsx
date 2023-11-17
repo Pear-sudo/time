@@ -147,9 +147,16 @@ function includeDate(date: Date, dates: Date[]): boolean {
     return ids.includes(getDayId(date))
 }
 
-export type Time = { hour: number, minute: number }
+export type Time = {
+    hour: number,
+    minute: number
+}
 
-export type Day = { year: number, month: number, date: number }
+export type Day = {
+    year: number,
+    month: number,
+    date: number
+}
 
 export function getDay(date?: Date): Day {
     let d: Date = date ? date : new Date()
@@ -162,4 +169,25 @@ export enum DayTime {
     date,
     hour,
     minute
+}
+
+export function date2Day(date: Date | undefined): Day | undefined {
+    if (!date) {
+        return undefined
+    }
+    return {
+        year: date.getFullYear(),
+        month: date.getMonth(),
+        date: date.getDate()
+    }
+}
+
+export function date2Time(date: Date | undefined): Time | undefined {
+    if (!date) {
+        return undefined
+    }
+    return {
+        hour: date.getHours(),
+        minute: date.getMinutes()
+    }
 }

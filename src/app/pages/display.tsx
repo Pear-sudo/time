@@ -156,7 +156,7 @@ function Record(prop: { calendarEvent: CalendarEventExt, height: number, color: 
     const calendarEvent = prop.calendarEvent
     return (
         <div className={'w-full'} style={{height: `${prop.height}px`, color: prop.color}}>
-            <div className={'font-bold'}>{calendarEvent.summary}</div>
+            <div className={'font-bold'}>{calendarEvent.title}</div>
             <div>{calendarEvent.description}</div>
         </div>
     )

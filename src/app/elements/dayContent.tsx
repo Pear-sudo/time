@@ -7,6 +7,7 @@ import {isTail} from "@/app/utility/numberUtil";
 import {CurrentTimeLine} from "@/app/elements/currentTimeLine";
 import {DisplayContext} from "@/app/pages/display";
 import {CalendarEvent} from "@/app/model/eventData";
+import {LogCreatorWrapper, PropWrapper} from "@/app/elements/ControlButton";
 
 export function DayContent(prop: {
     height: number,
@@ -100,10 +101,13 @@ export function DayContent(prop: {
             if (ratioDelta > 0) {
                 return ratioDelta * 100
             } else {
+                console.log(beginRatio)
+                console.log(endRatio)
                 throw new Error("ratio delta <= 0")
             }
         } else {
             console.log('begin || end not found')
+            console.log(event)
         }
     }
 
@@ -124,7 +128,11 @@ export function DayContent(prop: {
             const height = getEventHeight(event)
             const topP = getElementTop(event)
             const element: JSX.Element = (
-                <div className={'absolute w-full bg-blue-600'} style={{height: `${height}%`, top: `${topP}%`}}>
+                <div className={'absolute w-full bg-blue-600 overflow-auto overscroll-contain'} style={{height: `${height}%`, top: `${topP}%`}}>
+                    <div className={'text-center text-lg'}>{event.title}</div>
+                    <div className={'text-center text-sm'}>{event.location}</div>
+                    <div className={'text-center text-sm'}>{event.description}</div>
+                    <LogCreatorWrapper existingCE={new PropWrapper<CalendarEvent>(event)}/>
                 </div>
             )
             elements.push(element)

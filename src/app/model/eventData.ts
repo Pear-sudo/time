@@ -1,7 +1,8 @@
 export class CalendarEvent {
     // the standard iCalendar File Format: https://icalendar.org/
-    summary: string = ''
+    title: string = ''
     description: string = ''
+    location: string = ''
     begin: Date | undefined = undefined
     end: Date | undefined = undefined
 
@@ -16,3 +17,4 @@ export class CalendarEventExt extends CalendarEvent {
         super(begin, end);
     }
 }
+
