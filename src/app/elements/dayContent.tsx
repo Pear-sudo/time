@@ -22,6 +22,7 @@ export function DayContent(prop: {
     const selfRef = useRef<HTMLDivElement>(null)
     const timerRef = useRef<NodeJS.Timeout>()
     const {displayContextObj, updateContext} = useContext(DisplayContext)
+    const [calendarEventElements, setCalendarEventElements] = useState<JSX.Element[]>([])
     useEffect(() => {
         if (isToday(prop.date)) {
             updateTimeline()
@@ -44,8 +45,12 @@ export function DayContent(prop: {
         return clearTimer
     }, []);
     useEffect(() => {
-
-    });
+        // to prevent Text content does not match server-rendered HTML error, see https://nextjs.org/docs/messages/react-hydration-error
+        const events = displayContextObj.dataStore.getEvents(prop.date)
+        if (events.length > 0) {
+            setCalendarEventElements(events2elements(events))
+        }
+    }, [prop.date, displayContextObj.dataStore]);
 
     function registerTimer() {
         const interval = 60000 // update every 60 seconds
@@ -140,12 +145,6 @@ export function DayContent(prop: {
         return elements
     }
 
-    let eventElements: JSX.Element[] = []
-    const events = displayContextObj.dataStore.getEvents(prop.date)
-    if (events.length > 0) {
-        eventElements = events2elements(events)
-    }
-
     let slots: JSX.Element[] = []
     slots = repeatElements(24, (index) => <Slot id={index}
                                                 className={isTail(prop.index.index, prop.index.length) ? 'border-x' : 'border-l'}/>)
@@ -159,7 +158,7 @@ export function DayContent(prop: {
         <div className={'relative'} style={{height: `${prop.height}vh`}} ref={selfRef}>
             {slots}
             {isToday(prop.date) ? timeLine : ''}
-            {eventElements}
+            {calendarEventElements}
         </div>
     )
 }
