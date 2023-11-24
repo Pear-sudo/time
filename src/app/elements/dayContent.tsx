@@ -129,9 +129,9 @@ export function DayContent(prop: {
             const topP = getElementTop(event)
             const element: JSX.Element = (
                 <div className={'absolute w-full bg-blue-600 overflow-auto overscroll-contain'} style={{height: `${height}%`, top: `${topP}%`}}>
-                    <div className={'text-center text-lg'}>{event.title}</div>
-                    <div className={'text-center text-sm'}>{event.location}</div>
-                    <div className={'text-center text-sm'}>{event.description}</div>
+                    <div className={'text-center text-sm'}>{event.title}</div>
+                    <div className={'text-center text-xs'}>{event.location}</div>
+                    <div className={'text-center text-xs'}>{event.description}</div>
                     <LogCreatorWrapper existingCE={new PropWrapper<CalendarEvent>(event)}/>
                 </div>
             )
