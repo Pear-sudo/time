@@ -32,6 +32,7 @@ export function Calendar(prop: {
     const handleOnScroll = throttle((event: React.UIEvent<HTMLDivElement>): void => {
         const target = event.target as HTMLDivElement
         const scrollTop = target.scrollTop
+        displayContextObj.scrolledY = scrollTop
         updateChangeHeaderBg(scrollTop > 10)
     }, 200)
 

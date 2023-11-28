@@ -75,4 +75,12 @@ export class DisplayContextObj {
     private _dataStoreUpdatedTime: Date = new Date()
     private _setter: React.Dispatch<React.SetStateAction<DisplayContextObj>> | undefined = undefined
     private _dataStore: DataStore = new DataStore()
+    private _scrolledY: number = 0
+    get scrolledY(): number {
+        return this._scrolledY;
+    }
+
+    set scrolledY(value: number) {
+        this._scrolledY = value;
+    }
 }

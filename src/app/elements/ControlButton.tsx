@@ -1,9 +1,9 @@
 import React, {JSX, useContext, useEffect, useId, useRef, useState} from "react";
 import Image from "next/image";
 import plusIcon from "@/app/icons/plus.svg";
-import {isUN} from "@/app/utility/lanUtil";
+import {initObject, isUN} from "@/app/utility/lanUtil";
 import {toNumber} from "lodash";
-import {date2Day, date2Time, Day, DayTime, getDay, Time} from "@/app/utility/timeUtil";
+import {date2Day, date2Time, Day, DayTimeEnum, getDay, Time, timeKeys} from "@/app/utility/timeUtil";
 import {Theme} from "@/app/theme";
 import {DisplayContext} from "@/app/pages/display";
 import {CalendarEvent} from "@/app/model/eventData";
@@ -179,10 +179,10 @@ function LogCreator(prop: {
     }
 
     function handleCreate(event: React.MouseEvent) {
-        const reportingBeginTime = beginTimeRef.current ? beginTimeRef.current : {hour: 0, minute: 0}
-        const reportingEndTime = endTimeRef.current ? endTimeRef.current : {hour: 0, minute: 0}
+        let reportingBeginTime = beginTimeRef.current ? initObject(timeKeys, beginTimeRef.current, 0) : initObject(timeKeys, {} as Time, 0)
+        const reportingEndTime = endTimeRef.current ? initObject(timeKeys, endTimeRef.current, 0) : initObject(timeKeys, {} as Time, 0)
 
-        const reportingBeginDate = new Date(new Date().setHours(reportingBeginTime?.hour, reportingBeginTime?.minute, 0, 0))
+        const reportingBeginDate = new Date(new Date().setHours(reportingBeginTime.hour, reportingBeginTime.minute, 0, 0))
         const reportingEndDate = new Date(new Date().setHours(reportingEndTime?.hour, reportingEndTime?.minute, 0, 0))
 
         if (beginDayRef.current && endDayRef.current) {
@@ -201,7 +201,7 @@ function LogCreator(prop: {
             hintRef.current.innerText = ""
         }
 
-        const calendarEvent = new CalendarEvent(reportingBeginDate, reportingEndDate)
+        const calendarEvent = new CalendarEvent({begin: reportingBeginDate, end: reportingEndDate})
         calendarEvent.title = titleRef.current
         calendarEvent.location = locationRef.current
         calendarEvent.description = descriptionRef.current
@@ -272,9 +272,11 @@ function LogCreator(prop: {
 }
 
 export function LogCreatorWrapper(prop: {
-    existingCE?: PropWrapper<CalendarEvent>
+    existingCE?: PropWrapper<CalendarEvent>,
+    pending?: boolean
 }): JSX.Element {
     const [showCreator, updateShowCreator] = useState(false);
+    const [showSelf, setShowSelf] = useState(true)
 
     function handleOnClick(event: React.MouseEvent) {
         updateShowCreator(true)
@@ -292,8 +294,13 @@ export function LogCreatorWrapper(prop: {
     }
 
     return (
-        <div className={'absolute hover:cursor-pointer w-full h-full z-10 top-0 left-0'} onClick={handleOnClick}>
-            {showCreator ? <LogCreator callback={handleCallback} existingCE={prop.existingCE}/> : null}
+        <div>
+            {showSelf && (
+                <div className={'absolute hover:cursor-pointer w-full h-full z-10 top-0 left-0'}
+                     onClick={handleOnClick}>
+                    {showCreator ? <LogCreator callback={handleCallback} existingCE={prop.existingCE}/> : null}
+                </div>
+            )}
         </div>
     )
 }

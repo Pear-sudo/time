@@ -1,3 +1,5 @@
+import {DayTime} from "@/app/utility/timeUtil";
+
 export function isUN(v: any): boolean {
     return v === null || v === undefined;
 }
@@ -22,4 +24,14 @@ export function isOrAre(count: number): string {
     } else {
         return 'are'
     }
+}
+
+export function initObject<T extends Object, K extends keyof T>(keys: K[], obj: T, defaultValue: any): Required<T> {
+    for (const key of keys) {
+        const value = obj[key]
+        if (value == undefined) {
+            obj[key] = defaultValue
+        }
+    }
+    return obj as Required<T>
 }

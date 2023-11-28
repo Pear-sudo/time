@@ -6,15 +6,24 @@ export class CalendarEvent {
     begin: Date | undefined = undefined
     end: Date | undefined = undefined
 
-    constructor(begin: Date, end: Date) {
-        this.begin = begin
-        this.end = end
+    constructor(options?: CalendarEventOptions) {
+        if (options) {
+            if (options.begin)
+                this.begin = options.begin
+            if (options.end)
+                this.end = options.end
+        }
     }
 }
 
+export interface CalendarEventOptions {
+    begin: Date
+    end: Date
+}
+
 export class CalendarEventExt extends CalendarEvent {
-    constructor(begin: Date, end: Date) {
-        super(begin, end);
+    constructor(options?: CalendarEventOptions) {
+        super(options);
     }
 }
 

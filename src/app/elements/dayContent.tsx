@@ -1,7 +1,7 @@
 import React, {JSX, useContext, useEffect, useRef, useState} from "react";
-import {areSameDate, getDayId, getRatioOfDay, isToday} from "@/app/utility/timeUtil";
+import {areSameDate, getRatioOfDay, isToday, percentage2Date, rollDate} from "@/app/utility/timeUtil";
 import {isUN} from "@/app/utility/lanUtil";
-import {getElementHeight, repeatElements} from "@/app/utility/domUtil";
+import {getElementHeight, getPosition, repeatElements} from "@/app/utility/domUtil";
 import {Slot} from "@/app/elements/slot";
 import {isTail} from "@/app/utility/numberUtil";
 import {CurrentTimeLine} from "@/app/elements/currentTimeLine";
@@ -49,7 +49,9 @@ export function DayContent(prop: {
         const events = displayContextObj.dataStore.getEvents(prop.date)
         if (events.length > 0) {
             setCalendarEventElements(events2elements(events))
+            console.log('setting')
         }
+        // Don't naively think dataStore's reference won't be updated, remember when a calendar event is changed, the whole context will be recreated, including this dataStore.
     }, [prop.date, displayContextObj.dataStore]);
 
     function registerTimer() {
@@ -116,7 +118,7 @@ export function DayContent(prop: {
         }
     }
 
-    function getElementTop(event: CalendarEvent): number | undefined {
+    function getEventTop(event: CalendarEvent): number | undefined {
         if (event.begin) {
             const begin = event.begin
             if (areSameDate(begin, prop.date)) {
@@ -127,22 +129,44 @@ export function DayContent(prop: {
         }
     }
 
+    function event2element(event: CalendarEvent, pending?: boolean): JSX.Element {
+        const height = getEventHeight(event)
+        const topP = getEventTop(event)
+        return (
+            <div className={'absolute w-full bg-blue-600 overflow-auto overscroll-contain'}
+                 style={{height: `${height}%`, top: `${topP}%`}}>
+                <div className={'text-center text-sm'}>{event.title}</div>
+                <div className={'text-center text-xs'}>{event.location}</div>
+                <div className={'text-center text-xs'}>{event.description}</div>
+                <LogCreatorWrapper existingCE={new PropWrapper<CalendarEvent>(event)} pending={pending}/>
+            </div>
+        )
+    }
+
     function events2elements(events: CalendarEvent[]): JSX.Element[] {
         const elements: JSX.Element[] = []
         for (const event of events) {
-            const height = getEventHeight(event)
-            const topP = getElementTop(event)
-            const element: JSX.Element = (
-                <div className={'absolute w-full bg-blue-600 overflow-auto overscroll-contain'} style={{height: `${height}%`, top: `${topP}%`}}>
-                    <div className={'text-center text-sm'}>{event.title}</div>
-                    <div className={'text-center text-xs'}>{event.location}</div>
-                    <div className={'text-center text-xs'}>{event.description}</div>
-                    <LogCreatorWrapper existingCE={new PropWrapper<CalendarEvent>(event)}/>
-                </div>
-            )
+            const element = event2element(event)
             elements.push(element)
         }
         return elements
+    }
+
+    function handleOnClick(event: React.MouseEvent) {
+        if (selfRef.current) {
+            const clickPointPageY = event.pageY
+            const containerScrolledY = displayContextObj.scrolledY
+            const containerPageY = getPosition(selfRef.current).top
+            const topP = (clickPointPageY - containerPageY + containerScrolledY) / getElementHeight(selfRef.current)
+
+            const clickDate = percentage2Date(prop.date, topP)
+            const targetEnd = rollDate(clickDate, {hour: 1})
+            calendarEventElements.push(event2element(new CalendarEvent({begin: clickDate, end: targetEnd}), true))
+
+            // create a new copy, otherwise the UI won't be updated
+            setCalendarEventElements(Array.from(calendarEventElements))
+        }
+        event.stopPropagation()
     }
 
     let slots: JSX.Element[] = []
@@ -155,7 +179,7 @@ export function DayContent(prop: {
         </div>
 
     return (
-        <div className={'relative'} style={{height: `${prop.height}vh`}} ref={selfRef}>
+        <div className={'relative'} style={{height: `${prop.height}vh`}} ref={selfRef} onClick={handleOnClick}>
             {slots}
             {isToday(prop.date) ? timeLine : ''}
             {calendarEventElements}

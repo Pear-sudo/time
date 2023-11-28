@@ -1,4 +1,4 @@
-import {isUN} from "@/app/utility/lanUtil";
+import {initObject, isUN} from "@/app/utility/lanUtil";
 import {padNumber} from "@/app/utility/numberUtil";
 import * as math from 'mathjs';
 
@@ -111,6 +111,15 @@ export function rollDates(dates: Date[], count: number, step?: number): Date[] {
     return newDates
 }
 
+export function rollDate(date: Date, dayTime: DayTime): Date {
+    date = new Date(date.valueOf())
+    const dt = initObject(dayTimeKeys, dayTime, 0)
+    // the number of days in a month may vary, let the library do the job
+    date.setFullYear(date.getFullYear() + dt.year, date.getMonth() + dt.month, date.getDate() + dt.date)
+    date.setHours(date.getHours() + dt.hour, date.getMinutes() + dt.minute, date.getSeconds() + dt.second, date.getMilliseconds() + dt.millisecond)
+    return date
+}
+
 export function generateFullWeekDays(aDayOfWeek: Date): Date[] {
     let dates: Date[] = []
     let currentDayNumber = aDayOfWeek.getDay()
@@ -148,22 +157,29 @@ function includeDate(date: Date, dates: Date[]): boolean {
 }
 
 export type Time = {
-    hour: number,
-    minute: number
+    hour?: number,
+    minute?: number
+    second?: number
+    millisecond?: number
 }
+export const timeKeys:Array<keyof Time> = ['hour', 'minute', 'second', 'millisecond']
 
 export type Day = {
-    year: number,
-    month: number,
-    date: number
+    year?: number,
+    month?: number,
+    date?: number
 }
+export const dayKeys: Array<keyof Day> = ['year', 'month', 'date']
+
+export type DayTime = Day & Time
+export const dayTimeKeys: Array<keyof DayTime> = [...timeKeys, ...dayKeys]
 
 export function getDay(date?: Date): Day {
     let d: Date = date ? date : new Date()
     return {year: d.getFullYear(), month: d.getMonth(), date: d.getDate()}
 }
 
-export enum DayTime {
+export enum DayTimeEnum {
     year,
     month,
     date,
@@ -190,4 +206,12 @@ export function date2Time(date: Date | undefined): Time | undefined {
         hour: date.getHours(),
         minute: date.getMinutes()
     }
+}
+
+export function percentage2Date(date: Date, percentage: number) {
+    // adjust a Date's time according to percentage
+    const millisecondsTotal = 24 * 60 * 60 * 1000
+    const passedMilli = millisecondsTotal * percentage
+    const adjustedMilli = getBeginningOfDay(date).valueOf() + passedMilli
+    return new Date(adjustedMilli)
 }

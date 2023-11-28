@@ -58,7 +58,7 @@ export function getPixelsBefore(elements: Map<string, HTMLDivElement>, anchorKey
     return pixelsBefore
 }
 
-function getPosition(element: HTMLDivElement) {
+export function getPosition(element: HTMLDivElement) {
     let x = 0;
     let y = 0;
 

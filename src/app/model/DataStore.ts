@@ -73,7 +73,6 @@ export class DataStore {
                 if (value) {
                     this.dataMap = value
                 }
-                console.log(value)
                 this.lock = false
                 console.log("Load data successfully.")
             }
