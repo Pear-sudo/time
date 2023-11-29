@@ -47,9 +47,14 @@ export function DayContent(prop: {
     useEffect(() => {
         // to prevent Text content does not match server-rendered HTML error, see https://nextjs.org/docs/messages/react-hydration-error
         const events = displayContextObj.dataStore.getEvents(prop.date)
+
         if (events.length > 0) {
             setCalendarEventElements(events2elements(events))
+        } else if (calendarEventElements.length > 0) {
+            // only testing events.length > 0 is error-prone, because if the user deleted the only event of a day, it won't disappear :)
+            setCalendarEventElements([])
         }
+
         // Don't naively think dataStore's reference won't be updated, remember when a calendar event is changed, the whole context will be recreated, including this dataStore.
     }, [prop.date, displayContextObj.dataStore]);
 
