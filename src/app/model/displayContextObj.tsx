@@ -51,14 +51,15 @@ export class DisplayContextObj {
     private resetContext() {
         if (this.setter) {
             this.setter(this.getNewInstance())
+            console.log('resetting context')
         }
     }
 
     constructor() {
         if (!DisplayContextObj.instance) {
             DisplayContextObj.instance = this
+            this.loadDataStore()
         }
-        this.loadDataStore()
         return DisplayContextObj.instance
     }
 

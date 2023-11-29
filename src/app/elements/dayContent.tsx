@@ -49,7 +49,6 @@ export function DayContent(prop: {
         const events = displayContextObj.dataStore.getEvents(prop.date)
         if (events.length > 0) {
             setCalendarEventElements(events2elements(events))
-            console.log('setting')
         }
         // Don't naively think dataStore's reference won't be updated, remember when a calendar event is changed, the whole context will be recreated, including this dataStore.
     }, [prop.date, displayContextObj.dataStore]);

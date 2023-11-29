@@ -68,6 +68,7 @@ export class DataStore {
     }
 
     public async loadData() {
+        this.lock = true
         return getData(DataStore.key).then(
             value => {
                 if (value) {
