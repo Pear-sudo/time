@@ -122,6 +122,7 @@ function LogCreator(prop: {
     callback?: (result: PopupResult, data: any) => void,
     submitButtonName?: string,
     existingCE?: PropWrapper<CalendarEvent>
+    pending?: boolean
 }): JSX.Element {
     const {displayContextObj, updateContext} = useContext(DisplayContext)
     const selfRef = useRef<HTMLDivElement>(null);
@@ -160,6 +161,9 @@ function LogCreator(prop: {
         if (prop.callback) {
             prop.callback(PopupResult.Cancelled, undefined)
         }
+        if (prop.pending) {
+            displayContextObj.dataStoreUpdatedTime = new Date()
+        }
     }
 
     function handleTimeSelectorCallback(ref: React.MutableRefObject<Time | undefined>) {
@@ -188,7 +192,9 @@ function LogCreator(prop: {
         if (beginDayRef.current && endDayRef.current) {
             const beginDay = beginDayRef.current
             const endDay = endDayRef.current
+            // @ts-ignore
             reportingBeginDate.setFullYear(beginDay?.year, beginDay?.month, beginDay?.date)
+            // @ts-ignore
             reportingEndDate.setFullYear(endDay?.year, endDay?.month, endDay?.date)
         }
 
@@ -277,6 +283,11 @@ export function LogCreatorWrapper(prop: {
 }): JSX.Element {
     const [showCreator, updateShowCreator] = useState(false);
     const [showSelf, setShowSelf] = useState(true)
+    useEffect(() => {
+        if (prop.pending && !showCreator) {
+            updateShowCreator(true)
+        }
+    }, []);
 
     function handleOnClick(event: React.MouseEvent) {
         updateShowCreator(true)
@@ -298,7 +309,7 @@ export function LogCreatorWrapper(prop: {
             {showSelf && (
                 <div className={'absolute hover:cursor-pointer w-full h-full z-10 top-0 left-0'}
                      onClick={handleOnClick}>
-                    {showCreator ? <LogCreator callback={handleCallback} existingCE={prop.existingCE}/> : null}
+                    {showCreator ? <LogCreator callback={handleCallback} existingCE={prop.existingCE} pending={prop.pending}/> : null}
                 </div>
             )}
         </div>
@@ -375,6 +386,10 @@ function DaySelector(prop: {
 
     if (prop.parentRef) {
         prop.parentRef.setData(day.current)
+    }
+
+    if (day.current.month == undefined) {
+        day.current.month = 0
     }
 
     return (
