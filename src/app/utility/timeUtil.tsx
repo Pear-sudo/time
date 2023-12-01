@@ -174,7 +174,7 @@ export const dayKeys: Array<keyof Day> = ['year', 'month', 'date']
 export type DayTime = Day & Time
 export const dayTimeKeys: Array<keyof DayTime> = [...timeKeys, ...dayKeys]
 
-export function getDay(date?: Date): Day {
+export function getDay(date?: Date): Required<Day> {
     let d: Date = date ? date : new Date()
     return {year: d.getFullYear(), month: d.getMonth(), date: d.getDate()}
 }

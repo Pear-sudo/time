@@ -3,7 +3,7 @@ import Image from "next/image";
 import plusIcon from "@/app/icons/plus.svg";
 import {initObject, isUN} from "@/app/utility/lanUtil";
 import {toNumber} from "lodash";
-import {date2Day, date2Time, Day, DayTimeEnum, getDay, Time, timeKeys} from "@/app/utility/timeUtil";
+import {date2Day, date2Time, Day, dayKeys, getDay, Time, timeKeys} from "@/app/utility/timeUtil";
 import {Theme} from "@/app/theme";
 import {DisplayContext} from "@/app/pages/display";
 import {CalendarEvent} from "@/app/model/eventData";
@@ -190,11 +190,9 @@ function LogCreator(prop: {
         const reportingEndDate = new Date(new Date().setHours(reportingEndTime?.hour, reportingEndTime?.minute, 0, 0))
 
         if (beginDayRef.current && endDayRef.current) {
-            const beginDay = beginDayRef.current
-            const endDay = endDayRef.current
-            // @ts-ignore
+            const beginDay = initObject(dayKeys, beginDayRef.current, 0)
+            const endDay = initObject(dayKeys, endDayRef.current, 0)
             reportingBeginDate.setFullYear(beginDay?.year, beginDay?.month, beginDay?.date)
-            // @ts-ignore
             reportingEndDate.setFullYear(endDay?.year, endDay?.month, endDay?.date)
         }
 
@@ -309,7 +307,8 @@ export function LogCreatorWrapper(prop: {
             {showSelf && (
                 <div className={'absolute hover:cursor-pointer w-full h-full z-10 top-0 left-0'}
                      onClick={handleOnClick}>
-                    {showCreator ? <LogCreator callback={handleCallback} existingCE={prop.existingCE} pending={prop.pending}/> : null}
+                    {showCreator ? <LogCreator callback={handleCallback} existingCE={prop.existingCE}
+                                               pending={prop.pending}/> : null}
                 </div>
             )}
         </div>
@@ -366,7 +365,7 @@ function DaySelector(prop: {
     defaultDay?: Day,
     parentRef?: RefClass<Day>
 }): JSX.Element {
-    const day = useRef<Day>(prop.defaultDay ? prop.defaultDay : getDay())
+    const day = useRef<Required<Day>>(prop.defaultDay ? initObject(dayKeys, prop.defaultDay, 0) : getDay())
 
     function handleCallback(t: keyof Day) {
         return (
@@ -386,10 +385,6 @@ function DaySelector(prop: {
 
     if (prop.parentRef) {
         prop.parentRef.setData(day.current)
-    }
-
-    if (day.current.month == undefined) {
-        day.current.month = 0
     }
 
     return (
