@@ -125,7 +125,6 @@ function LogCreator(prop: {
     pending?: boolean
 }): JSX.Element {
     const {displayContextObj, updateContext} = useContext(DisplayContext)
-    const selfRef = useRef<HTMLDivElement>(null);
     const hintRef = useRef<HTMLSpanElement>(null);
 
     const beginTimeRef = useRef<Time>();
@@ -241,6 +240,53 @@ function LogCreator(prop: {
     extractExistingCE()
 
     return (
+        <View handleOutsideClick={handleOutsideClick}>
+            <TextInput placeholder={"Add title"} parentRef={new RefClass(titleRef)}/>
+            <span className={'whitespace-nowrap'}>
+                    Begin:
+                    <DaySelector callback={handleDaySelectorCallback(beginDayRef)}
+                                 parentRef={new RefClass(beginDayRef)} defaultDay={beginDayRef.current}/> &nbsp;
+                <TimeSelector callback={handleTimeSelectorCallback(beginTimeRef)} default={beginTimeRef.current}/>
+                </span>
+            <br/>
+            <span className={'whitespace-nowrap'}>
+                    End:
+                    <DaySelector callback={handleDaySelectorCallback(endDayRef)}
+                                 parentRef={new RefClass(endDayRef)} defaultDay={endDayRef.current}/> &nbsp;
+                <TimeSelector callback={handleTimeSelectorCallback(endTimeRef)} default={endTimeRef.current}/>
+                </span>
+            <span ref={hintRef} className={'text-red-600 text-sm'}></span>
+
+            <div>
+                Default color
+            </div>
+
+            <TextInput placeholder={"Add location"} parentRef={new RefClass(locationRef)}/>
+            <TextInput placeholder={"Add description"} parentRef={new RefClass(descriptionRef)}/>
+
+            <div className={'mt-auto flex-row inline-flex'}>
+                <button className={`${Theme.button} w-fit self-start`} onClick={handleDelete}>Delete</button>
+                <button className={`${Theme.button} w-fit self-end ml-auto`}
+                        onClick={handleCreate}>{submitButtonName}</button>
+            </div>
+        </View>
+    )
+}
+
+export function View(prop: {
+    children?: React.ReactNode,
+    handleOutsideClick?: (event: React.MouseEvent) => void
+}): JSX.Element {
+    const selfRef = useRef<HTMLDivElement>(null);
+
+    function handleOutsideClick(event: React.MouseEvent) {
+        event.stopPropagation()
+        if (prop.handleOutsideClick) {
+            prop.handleOutsideClick(event)
+        }
+    }
+
+    return (
         <div ref={selfRef}>
             <div className={'fixed bg-black top-0 left-0 cursor-default opacity-50'}
                  style={{width: '100dvw', height: '100dvh'}}
@@ -248,28 +294,7 @@ function LogCreator(prop: {
             <div
                 className={'w-fit p-3 fixed rounded bg-cyan-50 top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 cursor-default flex-col inline-flex gap-3'}
                 style={{height: '50dvh'}}>
-                <TextInput placeholder={"Add title"} parentRef={new RefClass(titleRef)}/>
-                <span className={'whitespace-nowrap'}>
-                    Begin:
-                    <DaySelector callback={handleDaySelectorCallback(beginDayRef)}
-                                 parentRef={new RefClass(beginDayRef)} defaultDay={beginDayRef.current}/> &nbsp;
-                    <TimeSelector callback={handleTimeSelectorCallback(beginTimeRef)} default={beginTimeRef.current}/>
-                </span>
-                <br/>
-                <span className={'whitespace-nowrap'}>
-                    End:
-                    <DaySelector callback={handleDaySelectorCallback(endDayRef)}
-                                 parentRef={new RefClass(endDayRef)} defaultDay={endDayRef.current}/> &nbsp;
-                    <TimeSelector callback={handleTimeSelectorCallback(endTimeRef)} default={endTimeRef.current}/>
-                </span>
-                <span ref={hintRef} className={'text-red-600 text-sm'}></span>
-                <TextInput placeholder={"Add location"} parentRef={new RefClass(locationRef)}/>
-                <TextInput placeholder={"Add description"} parentRef={new RefClass(descriptionRef)}/>
-                <div className={'mt-auto flex-row inline-flex'}>
-                    <button className={`${Theme.button} w-fit self-start`} onClick={handleDelete}>Delete</button>
-                    <button className={`${Theme.button} w-fit self-end ml-auto`}
-                            onClick={handleCreate}>{submitButtonName}</button>
-                </div>
+                {prop.children}
             </div>
         </div>
     )
