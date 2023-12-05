@@ -7,7 +7,7 @@ export function ColorList(): JSX.Element {
     return (
         <div className={'inline-flex flex-col w-fit items-start'}>
             {colorList.map((color) => {
-                return <ColorRow color={Color.setColor(color)} label={color}/>
+                return <ColorRow color={Color.setColor(color)} label={color} key={color}/>
             })}
         </div>
     )

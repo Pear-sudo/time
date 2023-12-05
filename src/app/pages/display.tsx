@@ -17,7 +17,7 @@ import {CalendarEventExt} from "@/app/model/eventData";
 // @ts-ignore
 export const DisplayContext = React.createContext<{ displayContextObj: DisplayContextObj, updateContext: React.Dispatch<React.SetStateAction<DisplayContextObj>> } >(undefined)
 
-function Display(): JSX.Element {
+export function Display(): JSX.Element {
     const [displayedDates, _updateDisplayedDates] = useState(generateFullWeekDays(new Date()))
     const displayedDatesRef = useRef(generateFullWeekDays(new Date()));
     const selfEvents = useRef({
