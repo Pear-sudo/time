@@ -71,6 +71,7 @@ export class WindowManager {
             const wrappedView = this.wrapView(view.view, key)
             ws.push(wrappedView)
         }
+        this.currentZ = this.baseZ
         return ws
     }
 
@@ -81,10 +82,18 @@ export class WindowManager {
     }
 
     private wrapView(view: JSX.Element, key: string | number): JSX.Element {
-        const z = this.currentZ + this.stepZ
+        this.currentZ += this.stepZ
+        console.log(this.currentZ)
         return (
-            <div style={{zIndex: z}} key={key}>
-                {view}
+            <div key={key}>
+                <div style={{zIndex: this.baseZ, width: '100dvw', height: '100dvh'}}
+                     className={'fixed top-0 left-0 cursor-default'}
+                >
+                </div>
+                <div className={'-translate-x-1/2 -translate-y-1/2 fixed'}
+                     style={{zIndex: this.currentZ, top: '50%', left: '50%'}}>
+                    {view}
+                </div>
             </div>
         )
     }
@@ -95,9 +104,7 @@ export class WindowManager {
         this.setUiDate = setUiDate
 
         return (
-            <div style={{zIndex: this.baseZ, width: '100dvw', height: '100dvh'}}
-                 className={'fixed top-0 left-0 cursor-default'}
-            >
+            <div>
                 {this.generateWindows()}
             </div>
         )

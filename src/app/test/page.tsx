@@ -11,10 +11,10 @@ export default function Test(): JSX.Element {
                 <ColorList/>,
             key: "ttt"
         })
-        setTimeout(()=>{
-            controller.closeWindow()
-            console.log('closing windows')
-        }, 5000)
+        // setTimeout(() => {
+        //     controller.closeWindow()
+        //     console.log('closing windows')
+        // }, 5000)
     }, []);
     const windowManager = new WindowManager()
 
