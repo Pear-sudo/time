@@ -1,4 +1,6 @@
 import React, {JSX, useState} from "react";
+import {string} from "fp-ts";
+import {key} from "localforage";
 
 export class WindowManager {
     static get ins(): WindowManager {
@@ -14,7 +16,7 @@ export class WindowManager {
     private readonly stepZ: number = 10
     private currentZ: number = this.baseZ
 
-    private readonly vMap: Map<string, View> = new Map()
+    private readonly vMap: Map<string, Win> = new Map()
 
     private setUiDate: React.Dispatch<React.SetStateAction<Date>> | undefined
 
@@ -33,8 +35,11 @@ export class WindowManager {
         if (this.vMap.has(key)) {
             return new WindowController(key)
         }
-        const view = new View(op.view)
-        this.vMap.set(key, view)
+
+        const win = new Win(op.view, key)
+        win.handleOutsideClick = op.handleOutSideClick
+
+        this.vMap.set(key, win)
 
         this.updateUi()
         if (WindowManager.logMode) {
@@ -68,7 +73,7 @@ export class WindowManager {
     private generateWindows(): JSX.Element[] {
         const ws: JSX.Element[] = []
         for (const [key, view] of this.vMap) {
-            const wrappedView = this.wrapView(view.view, key)
+            const wrappedView = this.wrapView(view)
             ws.push(wrappedView)
         }
         this.currentZ = this.baseZ
@@ -81,18 +86,27 @@ export class WindowManager {
         }
     }
 
-    private wrapView(view: JSX.Element, key: string | number): JSX.Element {
+    private handleOutsideClick(win: Win): () => void {
+        return function () {
+            if (win.handleOutsideClick) {
+                const controller = new WindowController(win.key_s)
+                win.handleOutsideClick(controller)
+            }
+        }
+    }
+
+    private wrapView(view: Win): JSX.Element {
         this.currentZ += this.stepZ
-        console.log(this.currentZ)
         return (
-            <div key={key}>
-                <div style={{zIndex: this.baseZ, width: '100dvw', height: '100dvh'}}
+            <div key={view.key_s}>
+                <div style={{zIndex: this.currentZ, width: '100dvw', height: '100dvh'}}
                      className={'fixed top-0 left-0 cursor-default'}
+                     onClick={this.handleOutsideClick(view)}
                 >
                 </div>
                 <div className={'-translate-x-1/2 -translate-y-1/2 fixed'}
-                     style={{zIndex: this.currentZ, top: '50%', left: '50%'}}>
-                    {view}
+                     style={{zIndex: this.currentZ + 1, top: '50%', left: '50%'}}>
+                    {view.view}
                 </div>
             </div>
         )
@@ -115,18 +129,33 @@ export interface CreateWindowOp {
     view: JSX.Element,
     key: string
     priority?: number
+    handleOutSideClick?: (wc: WindowController) => void
 }
 
-class View {
+class Win {
+    get handleOutsideClick(): ((wc: WindowController) => void) | undefined {
+        return this._handleOutsideClick;
+    }
+
+    set handleOutsideClick(value: ((wc: WindowController) => void) | undefined) {
+        this._handleOutsideClick = value;
+    }
+    get key_s(): string {
+        return this._key_s;
+    }
     get view(): React.JSX.Element {
         return this._view;
     }
 
     private readonly _view: JSX.Element
     private readonly _cTime: Date
+    private readonly _key_s: string
+    private _handleOutsideClick?: ((wc: WindowController) => void) | undefined
 
-    constructor(view: React.JSX.Element) {
+    constructor(view: React.JSX.Element, key: string) {
         this._view = view;
+        this._key_s = key
+
         this._cTime = new Date()
     }
 
@@ -135,7 +164,7 @@ class View {
     }
 }
 
-class WindowController {
+export class WindowController {
     private readonly _handle: string
     private readonly windowManager: WindowManager = new WindowManager()
 
