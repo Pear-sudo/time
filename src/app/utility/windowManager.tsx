@@ -1,6 +1,4 @@
 import React, {JSX, useState} from "react";
-import {string} from "fp-ts";
-import {key} from "localforage";
 
 export class WindowManager {
     static get ins(): WindowManager {
@@ -38,6 +36,7 @@ export class WindowManager {
 
         const win = new Win(op.view, key)
         win.handleOutsideClick = op.handleOutSideClick
+        win.fullScreen = op.fullScreen
 
         this.vMap.set(key, win)
 
@@ -104,7 +103,7 @@ export class WindowManager {
                      onClick={this.handleOutsideClick(view)}
                 >
                 </div>
-                <div className={'-translate-x-1/2 -translate-y-1/2 fixed'}
+                <div className={`-translate-x-1/2 -translate-y-1/2 fixed ${view.fullScreen ? 'w-full' : ''}`}
                      style={{zIndex: this.currentZ + 1, top: '50%', left: '50%'}}>
                     {view.view}
                 </div>
@@ -129,7 +128,8 @@ export interface CreateWindowOp {
     view: JSX.Element,
     key: string
     priority?: number
-    handleOutSideClick?: (wc: WindowController) => void
+    handleOutSideClick?: (wc: WindowController) => void,
+    fullScreen?: boolean
 }
 
 class Win {
@@ -140,9 +140,11 @@ class Win {
     set handleOutsideClick(value: ((wc: WindowController) => void) | undefined) {
         this._handleOutsideClick = value;
     }
+
     get key_s(): string {
         return this._key_s;
     }
+
     get view(): React.JSX.Element {
         return this._view;
     }
@@ -151,6 +153,7 @@ class Win {
     private readonly _cTime: Date
     private readonly _key_s: string
     private _handleOutsideClick?: ((wc: WindowController) => void) | undefined
+    fullScreen?: boolean
 
     constructor(view: React.JSX.Element, key: string) {
         this._view = view;
