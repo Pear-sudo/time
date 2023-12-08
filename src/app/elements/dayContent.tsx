@@ -160,7 +160,7 @@ export function DayContent(prop: {
         if (selfRef.current) {
             const clickPointPageY = event.pageY
             const containerScrolledY = displayContextObj.scrolledY
-            const containerPageY = getPosition(selfRef.current).top
+            const containerPageY = window.scrollY + selfRef.current.offsetTop
             const topP = (clickPointPageY - containerPageY + containerScrolledY) / getElementHeight(selfRef.current)
 
             const clickDate = percentage2Date(prop.date, topP)
