@@ -7,9 +7,10 @@ import {isTail} from "@/app/utility/numberUtil";
 import {CurrentTimeLine} from "@/app/elements/currentTimeLine";
 import {DisplayContext} from "@/app/utility/windowManager";
 import {CalendarEvent} from "@/app/model/eventData";
-import {LogCreatorWrapper, PropWrapper} from "@/app/elements/ControlButton";
 import {Theme} from "@/app/theme";
 import {Color} from "@/app/utility/color";
+import {LogCreatorWrapper} from "@/app/elements/calendarEventCreator";
+import {PropWrapper} from "@/app/elements/inputs/helper/inputHelper";
 
 export function DayContent(prop: {
     height: number,
