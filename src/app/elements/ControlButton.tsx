@@ -156,7 +156,7 @@ function LogCreator(prop: {
         }
     }
 
-    function handleOutsideClick(event: React.MouseEvent) {
+    function handleOutsideClick(wc: WindowController, event: React.MouseEvent) {
         event.stopPropagation()
         if (prop.callback) {
             prop.callback(PopupResult.Cancelled, undefined)
@@ -233,15 +233,18 @@ function LogCreator(prop: {
                 prop.callback(PopupResult.Delete, null)
             }
         } else {
-            handleOutsideClick(event)
+            new WindowManager().getController('logCreator')?.closeWindow()
             return
         }
     }
 
     extractExistingCE()
+    new WindowManager().setOnOutsideClick('logCreator', handleOutsideClick)
 
     return (
-        <View handleOutsideClick={handleOutsideClick}>
+        <div
+            className={'w-fit p-3 bg-cyan-50 cursor-default flex-col inline-flex gap-3'}
+        >
             <TextInput placeholder={"Add title"} parentRef={new RefClass(titleRef)}/>
             <span className={'whitespace-nowrap'}>
                     Begin:
@@ -270,10 +273,11 @@ function LogCreator(prop: {
                 <button className={`${Theme.button} w-fit self-end ml-auto`}
                         onClick={handleCreate}>{submitButtonName}</button>
             </div>
-        </View>
+        </div>
     )
 }
 
+// TODO remove this in the future as this should be done by window manager
 export function View(prop: {
     children?: React.ReactNode,
     handleOutsideClick?: (event: React.MouseEvent) => void
@@ -308,13 +312,14 @@ export function LogCreatorWrapper(prop: {
     const [showSelf, setShowSelf] = useState(true)
     const controller = useRef<WindowController>();
     const windowManager = new WindowManager()
+    useEffect(() => {
+        if (prop.pending) {
+            createWindow()
+        }
+    });
 
     function handleOnClick(event: React.MouseEvent) {
-        controller.current = windowManager.createWindow({
-            view: <LogCreator callback={handleCallback} existingCE={prop.existingCE}
-                              pending={prop.pending}/>,
-            key: 'logCreator'
-        })
+        createWindow()
         event.stopPropagation()
     }
 
@@ -330,6 +335,15 @@ export function LogCreatorWrapper(prop: {
 
     function closeWindow() {
         controller.current?.closeWindow()
+    }
+
+    function createWindow() {
+        controller.current = windowManager.createWindow({
+            view: <LogCreator callback={handleCallback} existingCE={prop.existingCE}
+                              pending={prop.pending}/>,
+            key: 'logCreator',
+            rounded: true
+        })
     }
 
     return (

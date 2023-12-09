@@ -1,6 +1,8 @@
 import React, {JSX, useState} from "react";
 import {DisplayContext} from "@/app/pages/display";
 import {DisplayContextObj} from "@/app/model/displayContextObj";
+import {boolean, string} from "fp-ts";
+import {key} from "localforage";
 
 export class WindowManager {
     static get ins(): WindowManager {
@@ -36,7 +38,7 @@ export class WindowManager {
             return new WindowController(key)
         }
 
-        const win = new Win(op.view, key)
+        const win = new Win(op.view, key, op)
         win.handleOutsideClick = op.handleOutSideClick
         win.fullScreen = op.fullScreen
 
@@ -47,6 +49,24 @@ export class WindowManager {
             console.log(`Creating window: ${key}`)
         }
         return new WindowController(key)
+    }
+
+    getController(key: string): WindowController | undefined {
+        if (this.vMap.has(key)) {
+            return new WindowController(key)
+        } else {
+            return
+        }
+    }
+
+    setOnOutsideClick(key: string, f: (wc: WindowController, event: React.MouseEvent) => void): boolean {
+        const win = this.vMap.get(key)
+        if (win) {
+            win.handleOutsideClick = f
+            return true
+        } else {
+            return false
+        }
     }
 
     closeWindows(...controllers: WindowController[]) {
@@ -87,25 +107,31 @@ export class WindowManager {
         }
     }
 
-    private handleOutsideClick(win: Win): () => void {
-        return function () {
+    private handleOutsideClick(win: Win): (event: React.MouseEvent) => void {
+        return function (event: React.MouseEvent) {
             if (win.handleOutsideClick) {
                 const controller = new WindowController(win.key_s)
-                win.handleOutsideClick(controller)
+                win.handleOutsideClick(controller, event)
             }
         }
     }
 
     private wrapView(view: Win): JSX.Element {
         this.currentZ += this.stepZ
+
+        /*
+        A few things to notice:
+            bg-white in the second div is important, otherwise the first div background will penetrate to some elements which does not have bg color
+        * */
         return (
             <div key={view.key_s}>
                 <div style={{zIndex: this.currentZ, width: '100dvw', height: '100dvh'}}
-                     className={'fixed top-0 left-0 cursor-default'}
+                     className={`fixed top-0 left-0 cursor-default bg-black opacity-50`}
                      onClick={this.handleOutsideClick(view)}
                 >
                 </div>
-                <div className={`-translate-x-1/2 -translate-y-1/2 fixed ${view.fullScreen ? 'w-full' : ''}`}
+                <div className={`-translate-x-1/2 -translate-y-1/2 fixed bg-white ${view.fullScreen ? 'w-full' : ''}
+                ${view.op.rounded ? 'rounded overflow-hidden' : ''}`}
                      style={{zIndex: this.currentZ + 1, top: '50%', left: '50%'}}>
                     {view.view}
                 </div>
@@ -139,14 +165,20 @@ export interface CreateWindowOp {
     priority?: number
     handleOutSideClick?: (wc: WindowController) => void,
     fullScreen?: boolean
+    background?: string
+    rounded?: boolean
 }
 
 class Win {
-    get handleOutsideClick(): ((wc: WindowController) => void) | undefined {
+    get op(): CreateWindowOp {
+        return this._op;
+    }
+
+    get handleOutsideClick(): ((wc: WindowController, event: React.MouseEvent) => void) | undefined {
         return this._handleOutsideClick;
     }
 
-    set handleOutsideClick(value: ((wc: WindowController) => void) | undefined) {
+    set handleOutsideClick(value: ((wc: WindowController, event: React.MouseEvent) => void) | undefined) {
         this._handleOutsideClick = value;
     }
 
@@ -161,12 +193,14 @@ class Win {
     private readonly _view: JSX.Element
     private readonly _cTime: Date
     private readonly _key_s: string
-    private _handleOutsideClick?: ((wc: WindowController) => void) | undefined
+    private _handleOutsideClick?: ((wc: WindowController, event: React.MouseEvent) => void) | undefined
     fullScreen?: boolean
+    private readonly _op: CreateWindowOp
 
-    constructor(view: React.JSX.Element, key: string) {
+    constructor(view: React.JSX.Element, key: string, op: CreateWindowOp) {
         this._view = view;
         this._key_s = key
+        this._op = op
 
         this._cTime = new Date()
     }
