@@ -24,7 +24,6 @@ export function Display(): JSX.Element {
         onTodayButtonClick: false
     });
     const selfRef = useRef<HTMLDivElement>(null);
-    const [displayContextObjState, setDisplayContextObjState] = useState(new DisplayContextObj())
 
     useEffect(() => {
         window.addEventListener('resize', handleResizeThrottled)
@@ -118,26 +117,21 @@ export function Display(): JSX.Element {
         onDayCountChange(getDisplayedDates().length)
     }
 
-    displayContextObjState.setter = setDisplayContextObjState
-
     return (
-        <DisplayContext.Provider
-            value={{displayContextObj: displayContextObjState, updateContext: setDisplayContextObjState}}>
-            <div className={'w-full relative'} style={{display: 'grid', gridTemplateRows: 'auto 1fr', height: '100dvh'}}
-                 ref={selfRef}>
-                <div className={'inline-flex flex-row justify-center'}>
-                    <DayCount onChange={onDayCountChange}/>
-                    <TodayButton onClick={onTodayButtonClick}/>
-                    <NavigationButtons onClick={onNavigationButtonClick}/>
-                    <YearHint dates={displayedDates}/>
-                </div>
-                <div className={'mx-8 overflow-y-hidden'}>
-                    <Calendar dates={displayedDates} events={{scrollToNow: selfEvents.current.onTodayButtonClick}}/>
-                </div>
-                <ControlButton/>
+        <div className={'w-full relative'} style={{display: 'grid', gridTemplateRows: 'auto 1fr', height: '100dvh'}}
+             ref={selfRef}>
+            <div className={'inline-flex flex-row justify-center'}>
+                <DayCount onChange={onDayCountChange}/>
+                <TodayButton onClick={onTodayButtonClick}/>
+                <NavigationButtons onClick={onNavigationButtonClick}/>
+                <YearHint dates={displayedDates}/>
             </div>
-        </DisplayContext.Provider>
-    )
+            <div className={'mx-8 overflow-y-hidden'}>
+                <Calendar dates={displayedDates} events={{scrollToNow: selfEvents.current.onTodayButtonClick}}/>
+            </div>
+            <ControlButton/>
+        </div>
+)
 }
 
 function isMobileDevice() {

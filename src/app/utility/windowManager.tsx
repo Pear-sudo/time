@@ -1,4 +1,6 @@
 import React, {JSX, useState} from "react";
+import {DisplayContext} from "@/app/pages/display";
+import {DisplayContextObj} from "@/app/model/displayContextObj";
 
 export class WindowManager {
     static get ins(): WindowManager {
@@ -113,13 +115,20 @@ export class WindowManager {
 
     initContext(): JSX.Element {
         const [UiDate, setUiDate] = useState(new Date())
+        const [displayContextObjState, setDisplayContextObjState] = useState(new DisplayContextObj())
+
+        displayContextObjState.setter = setDisplayContextObjState
+
         this.isInitiated = true
         this.setUiDate = setUiDate
 
         return (
-            <div>
-                {this.generateWindows()}
-            </div>
+            <DisplayContext.Provider
+                value={{displayContextObj: displayContextObjState, updateContext: setDisplayContextObjState}}>
+                <div>
+                    {this.generateWindows()}
+                </div>
+            </DisplayContext.Provider>
         )
     }
 }
