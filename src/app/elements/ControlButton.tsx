@@ -8,6 +8,7 @@ import {Theme} from "@/app/theme";
 import {DisplayContext} from "@/app/pages/display";
 import {CalendarEvent} from "@/app/model/eventData";
 import {WindowController, WindowManager} from "@/app/utility/windowManager";
+import {ColorList} from "@/app/elements/colorList";
 
 export function ControlButton(): JSX.Element {
     return (
@@ -238,8 +239,21 @@ function LogCreator(prop: {
         }
     }
 
+    function handleColorSelectorClick(event: React.MouseEvent) {
+        windowManager.createWindow({
+            view:
+                <div className={'p-2'}>
+                    <ColorList/>
+                </div>,
+            key: 'colorList',
+            rounded: true,
+            handleOutSideClick: (wc: WindowController) => wc.closeWindow()
+        })
+    }
+
     extractExistingCE()
-    new WindowManager().setOnOutsideClick('logCreator', handleOutsideClick)
+    const windowManager = new WindowManager()
+    windowManager.setOnOutsideClick('logCreator', handleOutsideClick)
 
     return (
         <div
@@ -261,7 +275,7 @@ function LogCreator(prop: {
                 </span>
             <span ref={hintRef} className={'text-red-600 text-sm'}></span>
 
-            <div>
+            <div onClick={handleColorSelectorClick}>
                 Default color
             </div>
 
