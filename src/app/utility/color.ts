@@ -32,7 +32,16 @@ export const ColorNames = {
     Red: [255, 0, 0],
     Tomato: [255, 99, 71],
     Tangerine: [242, 133, 0],
-    Banana: [227, 207, 87]
-} as const
+    Banana: [227, 207, 87],
+    Basil: [88, 130, 57],
+    Sage: [158, 165, 144],
+    Peacock: [0, 102, 153],
+    Blueberry: [44, 62, 80],
+    Lavender: [181, 126, 220],
+    Grape: [108, 52, 131],
+    Flamingo: [252, 142, 172],
+    Graphite: [60, 60, 60],
+    Ocean: [28, 160, 170],
+} as const;
 
 export type ColorNamesType = typeof ColorNames

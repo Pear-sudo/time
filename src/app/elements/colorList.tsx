@@ -4,7 +4,7 @@ import {Color, ColorNamesType} from "@/app/utility/color";
 import {Theme} from "@/app/theme";
 
 export function ColorList(prop: { handleSelection?: (color: Color) => void }): JSX.Element {
-    const colorList: (keyof ColorNamesType)[] = ['Tomato', 'Tangerine', 'Banana']
+    const colorList: (keyof ColorNamesType)[] = ['Basil', 'Sage', 'Peacock', 'Blueberry', 'Lavender', 'Grape', 'Flamingo', 'Graphite', 'Ocean']
 
     function handleClick(color: Color): void {
         if (prop.handleSelection) {
