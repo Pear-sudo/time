@@ -1,7 +1,7 @@
 import React, {JSX, useRef} from "react";
 import Image from "next/image";
 import plusIcon from "@/app/icons/plus.svg";
-import {LogCreatorWrapper} from "@/app/elements/calendarEventCreator";
+import {CalendarEventCreatorWrapper} from "@/app/elements/calendarEventCreator";
 
 export function ControlButton(): JSX.Element {
     return (
@@ -9,7 +9,7 @@ export function ControlButton(): JSX.Element {
              style={{width: '6vmin', height: '6vmin'}}
         >
             <Image src={plusIcon} alt={''}/>
-            <LogCreatorWrapper/>
+            <CalendarEventCreatorWrapper/>
         </div>
     )
 }

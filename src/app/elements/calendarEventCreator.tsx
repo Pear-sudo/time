@@ -11,7 +11,7 @@ import {DaySelector, TimeSelector} from "@/app/elements/inputs/datetimeSelector"
 
 import {PopupResult, PropWrapper, RefClass} from "@/app/elements/inputs/helper/inputHelper";
 
-function LogCreator(prop: {
+function CalendarEventCreator(prop: {
     callback?: (result: PopupResult, data: any) => void,
     submitButtonName?: string,
     existingCE?: PropWrapper<CalendarEvent>
@@ -193,7 +193,7 @@ function LogCreator(prop: {
     )
 }
 
-export function LogCreatorWrapper(prop: {
+export function CalendarEventCreatorWrapper(prop: {
     existingCE?: PropWrapper<CalendarEvent>,
     pending?: boolean
 }): JSX.Element {
@@ -227,7 +227,7 @@ export function LogCreatorWrapper(prop: {
 
     function createWindow() {
         controller.current = windowManager.createWindow({
-            view: <LogCreator callback={handleCallback} existingCE={prop.existingCE}
+            view: <CalendarEventCreator callback={handleCallback} existingCE={prop.existingCE}
                               pending={prop.pending}/>,
             key: 'logCreator',
             rounded: true

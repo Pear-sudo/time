@@ -9,7 +9,7 @@ import {DisplayContext} from "@/app/utility/windowManager";
 import {CalendarEvent} from "@/app/model/eventData";
 import {Theme} from "@/app/theme";
 import {Color} from "@/app/utility/color";
-import {LogCreatorWrapper} from "@/app/elements/calendarEventCreator";
+import {CalendarEventCreatorWrapper} from "@/app/elements/calendarEventCreator";
 import {PropWrapper} from "@/app/elements/inputs/helper/inputHelper";
 
 export function DayContent(prop: {
@@ -154,7 +154,7 @@ export function DayContent(prop: {
                 <div className={'text-center text-sm'}>{event.title}</div>
                 <div className={'text-center text-xs'}>{event.location}</div>
                 <div className={'text-center text-xs'}>{event.description}</div>
-                <LogCreatorWrapper existingCE={new PropWrapper<CalendarEvent>(event)} pending={pending}/>
+                <CalendarEventCreatorWrapper existingCE={new PropWrapper<CalendarEvent>(event)} pending={pending}/>
             </div>
         )
     }
