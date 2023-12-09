@@ -9,13 +9,9 @@ import {ControlButton} from "@/app/elements/ControlButton";
 import {DayCount} from "@/app/elements/dayCount";
 import {TodayButton} from "@/app/elements/todayButton";
 import {NavigationButtons} from "@/app/elements/navigationButtons";
-import {DisplayContextObj} from "@/app/model/displayContextObj";
 import {Calendar} from "@/app/elements/calendar";
 import {Scheduler} from "@/app/utility/scheduler";
 import {CalendarEventExt} from "@/app/model/eventData";
-
-// @ts-ignore
-export const DisplayContext = React.createContext<{ displayContextObj: DisplayContextObj, updateContext: React.Dispatch<React.SetStateAction<DisplayContextObj>> } >(undefined)
 
 export function Display(): JSX.Element {
     const [displayedDates, _updateDisplayedDates] = useState(generateFullWeekDays(new Date()))

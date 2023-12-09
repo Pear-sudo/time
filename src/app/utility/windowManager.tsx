@@ -1,6 +1,8 @@
 import React, {JSX, useState} from "react";
-import {DisplayContext} from "@/app/pages/display";
 import {DisplayContextObj} from "@/app/model/displayContextObj";
+
+// @ts-ignore
+export const DisplayContext = React.createContext<{ displayContextObj: DisplayContextObj, updateContext: React.Dispatch<React.SetStateAction<DisplayContextObj>> } >(undefined)
 
 export class WindowManager {
     static get ins(): WindowManager {

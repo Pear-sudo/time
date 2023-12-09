@@ -5,7 +5,7 @@ import {getElementHeight, getPosition, repeatElements} from "@/app/utility/domUt
 import {Slot} from "@/app/elements/slot";
 import {isTail} from "@/app/utility/numberUtil";
 import {CurrentTimeLine} from "@/app/elements/currentTimeLine";
-import {DisplayContext} from "@/app/pages/display";
+import {DisplayContext} from "@/app/utility/windowManager";
 import {CalendarEvent} from "@/app/model/eventData";
 import {LogCreatorWrapper, PropWrapper} from "@/app/elements/ControlButton";
 import {Theme} from "@/app/theme";

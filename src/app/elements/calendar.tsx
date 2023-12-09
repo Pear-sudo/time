@@ -8,7 +8,7 @@ import {Theme} from "@/app/theme";
 import {TimeAxis, TimeAxisUnit} from "@/app/elements/timeAxis";
 import {WeekNumber} from "@/app/elements/weekNumber";
 import {Pager} from "@/app/elements/pager";
-import {DisplayContext} from "@/app/pages/display";
+import {DisplayContext} from "@/app/utility/windowManager";
 
 export function Calendar(prop: {
     dates: Date[],

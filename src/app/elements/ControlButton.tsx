@@ -5,7 +5,7 @@ import {initObject, isUN} from "@/app/utility/lanUtil";
 import {toNumber} from "lodash";
 import {date2Day, date2Time, Day, dayKeys, getDay, Time, timeKeys} from "@/app/utility/timeUtil";
 import {Theme} from "@/app/theme";
-import {DisplayContext} from "@/app/pages/display";
+import {DisplayContext} from "@/app/utility/windowManager";
 import {CalendarEvent} from "@/app/model/eventData";
 import {WindowController, WindowManager} from "@/app/utility/windowManager";
 import {ColorList, ColorRow} from "@/app/elements/colorList";
