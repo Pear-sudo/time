@@ -31,6 +31,7 @@ export function Display(): JSX.Element {
         scheduler.registerTasks(tasks)
 
         return () => {
+            console.log('Cleaning up hooks...')
             window.removeEventListener('resize', handleResizeThrottled)
             window.removeEventListener('visibilitychange', handleVisibilityChange)
             scheduler.removeAllTasks()
@@ -65,8 +66,11 @@ export function Display(): JSX.Element {
         // This can also be used to detect the lock of screen
         // this cannot detect docking to the left sidebar (macOS)
         const isVisible: boolean = document.visibilityState === 'visible'
-        taskRerender()
-        // console.log(isVisible + ' ' + new Date().toLocaleString())
+        console.log('Visible: ' + isVisible + ' at ' + new Date().toLocaleString())
+        if (isVisible) {
+            // don't waste computing power if it is not visible; and the timer is not accurate at that state anyway.
+            taskRerender()
+        }
     }
 
     function handleResize() {
@@ -85,7 +89,9 @@ export function Display(): JSX.Element {
     }
 
     function taskRerender() {
+        // we need to ensure the timeline is on the next day (cross day problem)
         refreshUI()
+        console.log(`UI updated automatically at ${new Date().toLocaleString()}`)
         scheduler.removeTaskByFunction(rerenderTask.f)
         scheduler.registerTasks(rerenderTask)
     }

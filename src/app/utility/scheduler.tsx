@@ -4,6 +4,7 @@ export class Scheduler {
     registry: { date: Date, f: Function, handle: number }[] = []
 
     registerTasks(tasks: { date: Date, f: Function }[] | { date: Date, f: Function }): void {
+        console.log('registering tasks...')
         if (!(tasks instanceof Array)) {
             tasks = [tasks]
         }
