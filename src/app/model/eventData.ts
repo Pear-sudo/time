@@ -1,3 +1,5 @@
+import {Color} from "@/app/utility/color";
+
 export class CalendarEvent {
     // the standard iCalendar File Format: https://icalendar.org/
     title: string = ''
@@ -5,6 +7,7 @@ export class CalendarEvent {
     location: string = ''
     begin: Date | undefined = undefined
     end: Date | undefined = undefined
+    color: Color | undefined
 
     constructor(options?: CalendarEventOptions) {
         if (options) {

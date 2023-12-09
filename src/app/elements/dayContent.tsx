@@ -8,6 +8,8 @@ import {CurrentTimeLine} from "@/app/elements/currentTimeLine";
 import {DisplayContext} from "@/app/pages/display";
 import {CalendarEvent} from "@/app/model/eventData";
 import {LogCreatorWrapper, PropWrapper} from "@/app/elements/ControlButton";
+import {Theme} from "@/app/theme";
+import {Color} from "@/app/utility/color";
 
 export function DayContent(prop: {
     height: number,
@@ -136,9 +138,16 @@ export function DayContent(prop: {
     function event2element(event: CalendarEvent, pending?: boolean): JSX.Element {
         const height = getEventHeight(event)
         const topP = getEventTop(event)
+        let color = event.color ? event.color : Theme.defaultEventColor
+        // the underlying data store cannot store Color object
+        // TODO improve dataStore
+        if (!(color instanceof Color)) {
+            // @ts-ignore
+            color = Color.setColor(color._colorName)
+        }
         return (
-            <div className={'absolute w-full bg-blue-600 overflow-auto overscroll-contain'}
-                 style={{height: `${height}%`, top: `${topP}%`}}>
+            <div className={'absolute w-full overflow-auto overscroll-contain'}
+                 style={{height: `${height}%`, top: `${topP}%`, backgroundColor: color.toCss()}}>
                 <div className={'text-center text-sm'}>{event.title}</div>
                 <div className={'text-center text-xs'}>{event.location}</div>
                 <div className={'text-center text-xs'}>{event.description}</div>

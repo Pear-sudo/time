@@ -1,12 +1,19 @@
+import {number, string} from "fp-ts";
+
 export class Color {
+    get colorName(): keyof ColorNamesType {
+        return this._colorName;
+    }
     private readonly r: number
     private readonly g: number
     private readonly b: number
+    private readonly _colorName: keyof ColorNamesType
 
-    constructor(r: number, g: number, b: number) {
+    constructor(r: number, g: number, b: number, colorName: keyof ColorNamesType) {
         this.r = r
         this.g = g
         this.b = b
+        this._colorName = colorName
     }
 
     toCss(): string {
@@ -14,7 +21,7 @@ export class Color {
     }
 
     static setColor(colorName: keyof ColorNamesType): Color {
-        return new Color(...(ColorNames[colorName] as RGBColor))
+        return new Color(...(ColorNames[colorName] as RGBColor), colorName)
     }
 }
 

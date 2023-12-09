@@ -8,7 +8,8 @@ import {Theme} from "@/app/theme";
 import {DisplayContext} from "@/app/pages/display";
 import {CalendarEvent} from "@/app/model/eventData";
 import {WindowController, WindowManager} from "@/app/utility/windowManager";
-import {ColorList} from "@/app/elements/colorList";
+import {ColorList, ColorRow} from "@/app/elements/colorList";
+import {Color} from "@/app/utility/color";
 
 export function ControlButton(): JSX.Element {
     return (
@@ -139,6 +140,9 @@ function LogCreator(prop: {
     const locationRef = useRef("");
     const descriptionRef = useRef("");
 
+    // @ts-ignore
+    const colorRef = useRef(prop.existingCE?.prop.color ? Color.setColor(prop.existingCE?.prop.color._colorName) : Theme.defaultEventColor);
+
     const submitButtonName = prop.submitButtonName ? prop.submitButtonName : "Create"
 
     function extractExistingCE() {
@@ -183,6 +187,7 @@ function LogCreator(prop: {
         )
     }
 
+    // TODO refactor this function, use only one reference, that is, one calendar event, and delegate the setting logic to each click function
     function handleCreate(event: React.MouseEvent) {
         let reportingBeginTime = beginTimeRef.current ? initObject(timeKeys, beginTimeRef.current, 0) : initObject(timeKeys, {} as Time, 0)
         const reportingEndTime = endTimeRef.current ? initObject(timeKeys, endTimeRef.current, 0) : initObject(timeKeys, {} as Time, 0)
@@ -210,6 +215,7 @@ function LogCreator(prop: {
         calendarEvent.title = titleRef.current
         calendarEvent.location = locationRef.current
         calendarEvent.description = descriptionRef.current
+        calendarEvent.color = colorRef.current
 
         if (!prop.existingCE) {
             displayContextObj.dataStore.put(calendarEvent)
@@ -239,11 +245,17 @@ function LogCreator(prop: {
         }
     }
 
+    function handleColorSelection(color: Color) {
+        const controller = windowManager.getController('colorList')
+        colorRef.current = color
+        controller?.closeWindow()
+    }
+
     function handleColorSelectorClick(event: React.MouseEvent) {
         windowManager.createWindow({
             view:
                 <div className={'p-2'}>
-                    <ColorList/>
+                    <ColorList handleSelection={handleColorSelection}/>
                 </div>,
             key: 'colorList',
             rounded: true,
@@ -276,7 +288,7 @@ function LogCreator(prop: {
             <span ref={hintRef} className={'text-red-600 text-sm'}></span>
 
             <div onClick={handleColorSelectorClick}>
-                Default color
+                <ColorRow color={colorRef.current} label={colorRef.current.colorName}/>
             </div>
 
             <TextInput placeholder={"Add location"} parentRef={new RefClass(locationRef)}/>
