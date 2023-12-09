@@ -147,7 +147,9 @@ export function DayContent(prop: {
         }
         return (
             <div className={'absolute w-full overflow-auto overscroll-contain'}
-                 style={{height: `${height}%`, top: `${topP}%`, backgroundColor: color.toCss()}}>
+                 style={{height: `${height}%`, top: `${topP}%`, backgroundColor: color.toCss()}}
+                 key={event.createTimestamp.valueOf()}
+            >
                 <div className={'text-center text-sm'}>{event.title}</div>
                 <div className={'text-center text-xs'}>{event.location}</div>
                 <div className={'text-center text-xs'}>{event.description}</div>
@@ -184,7 +186,7 @@ export function DayContent(prop: {
 
     let slots: JSX.Element[] = []
     slots = repeatElements(24, (index) => <Slot id={index}
-                                                className={isTail(prop.index.index, prop.index.length) ? 'border-x' : 'border-l'}/>)
+                                                className={isTail(prop.index.index, prop.index.length) ? 'border-x' : 'border-l'} key={index}/>)
 
     const timeLine: JSX.Element =
         <div className={'absolute left-0 w-full'} style={{top: '0%'}} ref={timeLineRef}>

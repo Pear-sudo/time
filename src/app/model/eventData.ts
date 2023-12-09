@@ -8,6 +8,7 @@ export class CalendarEvent {
     begin: Date | undefined = undefined
     end: Date | undefined = undefined
     color: Color | undefined
+    createTimestamp: Date
 
     constructor(options?: CalendarEventOptions) {
         if (options) {
@@ -16,6 +17,7 @@ export class CalendarEvent {
             if (options.end)
                 this.end = options.end
         }
+        this.createTimestamp = new Date()
     }
 }
 
