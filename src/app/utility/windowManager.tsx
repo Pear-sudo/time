@@ -1,8 +1,6 @@
 import React, {JSX, useState} from "react";
 import {DisplayContext} from "@/app/pages/display";
 import {DisplayContextObj} from "@/app/model/displayContextObj";
-import {boolean, string} from "fp-ts";
-import {key} from "localforage";
 
 export class WindowManager {
     static get ins(): WindowManager {
@@ -38,9 +36,7 @@ export class WindowManager {
             return new WindowController(key)
         }
 
-        const win = new Win(op.view, key, op)
-        win.handleOutsideClick = op.handleOutSideClick
-        win.fullScreen = op.fullScreen
+        const win = new Win(op)
 
         this.vMap.set(key, win)
 
@@ -116,7 +112,7 @@ export class WindowManager {
         }
     }
 
-    private wrapView(view: Win): JSX.Element {
+    private wrapView(win: Win): JSX.Element {
         this.currentZ += this.stepZ
 
         /*
@@ -124,16 +120,16 @@ export class WindowManager {
             bg-white in the second div is important, otherwise the first div background will penetrate to some elements which does not have bg color
         * */
         return (
-            <div key={view.key_s}>
+            <div key={win.key_s}>
                 <div style={{zIndex: this.currentZ, width: '100dvw', height: '100dvh'}}
                      className={`fixed top-0 left-0 cursor-default bg-black opacity-50`}
-                     onClick={this.handleOutsideClick(view)}
+                     onClick={this.handleOutsideClick(win)}
                 >
                 </div>
-                <div className={`-translate-x-1/2 -translate-y-1/2 fixed bg-white ${view.fullScreen ? 'w-full' : ''}
-                ${view.op.rounded ? 'rounded overflow-hidden' : ''}`}
+                <div className={`-translate-x-1/2 -translate-y-1/2 fixed bg-white ${win.fullScreen ? 'w-full' : ''}
+                ${win.op.rounded ? 'rounded overflow-hidden' : ''}`}
                      style={{zIndex: this.currentZ + 1, top: '50%', left: '50%'}}>
-                    {view.view}
+                    {win.view}
                 </div>
             </div>
         )
@@ -163,7 +159,7 @@ export interface CreateWindowOp {
     view: JSX.Element,
     key: string
     priority?: number
-    handleOutSideClick?: (wc: WindowController) => void,
+    handleOutSideClick?: (wc: WindowController, event: React.MouseEvent) => void,
     fullScreen?: boolean
     background?: string
     rounded?: boolean
@@ -175,31 +171,29 @@ class Win {
     }
 
     get handleOutsideClick(): ((wc: WindowController, event: React.MouseEvent) => void) | undefined {
-        return this._handleOutsideClick;
+        return this.op.handleOutSideClick;
     }
 
     set handleOutsideClick(value: ((wc: WindowController, event: React.MouseEvent) => void) | undefined) {
-        this._handleOutsideClick = value;
+        this.op.handleOutSideClick = value;
     }
 
     get key_s(): string {
-        return this._key_s;
+        return this.op.key;
     }
 
     get view(): React.JSX.Element {
-        return this._view;
+        return this.op.view;
     }
 
-    private readonly _view: JSX.Element
+    get fullScreen(): boolean | undefined {
+        return this.op.fullScreen
+    }
+
     private readonly _cTime: Date
-    private readonly _key_s: string
-    private _handleOutsideClick?: ((wc: WindowController, event: React.MouseEvent) => void) | undefined
-    fullScreen?: boolean
     private readonly _op: CreateWindowOp
 
-    constructor(view: React.JSX.Element, key: string, op: CreateWindowOp) {
-        this._view = view;
-        this._key_s = key
+    constructor(op: CreateWindowOp) {
         this._op = op
 
         this._cTime = new Date()
