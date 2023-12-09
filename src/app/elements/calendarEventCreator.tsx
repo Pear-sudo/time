@@ -7,10 +7,11 @@ import {Theme} from "@/app/theme";
 import {initObject} from "@/app/utility/lanUtil";
 import {ColorList, ColorRow} from "@/app/elements/colorList";
 import {TextInput} from "@/app/elements/inputs/textInput";
-import {DaySelector, TimeSelector} from "@/app/elements/inputs/datetimeSelector";
+import {DateSelector, TimeSelector} from "@/app/elements/inputs/datetimeSelector";
 
 import {PopupResult, PropWrapper, RefClass} from "@/app/elements/inputs/helper/inputHelper";
 
+// TODO there is a bug here: set title, then set color, title would disappear in the newly created event
 function CalendarEventCreator(prop: {
     callback?: (result: PopupResult, data: any) => void,
     submitButtonName?: string,
@@ -19,6 +20,8 @@ function CalendarEventCreator(prop: {
 }): JSX.Element {
     const {displayContextObj, updateContext} = useContext(DisplayContext)
     const hintRef = useRef<HTMLSpanElement>(null);
+
+    const calendarEventRef = useRef(new CalendarEvent());
 
     const beginTimeRef = useRef<Time>();
     const endTimeRef = useRef<Time>();
@@ -164,15 +167,15 @@ function CalendarEventCreator(prop: {
             <TextInput placeholder={"Add title"} parentRef={new RefClass(titleRef)}/>
             <span className={'whitespace-nowrap'}>
                     Begin:
-                    <DaySelector callback={handleDaySelectorCallback(beginDayRef)}
-                                 parentRef={new RefClass(beginDayRef)} defaultDay={beginDayRef.current}/> &nbsp;
+                    <DateSelector callback={handleDaySelectorCallback(beginDayRef)}
+                                  parentRef={new RefClass(beginDayRef)} defaultDay={beginDayRef.current}/> &nbsp;
                 <TimeSelector callback={handleTimeSelectorCallback(beginTimeRef)} default={beginTimeRef.current}/>
                 </span>
             <br/>
             <span className={'whitespace-nowrap'}>
                     End:
-                    <DaySelector callback={handleDaySelectorCallback(endDayRef)}
-                                 parentRef={new RefClass(endDayRef)} defaultDay={endDayRef.current}/> &nbsp;
+                    <DateSelector callback={handleDaySelectorCallback(endDayRef)}
+                                  parentRef={new RefClass(endDayRef)} defaultDay={endDayRef.current}/> &nbsp;
                 <TimeSelector callback={handleTimeSelectorCallback(endTimeRef)} default={endTimeRef.current}/>
                 </span>
             <span ref={hintRef} className={'text-red-600 text-sm'}></span>

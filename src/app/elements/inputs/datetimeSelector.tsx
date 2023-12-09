@@ -1,90 +1,104 @@
-import {Day, dayKeys, getDay, Time} from "@/app/utility/timeUtil";
+import {Day, Time} from "@/app/utility/timeUtil";
 import React, {JSX, useRef} from "react";
-import {initObject} from "@/app/utility/lanUtil";
 import {NumberInput} from "@/app/elements/inputs/numberInput";
 
 import {RefClass} from "@/app/elements/inputs/helper/inputHelper";
 
 export function TimeSelector(prop: {
-    callback: (time: Time) => void,
-    default?: Time
+    callback?: (time: Date) => void,
+    default?: Date,
+    parentRef?: RefClass<Date>
 }): JSX.Element {
-    const timeRef = useRef<Time | undefined>(prop.default);
+    const timeRef = useRef<Date>(prop.default ? prop.default : new Date());
+    timeRef.current.setFullYear(1970, 1, 1)
 
     function handleCallback(key: keyof Time) {
         return (
             (num: number | undefined) => {
-                let t: Time
-                if (timeRef.current) {
-                    t = timeRef.current
-                } else {
-                    t = {hour: 0, minute: 0}
+                if (num != undefined) {
+                    const time = timeRef.current
+                    switch (key) {
+                        case "hour":
+                            time.setHours(num)
+                            break
+                        case "minute":
+                            time.setMinutes(num)
+                            break
+                    }
+                    pass2Parent()
                 }
-                if (num) {
-                    t[key] = num
-                    timeRef.current = t
-                }
-                activateCallback()
             }
         )
     }
 
-    function activateCallback() {
-        const reportingHour = timeRef.current?.hour != undefined ? timeRef.current?.hour : 0
-        const reportingMinute = timeRef.current?.minute != undefined ? timeRef.current?.minute : 0
-        const time: Time = {
-            hour: reportingHour,
-            minute: reportingMinute
+    function pass2Parent() {
+        if (prop.parentRef) {
+            prop.parentRef.setData(timeRef.current)
         }
-        prop.callback(time)
+        if (prop.callback) {
+            prop.callback(timeRef.current)
+        }
     }
 
     return (
         <span>
             <NumberInput callback={handleCallback("hour")} max={23} min={0} allowLeadingZero={true}
-                         value={timeRef.current?.hour}/>
+                         value={timeRef.current.getHours()}/>
             :
             <NumberInput callback={handleCallback("minute")} max={59} min={0} allowLeadingZero={true}
-                         value={timeRef.current?.minute}/>
+                         value={timeRef.current.getMinutes()}/>
         </span>
     )
 }
 
-export function DaySelector(prop: {
-    callback: (day: Day) => void,
-    defaultDay?: Day,
-    parentRef?: RefClass<Day>
+export function DateSelector(prop: {
+    callback?: (day: Date) => void,
+    defaultDay?: Date,
+    parentRef?: RefClass<Date>
 }): JSX.Element {
-    const day = useRef<Required<Day>>(prop.defaultDay ? initObject(dayKeys, prop.defaultDay, 0) : getDay())
+    const dayRef = useRef<Date>(prop.defaultDay ? prop.defaultDay : new Date())
+    dayRef.current.setHours(0, 0, 0, 0)
 
     function handleCallback(t: keyof Day) {
         return (
             (num: number | undefined) => {
                 if (num != undefined) {
-                    // in js, month starts from 0.
-                    day.current[t] = t == "month" ? num - 1 : num
-
-                    if (prop.parentRef) {
-                        const ref = prop.parentRef
-                        ref.setData(day.current)
+                    switch (t) {
+                        case "year":
+                            dayRef.current.setFullYear(num)
+                            break
+                        case "month":
+                            // in js, month starts from 0.
+                            const month = num - 1
+                            dayRef.current.setMonth(month)
+                            break
+                        case "date":
+                            dayRef.current.setDate(num)
+                            break
                     }
+                    pass2Parent()
                 }
             }
         )
     }
 
-    if (prop.parentRef) {
-        prop.parentRef.setData(day.current)
+    function pass2Parent() {
+        if (prop.parentRef) {
+            prop.parentRef.setData(dayRef.current)
+        }
+        if (prop.callback) {
+            prop.callback(dayRef.current)
+        }
     }
 
     return (
         <span>
             <NumberInput len={4} callback={handleCallback("year")} allowLeadingZero={false} min={2000} max={3000}
-                         value={day.current.year}/>/
+                         value={dayRef.current.getFullYear()}/>/
             <NumberInput callback={handleCallback("month")} allowLeadingZero={true} min={1} max={12}
-                         value={day.current.month + 1}/>/
+                         value={dayRef.current.getMonth() + 1}/>/
             <NumberInput callback={handleCallback("date")} allowLeadingZero={true} min={1} max={31}
-                         value={day.current.date}/>
+                         value={dayRef.current.getDate()}/>
         </span>
     )
 }
