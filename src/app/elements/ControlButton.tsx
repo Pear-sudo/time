@@ -7,6 +7,7 @@ import {date2Day, date2Time, Day, dayKeys, getDay, Time, timeKeys} from "@/app/u
 import {Theme} from "@/app/theme";
 import {DisplayContext} from "@/app/pages/display";
 import {CalendarEvent} from "@/app/model/eventData";
+import {WindowController, WindowManager} from "@/app/utility/windowManager";
 
 export function ControlButton(): JSX.Element {
     return (
@@ -304,27 +305,31 @@ export function LogCreatorWrapper(prop: {
     existingCE?: PropWrapper<CalendarEvent>,
     pending?: boolean
 }): JSX.Element {
-    const [showCreator, updateShowCreator] = useState(false);
     const [showSelf, setShowSelf] = useState(true)
-    useEffect(() => {
-        if (prop.pending && !showCreator) {
-            updateShowCreator(true)
-        }
-    }, []);
+    const controller = useRef<WindowController>();
+    const windowManager = new WindowManager()
 
     function handleOnClick(event: React.MouseEvent) {
-        updateShowCreator(true)
+        controller.current = windowManager.createWindow({
+            view: <LogCreator callback={handleCallback} existingCE={prop.existingCE}
+                              pending={prop.pending}/>,
+            key: 'logCreator'
+        })
         event.stopPropagation()
     }
 
     function handleCallback(result: PopupResult, data: any) {
         if (result == PopupResult.Cancelled) {
-            updateShowCreator(false)
+            closeWindow()
         } else if (result == PopupResult.Success) {
-            updateShowCreator(false)
+            closeWindow()
         } else if (result == PopupResult.Delete) {
-            updateShowCreator(false)
+            closeWindow()
         }
+    }
+
+    function closeWindow() {
+        controller.current?.closeWindow()
     }
 
     return (
@@ -332,8 +337,6 @@ export function LogCreatorWrapper(prop: {
             {showSelf && (
                 <div className={'absolute hover:cursor-pointer w-full h-full z-10 top-0 left-0'}
                      onClick={handleOnClick}>
-                    {showCreator ? <LogCreator callback={handleCallback} existingCE={prop.existingCE}
-                                               pending={prop.pending}/> : null}
                 </div>
             )}
         </div>
