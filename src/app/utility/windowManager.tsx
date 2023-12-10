@@ -1,4 +1,4 @@
-import React, {JSX, useState} from "react";
+import React, {JSX, useMemo, useState} from "react";
 import {DisplayContextObj} from "@/app/model/displayContextObj";
 
 // @ts-ignore
@@ -137,21 +137,33 @@ export class WindowManager {
         )
     }
 
-    initContext(): JSX.Element {
+    private Context(): JSX.Element {
         const [UiDate, setUiDate] = useState(new Date())
+        this.setUiDate = setUiDate
+
+        return (
+            <div>
+                {this.generateWindows()}
+            </div>
+        )
+    }
+
+    initContext(): JSX.Element {
         const [displayContextObjState, setDisplayContextObjState] = useState(new DisplayContextObj())
 
         displayContextObjState.setter = setDisplayContextObjState
 
+        const contextValue = useMemo(() => {
+            console.log('Creating context value.')
+            return {displayContextObj: displayContextObjState, updateContext: setDisplayContextObjState}
+        }, [displayContextObjState])
+
         this.isInitiated = true
-        this.setUiDate = setUiDate
 
         return (
             <DisplayContext.Provider
-                value={{displayContextObj: displayContextObjState, updateContext: setDisplayContextObjState}}>
-                <div>
-                    {this.generateWindows()}
-                </div>
+                value={contextValue}>
+                {this.Context()}
             </DisplayContext.Provider>
         )
     }
