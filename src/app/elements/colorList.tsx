@@ -2,13 +2,17 @@ import '@/app/index.css'
 import {JSX} from "react";
 import {Color, ColorNamesType} from "@/app/utility/color";
 import {Theme} from "@/app/theme";
+import {RefClass} from "@/app/elements/inputs/helper/inputHelper";
 
-export function ColorList(prop: { handleSelection?: (color: Color) => void }): JSX.Element {
+export function ColorList(prop: { handleSelection?: (color: Color) => void , parentRef?: RefClass<Color>}): JSX.Element {
     const colorList: (keyof ColorNamesType)[] = ['Basil', 'Sage', 'Peacock', 'Blueberry', 'Lavender', 'Grape', 'Flamingo', 'Graphite', 'Ocean']
 
     function handleClick(color: Color): void {
         if (prop.handleSelection) {
             prop.handleSelection(color)
+        }
+        if (prop.parentRef) {
+            prop.parentRef.setData(color)
         }
     }
 

@@ -72,7 +72,7 @@ function CalendarEventCreator(prop: {
 
         calendarEvent.title = titleRef.current
         calendarEvent.description = descriptionRef.current
-        calendarEvent.location = descriptionRef.current
+        calendarEvent.location = locationRef.current
 
         calendarEvent.color = colorRef.current
 
@@ -125,7 +125,6 @@ function CalendarEventCreator(prop: {
 
     function handleColorSelection(color: Color) {
         const controller = windowManager.getController('colorList')
-        colorRef.current = color
         controller?.closeWindow()
     }
 
@@ -133,7 +132,7 @@ function CalendarEventCreator(prop: {
         windowManager.createWindow({
             view:
                 <div className={'p-2'}>
-                    <ColorList handleSelection={handleColorSelection}/>
+                    <ColorList handleSelection={handleColorSelection} parentRef={new RefClass<Color>(colorRef)}/>
                 </div>,
             key: 'colorList',
             rounded: true,
