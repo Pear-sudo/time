@@ -10,7 +10,6 @@ export function TimeSelector(prop: {
     parentRef?: RefClass<Date>
 }): JSX.Element {
     const timeRef = useRef<Date>(prop.default ? prop.default : new Date());
-    timeRef.current.setFullYear(1970, 1, 1)
 
     function handleCallback(key: keyof Time) {
         return (
@@ -53,11 +52,10 @@ export function TimeSelector(prop: {
 
 export function DateSelector(prop: {
     callback?: (day: Date) => void,
-    defaultDay?: Date,
+    default?: Date,
     parentRef?: RefClass<Date>
 }): JSX.Element {
-    const dayRef = useRef<Date>(prop.defaultDay ? prop.defaultDay : new Date())
-    dayRef.current.setHours(0, 0, 0, 0)
+    const dayRef = useRef<Date>(prop.default ? prop.default : new Date())
 
     function handleCallback(t: keyof Day) {
         return (
@@ -99,6 +97,28 @@ export function DateSelector(prop: {
                          value={dayRef.current.getMonth() + 1}/>/
             <NumberInput callback={handleCallback("date")} allowLeadingZero={true} min={1} max={31}
                          value={dayRef.current.getDate()}/>
+        </span>
+    )
+}
+
+export function DateTimeSelector(prop: {
+    callback?: (time: Date) => void,
+    default?: Date,
+    parentRef?: RefClass<Date>
+}): JSX.Element {
+    return (
+        <span>
+            <DateSelector
+                default={prop.default}
+                callback={prop.callback}
+                parentRef={prop.parentRef}
+            />
+            &nbsp;
+            <TimeSelector
+                default={prop.default}
+                callback={prop.callback}
+                parentRef={prop.parentRef}
+            />
         </span>
     )
 }

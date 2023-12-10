@@ -154,7 +154,7 @@ export function DayContent(prop: {
                 <div className={'text-center text-sm'}>{event.title}</div>
                 <div className={'text-center text-xs'}>{event.location}</div>
                 <div className={'text-center text-xs'}>{event.description}</div>
-                <CalendarEventCreatorWrapper existingCE={new PropWrapper<CalendarEvent>(event)} pending={pending}/>
+                <CalendarEventCreatorWrapper existingCE={event} pending={pending}/>
             </div>
         )
     }

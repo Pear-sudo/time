@@ -35,3 +35,11 @@ export function initObject<T extends Object, K extends keyof T>(keys: K[], obj: 
     }
     return obj as Required<T>
 }
+
+export class StringWrapper {
+    public value: string;
+
+    constructor(value: string) {
+        this.value = value;
+    }
+}

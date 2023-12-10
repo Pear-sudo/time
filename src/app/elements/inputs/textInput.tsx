@@ -1,6 +1,7 @@
 import React, {JSX, useEffect, useId, useRef} from "react";
 
 import {RefClass} from "@/app/elements/inputs/helper/inputHelper";
+import {StringWrapper} from "@/app/utility/lanUtil";
 
 export function TextInput(prop: {
     label?: string,
