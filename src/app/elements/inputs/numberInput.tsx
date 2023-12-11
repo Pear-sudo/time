@@ -82,6 +82,10 @@ export function NumberInput(prop: {
         }
     }
 
+    function handleOnFocus(event: React.FocusEvent<HTMLInputElement>) {
+        event.target.select()
+    }
+
     return (
         <span className={'w-fit flex-col inline-flex items-center'}>
             <input type={'text'}
@@ -93,6 +97,7 @@ export function NumberInput(prop: {
                    }}
                    placeholder={'0'.repeat(len)} onChange={handleOnChange}
                    onBlur={handleOnBlur}
+                   onFocus={handleOnFocus}
                    value={value}
             />
             <span className={'text-red-600 text-sm'} ref={hintRef}></span>
