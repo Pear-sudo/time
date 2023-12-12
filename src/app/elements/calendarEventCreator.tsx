@@ -12,7 +12,6 @@ import {PopupResult, RefClass} from "@/app/elements/inputs/helper/inputHelper";
 
 function CalendarEventCreator(prop: {
     callback?: (result: PopupResult, data: any) => void,
-    submitButtonName?: string,
     existingCE?: CalendarEvent
     pending?: boolean
 }): JSX.Element {
@@ -30,8 +29,6 @@ function CalendarEventCreator(prop: {
 
     // @ts-ignore
     const colorRef = useRef(calendarEventRef.current.color ? Color.setColor(calendarEventRef.current.color._colorName) : Theme.defaultEventColor);
-
-    const submitButtonName = prop.submitButtonName ? prop.submitButtonName : "Create"
 
     function initCalendarEvent(): CalendarEvent {
         if (prop.existingCE) {
@@ -118,9 +115,13 @@ function CalendarEventCreator(prop: {
                 prop.callback(PopupResult.Delete, null)
             }
         } else {
-            new WindowManager().getController('logCreator')?.closeWindow()
+            closeThisWindow()
             return
         }
+    }
+
+    function closeThisWindow() {
+        new WindowManager().getController('logCreator')?.closeWindow()
     }
 
     function handleColorSelection(color: Color) {
@@ -142,6 +143,8 @@ function CalendarEventCreator(prop: {
 
     const windowManager = new WindowManager()
     windowManager.setOnOutsideClick('logCreator', handleOutsideClick)
+
+    const isNewCalendarEvent = !prop.existingCE || prop.pending
 
     return (
         <div
@@ -173,9 +176,10 @@ function CalendarEventCreator(prop: {
             <TextInput placeholder={"Add description"} parentRef={new RefClass(descriptionRef)}/>
 
             <div className={'mt-auto flex-row inline-flex'}>
-                <button className={`${Theme.button} w-fit self-start`} onClick={handleDelete}>Delete</button>
+                <button className={`${Theme.button} w-fit self-start`} onClick={handleDelete}>{!isNewCalendarEvent ? "Delete" : "Cancel"}</button>
+                {!isNewCalendarEvent ? <button className={`${Theme.button}`} onClick={closeThisWindow}>Cancel</button> : undefined}
                 <button className={`${Theme.button} w-fit self-end ml-auto`}
-                        onClick={handleCreate}>{submitButtonName}</button>
+                        onClick={handleCreate}>{!isNewCalendarEvent ? "Update" : "Create"}</button>
             </div>
         </div>
     )
