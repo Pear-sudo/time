@@ -150,11 +150,11 @@ function CalendarEventCreator(prop: {
         <div
             className={'w-fit p-3 bg-cyan-50 cursor-default flex-col inline-flex gap-3'}
         >
-            <TextInput placeholder={"Add title"} parentRef={new RefClass(titleRef)}/>
+            <TextInput placeholder={"Add title"} parentData={new RefClass(titleRef)}/>
             <span className={'whitespace-nowrap'}>
                     Begin:
                 <DateTimeSelector
-                    parentRef={new RefClass<Date>(beginDTRef)}
+                    parentData={new RefClass<Date>(beginDTRef)}
                     default={beginDTRef.current}
                 />
                 </span>
@@ -162,7 +162,7 @@ function CalendarEventCreator(prop: {
             <span className={'whitespace-nowrap'}>
                     End:
                     <DateTimeSelector
-                        parentRef={new RefClass<Date>(endDTRef)}
+                        parentData={new RefClass<Date>(endDTRef)}
                         default={endDTRef.current}
                     />
                 </span>
@@ -172,8 +172,8 @@ function CalendarEventCreator(prop: {
                 <ColorRow color={colorState} label={colorState.colorName}/>
             </div>
 
-            <TextInput placeholder={"Add location"} parentRef={new RefClass(locationRef)}/>
-            <TextInput placeholder={"Add description"} parentRef={new RefClass(descriptionRef)}/>
+            <TextInput placeholder={"Add location"} parentData={new RefClass(locationRef)}/>
+            <TextInput placeholder={"Add description"} parentData={new RefClass(descriptionRef)}/>
 
             <div className={'mt-auto flex-row inline-flex'}>
                 <button className={`${Theme.button} w-fit self-start`} onClick={handleDelete}>{!isNewCalendarEvent ? "Delete" : "Cancel"}</button>

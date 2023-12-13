@@ -2,7 +2,7 @@ import '@/app/index.css'
 import {JSX} from "react";
 import {Color, ColorNamesType} from "@/app/utility/color";
 import {Theme} from "@/app/theme";
-import {DataWrapper, RefClass} from "@/app/elements/inputs/helper/inputHelper";
+import {DataWrapper} from "@/app/elements/inputs/helper/inputHelper";
 
 export function ColorList(prop: { handleSelection?: (color: Color) => void , parentData?: DataWrapper<Color>}): JSX.Element {
     const colorList: (keyof ColorNamesType)[] = ['Basil', 'Sage', 'Peacock', 'Blueberry', 'Lavender', 'Grape', 'Flamingo', 'Graphite', 'Ocean']

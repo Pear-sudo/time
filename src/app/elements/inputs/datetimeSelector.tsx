@@ -2,12 +2,12 @@ import {Day, Time} from "@/app/utility/timeUtil";
 import React, {JSX, useRef} from "react";
 import {NumberInput} from "@/app/elements/inputs/numberInput";
 
-import {RefClass} from "@/app/elements/inputs/helper/inputHelper";
+import {DataWrapper} from "@/app/elements/inputs/helper/inputHelper";
 
 export function TimeSelector(prop: {
     callback?: (time: Date) => void,
     default?: Date,
-    parentRef?: RefClass<Date>
+    parentData?: DataWrapper<Date | undefined>
 }): JSX.Element {
     const timeRef = useRef<Date>(prop.default ? prop.default : new Date());
 
@@ -31,8 +31,8 @@ export function TimeSelector(prop: {
     }
 
     function pass2Parent() {
-        if (prop.parentRef) {
-            prop.parentRef.setData(timeRef.current)
+        if (prop.parentData) {
+            prop.parentData.setData(timeRef.current)
         }
         if (prop.callback) {
             prop.callback(timeRef.current)
@@ -53,7 +53,7 @@ export function TimeSelector(prop: {
 export function DateSelector(prop: {
     callback?: (day: Date) => void,
     default?: Date,
-    parentRef?: RefClass<Date>
+    parentData?: DataWrapper<Date | undefined>
 }): JSX.Element {
     const dayRef = useRef<Date>(prop.default ? prop.default : new Date())
 
@@ -81,8 +81,8 @@ export function DateSelector(prop: {
     }
 
     function pass2Parent() {
-        if (prop.parentRef) {
-            prop.parentRef.setData(dayRef.current)
+        if (prop.parentData) {
+            prop.parentData.setData(dayRef.current)
         }
         if (prop.callback) {
             prop.callback(dayRef.current)
@@ -104,20 +104,20 @@ export function DateSelector(prop: {
 export function DateTimeSelector(prop: {
     callback?: (time: Date) => void,
     default?: Date,
-    parentRef?: RefClass<Date>
+    parentData?: DataWrapper<Date | undefined>
 }): JSX.Element {
     return (
         <span>
             <DateSelector
                 default={prop.default}
                 callback={prop.callback}
-                parentRef={prop.parentRef}
+                parentData={prop.parentData}
             />
             &nbsp;
             <TimeSelector
                 default={prop.default}
                 callback={prop.callback}
-                parentRef={prop.parentRef}
+                parentData={prop.parentData}
             />
         </span>
     )

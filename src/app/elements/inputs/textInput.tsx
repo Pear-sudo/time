@@ -1,11 +1,11 @@
 import React, {JSX, useEffect, useId, useRef} from "react";
 
-import {RefClass} from "@/app/elements/inputs/helper/inputHelper";
+import {DataWrapper} from "@/app/elements/inputs/helper/inputHelper";
 
 export function TextInput(prop: {
     label?: string,
     placeholder?: string,
-    parentRef?: RefClass<string>
+    parentData?: DataWrapper<string | undefined>
 }): JSX.Element {
     const id = useId()
     const inputRef = useRef<HTMLTextAreaElement>(null);
@@ -16,7 +16,7 @@ export function TextInput(prop: {
         }
     }, []);
 
-    const parentRef = prop.parentRef
+    const parentRef = prop.parentData
 
     function handleOnBlur(event: React.FocusEvent<HTMLTextAreaElement>) {
         const target = event.target
