@@ -1,5 +1,6 @@
-import React, {JSX, useMemo, useState} from "react";
+import React, {JSX, useMemo, useRef, useState} from "react";
 import {DisplayContextObj} from "@/app/model/displayContextObj";
+import {boolean, number, string} from "fp-ts";
 
 // @ts-ignore
 export const DisplayContext = React.createContext<{ displayContextObj: DisplayContextObj, updateContext: React.Dispatch<React.SetStateAction<DisplayContextObj>> } >(undefined)
@@ -130,9 +131,23 @@ export class WindowManager {
                 </div>
                 <div className={`-translate-x-1/2 -translate-y-1/2 fixed bg-white ${win.fullScreen ? 'w-full' : ''}
                 ${win.op.rounded ? 'rounded overflow-hidden' : ''}`}
-                     style={{zIndex: this.currentZ + 1, top: '50%', left: '50%'}}>
+                     style={{zIndex: this.currentZ + 1, top: win.top, left: win.left}}>
+                    {win.op.header ? <this.WindowHeader win={win}></this.WindowHeader> : undefined}
                     {win.view}
                 </div>
+            </div>
+        )
+    }
+
+    private WindowHeader(prop: {win: Win}): JSX.Element {
+        const win = prop.win
+
+        function handleOnClick() {
+        }
+
+        return (
+            <div className={'w-full h-4 bg-gray-400 cursor-move'} onClick={handleOnClick}>
+
             </div>
         )
     }
@@ -177,6 +192,7 @@ export interface CreateWindowOp {
     fullScreen?: boolean
     background?: string
     rounded?: boolean
+    header?: boolean
 }
 
 class Win {
@@ -206,6 +222,27 @@ class Win {
 
     private readonly _cTime: Date
     private readonly _op: CreateWindowOp
+
+    private _top: number = window.innerHeight / 2
+    private _left: number = window.innerWidth / 2
+
+    selfDiv: undefined | React.RefObject<HTMLDivElement>
+
+    get top(): number {
+        return this._top;
+    }
+
+    set top(value: number) {
+        this._top = value;
+    }
+
+    get left(): number {
+        return this._left;
+    }
+
+    set left(value: number) {
+        this._left = value;
+    }
 
     constructor(op: CreateWindowOp) {
         this._op = op

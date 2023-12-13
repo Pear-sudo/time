@@ -222,7 +222,8 @@ export function CalendarEventCreatorWrapper(prop: {
             view: <CalendarEventCreator callback={handleCallback} existingCE={prop.existingCE}
                                         pending={prop.pending}/>,
             key: 'logCreator',
-            rounded: true
+            rounded: true,
+            header: true
         })
     }
 
