@@ -1,6 +1,6 @@
 import React from "react";
 
-export class RefClass<T> {
+export class RefClass<T> implements DataWrapper<T | undefined> {
     private ref: React.MutableRefObject<T | undefined>;
 
     constructor(ref: React.MutableRefObject<T | undefined>) {
@@ -15,6 +15,29 @@ export class RefClass<T> {
         this.ref.current = data
     }
 
+}
+
+export class StateClass<T> implements DataWrapper<T> {
+    private readonly state: T
+    private readonly stateSetter: React.Dispatch<React.SetStateAction<T>>
+
+    constructor(state: T, stateSetter: React.Dispatch<React.SetStateAction<T>>) {
+        this.state = state
+        this.stateSetter = stateSetter
+    }
+
+    getData(): T {
+        return this.state;
+    }
+
+    setData(data: T): void {
+        this.stateSetter(data)
+    }
+}
+
+export interface DataWrapper<T> {
+    getData: () => T;
+    setData: (data: T) => void
 }
 
 export enum PopupResult {

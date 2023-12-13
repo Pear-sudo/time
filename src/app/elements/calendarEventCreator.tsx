@@ -8,7 +8,7 @@ import {ColorList, ColorRow} from "@/app/elements/colorList";
 import {TextInput} from "@/app/elements/inputs/textInput";
 import {DateTimeSelector} from "@/app/elements/inputs/datetimeSelector";
 
-import {PopupResult, RefClass} from "@/app/elements/inputs/helper/inputHelper";
+import {PopupResult, RefClass, StateClass} from "@/app/elements/inputs/helper/inputHelper";
 
 function CalendarEventCreator(prop: {
     callback?: (result: PopupResult, data: any) => void,
@@ -28,7 +28,7 @@ function CalendarEventCreator(prop: {
     const descriptionRef = useRef(calendarEventRef.current.description);
 
     // @ts-ignore
-    const colorRef = useRef(calendarEventRef.current.color ? Color.setColor(calendarEventRef.current.color._colorName) : Theme.defaultEventColor);
+    const [colorState, setColorState] = useState(calendarEventRef.current.color ? Color.setColor(calendarEventRef.current.color._colorName) : Theme.defaultEventColor)
 
     function initCalendarEvent(): CalendarEvent {
         if (prop.existingCE) {
@@ -71,7 +71,7 @@ function CalendarEventCreator(prop: {
         calendarEvent.description = descriptionRef.current
         calendarEvent.location = locationRef.current
 
-        calendarEvent.color = colorRef.current
+        calendarEvent.color = colorState
 
         if (!(calendarEvent.begin && calendarEvent.end)) {
             console.log("begin or end does not exist!")
@@ -133,7 +133,7 @@ function CalendarEventCreator(prop: {
         windowManager.createWindow({
             view:
                 <div className={'p-2'}>
-                    <ColorList handleSelection={handleColorSelection} parentRef={new RefClass<Color>(colorRef)}/>
+                    <ColorList handleSelection={handleColorSelection} parentData={new StateClass<Color>(colorState, setColorState)}/>
                 </div>,
             key: 'colorList',
             rounded: true,
@@ -169,7 +169,7 @@ function CalendarEventCreator(prop: {
             <span ref={hintRef} className={'text-red-600 text-sm'}></span>
 
             <div onClick={handleColorSelectorClick}>
-                <ColorRow color={colorRef.current} label={colorRef.current.colorName}/>
+                <ColorRow color={colorState} label={colorState.colorName}/>
             </div>
 
             <TextInput placeholder={"Add location"} parentRef={new RefClass(locationRef)}/>
