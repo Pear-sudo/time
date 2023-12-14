@@ -106,7 +106,7 @@ export class WindowManager {
         }
     }
 
-    private handleOutsideClick(win: Win): (event: React.MouseEvent) => void {
+    private generateHandleOutsideClick(win: Win): (event: React.MouseEvent) => void {
         return function (event: React.MouseEvent) {
             if (win.handleOutsideClick) {
                 const controller = new WindowController(win.key_s)
@@ -123,32 +123,7 @@ export class WindowManager {
             bg-white in the second div is important, otherwise the first div background will penetrate to some elements which does not have bg color
         * */
         return (
-            <div key={win.key_s}>
-                <div style={{zIndex: this.currentZ, width: '100dvw', height: '100dvh'}}
-                     className={`fixed top-0 left-0 cursor-default bg-black opacity-50`}
-                     onClick={this.handleOutsideClick(win)}
-                >
-                </div>
-                <div className={`-translate-x-1/2 -translate-y-1/2 fixed bg-white ${win.fullScreen ? 'w-full' : ''}
-                ${win.op.rounded ? 'rounded overflow-hidden' : ''}`}
-                     style={{zIndex: this.currentZ + 1, top: win.top, left: win.left}}>
-                    {win.op.header ? <this.WindowHeader win={win}></this.WindowHeader> : undefined}
-                    {win.view}
-                </div>
-            </div>
-        )
-    }
-
-    private WindowHeader(prop: {win: Win}): JSX.Element {
-        const win = prop.win
-
-        function handleOnClick() {
-        }
-
-        return (
-            <div className={'w-full h-4 bg-gray-400 cursor-move'} onClick={handleOnClick}>
-
-            </div>
+            <WindowView win={win} z={this.currentZ} handleOutsideClick={this.generateHandleOutsideClick(win)} key={win.key_s}/>
         )
     }
 
@@ -270,4 +245,40 @@ export class WindowController {
     closeWindow(): void {
         this.windowManager.closeWindow(this)
     }
+}
+
+function WindowView(prop: { win: Win, z: number, handleOutsideClick: (event: React.MouseEvent) => void  }): JSX.Element {
+    const [top, setTop] = useState(prop.win.top)
+    const [left, setLeft] = useState(prop.win.left)
+
+    const win = prop.win
+    const z = prop.z
+    return (
+        <div>
+            <div style={{zIndex: z, width: '100dvw', height: '100dvh'}}
+                 className={`fixed top-0 left-0 cursor-default bg-black opacity-50`}
+                 onClick={prop.handleOutsideClick}
+            >
+            </div>
+            <div className={`-translate-x-1/2 -translate-y-1/2 fixed bg-white ${win.fullScreen ? 'w-full' : ''}
+                ${win.op.rounded ? 'rounded overflow-hidden' : ''}`}
+                 style={{zIndex: z + 1, top: win.top, left: win.left}}>
+                {win.op.header ? <WindowHeader win={win}></WindowHeader> : undefined}
+                {win.view}
+            </div>
+        </div>
+    )
+}
+
+function WindowHeader(prop: { win: Win }): JSX.Element {
+    const win = prop.win
+
+    function handleOnClick() {
+    }
+
+    return (
+        <div className={'w-full h-4 bg-gray-400 cursor-move'} onClick={handleOnClick}>
+
+        </div>
+    )
 }
