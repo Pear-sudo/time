@@ -1,6 +1,7 @@
 import React, {JSX, useMemo, useRef, useState} from "react";
 import {DisplayContextObj} from "@/app/model/displayContextObj";
 import {boolean, number, string} from "fp-ts";
+import {String} from "postcss-selector-parser";
 
 // @ts-ignore
 export const DisplayContext = React.createContext<{ displayContextObj: DisplayContextObj, updateContext: React.Dispatch<React.SetStateAction<DisplayContextObj>> } >(undefined)
@@ -198,25 +199,15 @@ class Win {
     private readonly _cTime: Date
     private readonly _op: CreateWindowOp
 
-    private _top: number = window.innerHeight / 2
-    private _left: number = window.innerWidth / 2
+    private _top: string = "50%"
+    private _left: string = "50%"
 
-    selfDiv: undefined | React.RefObject<HTMLDivElement>
-
-    get top(): number {
+    get top(): string {
         return this._top;
     }
 
-    set top(value: number) {
-        this._top = value;
-    }
-
-    get left(): number {
+    get left(): string {
         return this._left;
-    }
-
-    set left(value: number) {
-        this._left = value;
     }
 
     constructor(op: CreateWindowOp) {
