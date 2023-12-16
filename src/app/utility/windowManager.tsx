@@ -1,4 +1,4 @@
-import React, {JSX, useMemo, useRef, useState} from "react";
+import React, {JSX, useEffect, useMemo, useRef, useState} from "react";
 import {DisplayContextObj} from "@/app/model/displayContextObj";
 import {boolean, number, string} from "fp-ts";
 import {String} from "postcss-selector-parser";
@@ -124,7 +124,8 @@ export class WindowManager {
             bg-white in the second div is important, otherwise the first div background will penetrate to some elements which does not have bg color
         * */
         return (
-            <WindowView win={win} z={this.currentZ} handleOutsideClick={this.generateHandleOutsideClick(win)} key={win.key_s}/>
+            <WindowView win={win} z={this.currentZ} handleOutsideClick={this.generateHandleOutsideClick(win)}
+                        key={win.key_s}/>
         )
     }
 
@@ -172,6 +173,22 @@ export interface CreateWindowOp {
 }
 
 class Win {
+    get topSetter(): React.Dispatch<React.SetStateAction<string>> | undefined {
+        return this._topSetter;
+    }
+
+    get leftSetter(): React.Dispatch<React.SetStateAction<string>> | undefined {
+        return this._leftSetter;
+    }
+
+    set topSetter(value: React.Dispatch<React.SetStateAction<string>> | undefined) {
+        this._topSetter = value;
+    }
+
+    set leftSetter(value: React.Dispatch<React.SetStateAction<string>> | undefined) {
+        this._leftSetter = value;
+    }
+
     get op(): CreateWindowOp {
         return this._op;
     }
@@ -199,15 +216,51 @@ class Win {
     private readonly _cTime: Date
     private readonly _op: CreateWindowOp
 
-    private _top: string = "50%"
-    private _left: string = "50%"
+    private _top: number = 0.5
+    private _left: number = 0.5
+    private _topSetter: React.Dispatch<React.SetStateAction<string>> | undefined
+    private _leftSetter: React.Dispatch<React.SetStateAction<string>> | undefined
 
     get top(): string {
-        return this._top;
+        return this._top * 100 + '%';
     }
 
     get left(): string {
-        return this._left;
+        return this._left * 100 + '%';
+    }
+
+    private set top(top: number) {
+        this._top = top
+        if (this.topSetter) {
+            this.topSetter(this.top)
+        }
+    }
+
+    private set left(left: number) {
+        this._left = left
+        if (this.leftSetter) {
+            this.leftSetter(this.left)
+        }
+    }
+
+    topDelta(pixel: number) {
+        const percentageDelta = pixel / window.innerHeight
+        this.top = this._top + percentageDelta
+    }
+
+    leftDelta(pixel: number) {
+        const percentageDelta = pixel / window.innerWidth
+        this.left = this._left + percentageDelta
+    }
+
+    newTop(top: number) {
+        console.log(top)
+        console.log(window.innerHeight)
+        this.top = top / window.innerHeight
+    }
+
+    newLeft(left: number) {
+        this.left = left / window.innerWidth
     }
 
     constructor(op: CreateWindowOp) {
@@ -238,12 +291,15 @@ export class WindowController {
     }
 }
 
-function WindowView(prop: { win: Win, z: number, handleOutsideClick: (event: React.MouseEvent) => void  }): JSX.Element {
+function WindowView(prop: { win: Win, z: number, handleOutsideClick: (event: React.MouseEvent) => void }): JSX.Element {
     const [top, setTop] = useState(prop.win.top)
     const [left, setLeft] = useState(prop.win.left)
 
     const win = prop.win
+    win.topSetter = setTop
+    win.leftSetter = setLeft
     const z = prop.z
+
     return (
         <div>
             <div style={{zIndex: z, width: '100dvw', height: '100dvh'}}
@@ -262,14 +318,38 @@ function WindowView(prop: { win: Win, z: number, handleOutsideClick: (event: Rea
 }
 
 function WindowHeader(prop: { win: Win }): JSX.Element {
+    const isMouseDownRef = useRef(false)
+    useEffect(() => {
+        const handleMouseUpGlobal = () => {
+            if (isMouseDownRef.current) {
+                isMouseDownRef.current = false;
+            }
+        };
+
+        function handleOnMouseMoveGlobal(e: MouseEvent) {
+            if (isMouseDownRef.current) {
+                win.topDelta(e.movementY)
+                win.leftDelta(e.movementX)
+            }
+        }
+
+        window.addEventListener('mouseup', handleMouseUpGlobal);
+        window.addEventListener('mousemove', handleOnMouseMoveGlobal)
+
+        return () => {
+            window.removeEventListener('mouseup', handleMouseUpGlobal);
+            window.removeEventListener('mousemove', handleOnMouseMoveGlobal)
+        };
+    }, []);
+
     const win = prop.win
 
-    function handleOnClick() {
+    function handleOnMouseDown() {
+        isMouseDownRef.current = true
     }
 
     return (
-        <div className={'w-full h-4 bg-gray-400 cursor-move'} onClick={handleOnClick}>
-
+        <div className={'w-full h-4 bg-gray-400 cursor-move'} onMouseDown={handleOnMouseDown}>
         </div>
     )
 }
