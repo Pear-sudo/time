@@ -137,7 +137,8 @@ function CalendarEventCreator(prop: {
                 </div>,
             key: 'colorList',
             rounded: true,
-            handleOutSideClick: (wc: WindowController) => wc.closeWindow()
+            handleOutSideClick: (wc: WindowController) => wc.closeWindow(),
+            header: true
         })
     }
 

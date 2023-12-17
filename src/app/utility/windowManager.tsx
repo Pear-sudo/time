@@ -1,7 +1,5 @@
 import React, {JSX, useEffect, useMemo, useRef, useState} from "react";
 import {DisplayContextObj} from "@/app/model/displayContextObj";
-import {boolean, number, string} from "fp-ts";
-import {String} from "postcss-selector-parser";
 
 // @ts-ignore
 export const DisplayContext = React.createContext<{ displayContextObj: DisplayContextObj, updateContext: React.Dispatch<React.SetStateAction<DisplayContextObj>> } >(undefined)
@@ -21,6 +19,7 @@ export class WindowManager {
     private currentZ: number = this.baseZ
 
     private readonly vMap: Map<string, Win> = new Map()
+    private focusedWindow: Win | undefined
 
     private setUiDate: React.Dispatch<React.SetStateAction<Date>> | undefined
 
@@ -131,6 +130,9 @@ export class WindowManager {
 
     private Context(): JSX.Element {
         const [UiDate, setUiDate] = useState(new Date())
+        useEffect(() => {
+            return this.registerWindowHeaderActivation()
+        });
         this.setUiDate = setUiDate
 
         return (
@@ -138,6 +140,36 @@ export class WindowManager {
                 {this.generateWindows()}
             </div>
         )
+    }
+
+    private registerWindowHeaderActivation() {
+        const focused = Array.from(this.vMap.values()).pop()
+
+        if (focused && focused.windowHeaderActivation) {
+            let activationRef = focused.windowHeaderActivation
+
+            function handleMouseUpGlobal() {
+                if (activationRef.current) {
+                    activationRef.current = false;
+                }
+            }
+
+            function handleOnMouseMoveGlobal(e: MouseEvent) {
+                if (activationRef.current && focused) {
+                    focused.topDelta(e.movementY)
+                    focused.leftDelta(e.movementX)
+                }
+            }
+
+            window.addEventListener('mouseup', handleMouseUpGlobal);
+            window.addEventListener('mousemove', handleOnMouseMoveGlobal)
+
+            return () => {
+                window.removeEventListener('mouseup', handleMouseUpGlobal);
+                window.removeEventListener('mousemove', handleOnMouseMoveGlobal)
+            };
+        }
+
     }
 
     initContext(): JSX.Element {
@@ -213,6 +245,8 @@ class Win {
         return this.op.fullScreen
     }
 
+    windowHeaderActivation: React.MutableRefObject<boolean> | undefined
+
     private readonly _cTime: Date
     private readonly _op: CreateWindowOp
 
@@ -251,16 +285,6 @@ class Win {
     leftDelta(pixel: number) {
         const percentageDelta = pixel / window.innerWidth
         this.left = this._left + percentageDelta
-    }
-
-    newTop(top: number) {
-        console.log(top)
-        console.log(window.innerHeight)
-        this.top = top / window.innerHeight
-    }
-
-    newLeft(left: number) {
-        this.left = left / window.innerWidth
     }
 
     constructor(op: CreateWindowOp) {
@@ -319,30 +343,9 @@ function WindowView(prop: { win: Win, z: number, handleOutsideClick: (event: Rea
 
 function WindowHeader(prop: { win: Win }): JSX.Element {
     const isMouseDownRef = useRef(false)
-    useEffect(() => {
-        const handleMouseUpGlobal = () => {
-            if (isMouseDownRef.current) {
-                isMouseDownRef.current = false;
-            }
-        };
-
-        function handleOnMouseMoveGlobal(e: MouseEvent) {
-            if (isMouseDownRef.current) {
-                win.topDelta(e.movementY)
-                win.leftDelta(e.movementX)
-            }
-        }
-
-        window.addEventListener('mouseup', handleMouseUpGlobal);
-        window.addEventListener('mousemove', handleOnMouseMoveGlobal)
-
-        return () => {
-            window.removeEventListener('mouseup', handleMouseUpGlobal);
-            window.removeEventListener('mousemove', handleOnMouseMoveGlobal)
-        };
-    }, []);
 
     const win = prop.win
+    win.windowHeaderActivation = isMouseDownRef
 
     function handleOnMouseDown() {
         isMouseDownRef.current = true
