@@ -1,6 +1,11 @@
 import React, {JSX} from "react";
 
-export function Dropdown(prop: {parent: JSX.Element, child: JSX.Element, show: boolean, onCancel?: () => void}): JSX.Element {
+export function Dropdown(prop: {
+    parent: JSX.Element,
+    child: JSX.Element,
+    show: boolean,
+    onCancel?: () => void
+}): JSX.Element {
     function handleOnCancel() {
         if (prop.onCancel) {
             prop.onCancel()
@@ -20,10 +25,8 @@ export function Dropdown(prop: {parent: JSX.Element, child: JSX.Element, show: b
         </div>
     )
     return (
-        <div className={'relative'}>
-            <div>
-                {prop.parent}
-            </div>
+        <div className={'relative h-fit'}>
+            {prop.parent}
             {prop.show ? child : undefined}
         </div>
     )

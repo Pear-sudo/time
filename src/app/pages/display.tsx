@@ -129,7 +129,7 @@ export function Display(): JSX.Element {
     return (
         <div className={'w-full relative'} style={{display: 'grid', gridTemplateRows: 'auto 1fr', height: '100dvh'}}
              ref={selfRef}>
-            <div className={'inline-flex flex-row justify-center'}>
+            <div className={'inline-flex flex-row justify-center items-center'}>
                 <DayCount onChange={onDayCountOrAnchorChange}/>
                 <TodayButton onClick={onTodayButtonClick}/>
                 <NavigationButtons onClick={onNavigationButtonClick}/>
