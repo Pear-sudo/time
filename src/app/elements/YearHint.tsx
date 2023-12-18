@@ -29,6 +29,10 @@ export function YearHint(prop: {
         hint = firstMonthStrS + ' ' + firstYearStr + ' - ' + lastMonthStrS + ' ' + lastYearStr
     }
 
+    function handleOnCancel() {
+        setShowDropdown(false)
+    }
+
     const buttonView: JSX.Element = (
         <Dropdown parent={
             <div className={`h-full ${Theme.button}`} onClick={handleOnClick}>
@@ -36,7 +40,7 @@ export function YearHint(prop: {
             </div>
         } child={
             <MonthlyCalendar focus={new Date()} selfHider={setShowDropdown}/>
-        } show={showDropdown}/>
+        } show={showDropdown} onCancel={handleOnCancel}/>
     )
 
     const normalView: JSX.Element = (
