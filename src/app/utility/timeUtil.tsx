@@ -130,6 +130,36 @@ export function generateFullWeekDays(aDayOfWeek: Date): Date[] {
     return dates
 }
 
+export function generatePaddedMonth(aDayOfMonth: Date): Date[] {
+    let dates: Date[] = []
+    const monthBeginDate = getMonthBegin(aDayOfMonth)
+    const monthEndDate = getMonthEnd(aDayOfMonth)
+    const firstPaddedWeek: Date[] = generateFullWeekDays(monthBeginDate)
+    const lastPaddedWeek: Date[] = generateFullWeekDays(monthEndDate)
+    let middlePaddedWeek: Date[] = firstPaddedWeek
+    let count = 0
+    while (!areSameDate(middlePaddedWeek[0], lastPaddedWeek[0]) && count < 6) {
+        dates.push(...middlePaddedWeek)
+        middlePaddedWeek = rollDates(middlePaddedWeek, 1)
+
+        // just serve as a safeguard for the dangerous while loop
+        count++
+    }
+    dates.push(...lastPaddedWeek)
+    return dates
+}
+
+export function getMonthBegin(aDayOfMonth: Date): Date {
+    return new Date(aDayOfMonth.getFullYear(), aDayOfMonth.getMonth(), 1)
+}
+
+export function getMonthEnd(aDayOfMonth: Date): Date {
+    const year = aDayOfMonth.getFullYear();
+    const month = aDayOfMonth.getMonth();
+    const firstDayNextMonth = new Date(year, month + 1, 1);
+    return new Date(firstDayNextMonth.getTime() - 1)
+}
+
 export function hour2String(hour: number, mode?: '24' | '12'): string {
     if (isUN(mode)) {
         mode = '12'
