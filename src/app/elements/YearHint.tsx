@@ -2,7 +2,8 @@ import React, {JSX} from "react";
 import {Theme} from "@/app/theme";
 
 export function YearHint(prop: {
-    dates: Date[]
+    dates: Date[],
+    clickable?: boolean
 }): JSX.Element {
     let hint: string = ''
 
@@ -25,11 +26,21 @@ export function YearHint(prop: {
         hint = firstMonthStrS + ' ' + firstYearStr + ' - ' + lastMonthStrS + ' ' + lastYearStr
     }
 
+    const buttonView: JSX.Element = (
+        <button className={`h-full ${Theme.button}`}>
+            {hint}
+        </button>
+    )
+
+    const normalView: JSX.Element = (
+        <div className={`h-full`}>
+            {hint}
+        </div>
+    )
+
     return (
         <div>
-            <button className={`h-full ${Theme.button}`}>
-                {hint}
-            </button>
+            {prop.clickable ? buttonView : normalView}
         </div>
     )
 }
