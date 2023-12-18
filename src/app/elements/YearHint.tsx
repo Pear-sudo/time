@@ -1,10 +1,13 @@
-import React, {JSX} from "react";
+import React, {JSX, useState} from "react";
 import {Theme} from "@/app/theme";
+import {Dropdown} from "@/app/elements/ui/dropdown";
+import {MonthlyCalendar} from "@/app/elements/monthlyCalendar";
 
 export function YearHint(prop: {
     dates: Date[],
     clickable?: boolean
 }): JSX.Element {
+    const [showDropdown, setShowDropdown] = useState(false)
     let hint: string = ''
 
     const firstDate = prop.dates[0]
@@ -27,9 +30,13 @@ export function YearHint(prop: {
     }
 
     const buttonView: JSX.Element = (
-        <button className={`h-full ${Theme.button}`}>
-            {hint}
-        </button>
+        <Dropdown parent={
+            <div className={`h-full ${Theme.button}`} onClick={handleOnClick}>
+                {hint}
+            </div>
+        } child={
+            <MonthlyCalendar focus={new Date()}/>
+        } show={showDropdown}/>
     )
 
     const normalView: JSX.Element = (
@@ -38,9 +45,11 @@ export function YearHint(prop: {
         </div>
     )
 
+    function handleOnClick() {
+        setShowDropdown(!showDropdown)
+    }
+
     return (
-        <div>
-            {prop.clickable ? buttonView : normalView}
-        </div>
+        prop.clickable ? buttonView : normalView
     )
 }

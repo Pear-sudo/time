@@ -3,9 +3,12 @@
 import {JSX} from "react";
 import '@/app/index.css';
 import {MonthlyCalendar} from "@/app/elements/monthlyCalendar";
+import {Dropdown} from "@/app/elements/ui/dropdown";
 
 export default function Test(): JSX.Element {
     return (
-        <MonthlyCalendar focus={new Date()}/>
+        <div>
+            <Dropdown child={<MonthlyCalendar focus={new Date()}/>} parent={<div>Test</div>} show={false}/>
+        </div>
     )
 }
