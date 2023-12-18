@@ -17,7 +17,7 @@ export class RefClass<T> implements DataWrapper<T | undefined> {
 
 }
 
-export class StateClass<T> implements DataWrapper<T> {
+export class StateClass<T> implements DataWrapper<T>, DataInterception<T> {
     private readonly state: T
     private readonly stateSetter: React.Dispatch<React.SetStateAction<T>>
 
@@ -32,12 +32,20 @@ export class StateClass<T> implements DataWrapper<T> {
 
     setData(data: T): void {
         this.stateSetter(data)
+        this.afterSet(data)
+    }
+
+    afterSet(data: T): void {
     }
 }
 
 export interface DataWrapper<T> {
     getData: () => T;
     setData: (data: T) => void
+}
+
+export interface DataInterception<T> {
+    afterSet: (data: T) => void
 }
 
 export enum PopupResult {

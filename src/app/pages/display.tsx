@@ -12,6 +12,7 @@ import {NavigationButtons} from "@/app/elements/navigationButtons";
 import {Calendar} from "@/app/elements/calendar";
 import {Scheduler} from "@/app/utility/scheduler";
 import {CalendarEventExt} from "@/app/model/eventData";
+import {DisplayContextObj} from "@/app/model/displayContextObj";
 
 export function Display(): JSX.Element {
     const [displayedDates, _updateDisplayedDates] = useState(generateFullWeekDays(new Date()))
@@ -41,6 +42,8 @@ export function Display(): JSX.Element {
     useEffect(() => {
         // updateHeight()
     });
+
+    const displayContext = new DisplayContextObj()
 
     const scheduler = new Scheduler()
     const rerenderTask: { date: Date, f: Function } = {date: new Date(new Date().setHours(23, 59, 59, 999)), f: taskRerender}
@@ -99,12 +102,14 @@ export function Display(): JSX.Element {
     }
 
     const onTodayButtonClick = (): void => {
-        onDayCountChange(getDisplayedDates().length, new Date())
+        onDayCountOrAnchorChange(getDisplayedDates().length, new Date())
         selfEvents.current.onTodayButtonClick = !selfEvents.current.onTodayButtonClick
     }
 
-    const onDayCountChange = (count: number, anchor?: Date): void => {
-        anchor = anchor ? anchor : getDisplayedDates()[0]
+    const onDayCountOrAnchorChange = (count?: number, anchor?: Date): void => {
+        const currentDisplayedDates = getDisplayedDates()
+        count = count ? count : currentDisplayedDates.length
+        anchor = anchor ? anchor : currentDisplayedDates[0]
         switch (count) {
             case 7:
                 updateDisplayedDates(generateFullWeekDays(anchor))
@@ -116,14 +121,16 @@ export function Display(): JSX.Element {
     }
 
     const refreshUI = (): void => {
-        onDayCountChange(getDisplayedDates().length)
+        onDayCountOrAnchorChange(getDisplayedDates().length)
     }
+
+    displayContext.onDayCountOrAnchorChange = onDayCountOrAnchorChange
 
     return (
         <div className={'w-full relative'} style={{display: 'grid', gridTemplateRows: 'auto 1fr', height: '100dvh'}}
              ref={selfRef}>
             <div className={'inline-flex flex-row justify-center'}>
-                <DayCount onChange={onDayCountChange}/>
+                <DayCount onChange={onDayCountOrAnchorChange}/>
                 <TodayButton onClick={onTodayButtonClick}/>
                 <NavigationButtons onClick={onNavigationButtonClick}/>
                 <YearHint dates={displayedDates} clickable={true}/>

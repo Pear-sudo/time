@@ -35,7 +35,7 @@ export function YearHint(prop: {
                 {hint}
             </div>
         } child={
-            <MonthlyCalendar focus={new Date()}/>
+            <MonthlyCalendar focus={new Date()} selfHider={setShowDropdown}/>
         } show={showDropdown}/>
     )
 

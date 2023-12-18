@@ -1,8 +1,16 @@
 import React from "react";
 import {cloneDeep} from "lodash"
 import {DataStore} from "@/app/model/DataStore";
+import {number} from "fp-ts";
 
 export class DisplayContextObj {
+    get onDayCountOrAnchorChange(): ((count?: number, anchor?: Date) => void) | undefined {
+        return this._onDayCountOrAnchorChange;
+    }
+
+    set onDayCountOrAnchorChange(value: (count?: number, anchor?: Date) => void) {
+        this._onDayCountOrAnchorChange = value;
+    }
     get dataStore(): DataStore {
         return this._dataStore;
     }
@@ -77,6 +85,7 @@ export class DisplayContextObj {
     private _setter: React.Dispatch<React.SetStateAction<DisplayContextObj>> | undefined = undefined
     private _dataStore: DataStore = new DataStore()
     private _scrolledY: number = 0
+    private _onDayCountOrAnchorChange: ((count?: number, anchor?: Date) => void) | undefined
     get scrolledY(): number {
         return this._scrolledY;
     }
