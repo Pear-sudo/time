@@ -1,11 +1,15 @@
 import React, {JSX} from "react";
 import {YearHint} from "@/app/elements/YearHint";
 import {Theme} from "@/app/theme";
-import {generatePaddedMonth, getDayId} from "@/app/utility/timeUtil";
+import {areSameDate, generatePaddedMonth, getDayId} from "@/app/utility/timeUtil";
 import {DataWrapper} from "@/app/elements/inputs/helper/inputHelper";
 import {DisplayContextObj} from "@/app/model/displayContextObj";
 
-export function MonthlyCalendar(prop: { focus: Date, parentData?: DataWrapper<Date | undefined>, selfHider?:  React.Dispatch<React.SetStateAction<boolean>>}): JSX.Element {
+export function MonthlyCalendar(prop: {
+    focus: Date,
+    parentData?: DataWrapper<Date | undefined>,
+    selfHider?: React.Dispatch<React.SetStateAction<boolean>>
+}): JSX.Element {
     const dates: Date[] = generatePaddedMonth(prop.focus)
 
     function generateHandleOnDateClick(date: Date): () => void {
@@ -30,8 +34,10 @@ export function MonthlyCalendar(prop: { focus: Date, parentData?: DataWrapper<Da
         )
     })
     const dateSlots: JSX.Element[] = dates.map((date) => {
+        const highlight: boolean = areSameDate(date, new Date())
         return (
-            <CircledSlot text={date.getDate().toString()} key={getDayId(date)} handleOnClick={generateHandleOnDateClick(date)}/>
+            <CircledSlot text={date.getDate().toString()} key={getDayId(date)}
+                         handleOnClick={generateHandleOnDateClick(date)} highlight={highlight}/>
         )
     })
     return (
@@ -45,9 +51,14 @@ export function MonthlyCalendar(prop: { focus: Date, parentData?: DataWrapper<Da
     )
 }
 
-function CircledSlot(prop: { text: string, hint?: string, handleOnClick?: () => void }): JSX.Element {
+function CircledSlot(prop: {
+    text: string,
+    highlight?: boolean,
+    hint?: string,
+    handleOnClick?: () => void
+}): JSX.Element {
     return (
-        <button className={`w-fit ${Theme.button}`} onClick={prop.handleOnClick}>
+        <button className={`w-fit ${prop.highlight ? Theme.todayHighlight : undefined} ${Theme.button}`} onClick={prop.handleOnClick}>
             {prop.text}
         </button>
     )
