@@ -7,7 +7,7 @@ import {getElementHeight} from "@/app/utility/domUtil";
 import {Theme} from "@/app/theme";
 import {TimeAxis, TimeAxisUnit} from "@/app/elements/timeAxis";
 import {WeekNumber} from "@/app/elements/weekNumber";
-import {Pager} from "@/app/elements/pager";
+import {Pager} from "@/app/elements/ui/pager";
 import {DisplayContext} from "@/app/utility/windowManager";
 
 export function Calendar(prop: {

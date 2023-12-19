@@ -8,7 +8,7 @@ import {generateDates, generateFullWeekDays, rollDates} from "@/app/utility/time
 import {ControlButton} from "@/app/elements/ControlButton";
 import {DayCount} from "@/app/elements/dayCount";
 import {TodayButton} from "@/app/elements/todayButton";
-import {NavigationButtons} from "@/app/elements/navigationButtons";
+import {NavigationButtons} from "@/app/elements/ui/navigationButtons";
 import {Calendar} from "@/app/elements/calendar";
 import {Scheduler} from "@/app/utility/scheduler";
 import {CalendarEventExt} from "@/app/model/eventData";

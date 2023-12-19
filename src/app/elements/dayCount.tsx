@@ -1,6 +1,6 @@
 import React, {JSX, useState} from "react";
 import {Theme} from "@/app/theme";
-import {Choices} from "@/app/elements/choices";
+import {Choices} from "@/app/elements/ui/choices";
 
 export function DayCount(prop: {
     onChange: (count: number) => void

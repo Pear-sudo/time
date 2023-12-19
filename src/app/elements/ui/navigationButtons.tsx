@@ -1,5 +1,5 @@
 import React, {JSX} from "react";
-import {ImageButton} from "@/app/elements/imageButton";
+import {ImageButton} from "@/app/elements/ui/imageButton";
 import arrowPrev from "@/app/icons/arrow-prev-small.svg";
 import arrowNext from "@/app/icons/arrow-next-small.svg";
 
