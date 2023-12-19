@@ -39,7 +39,7 @@ export function YearHint(prop: {
                 {hint}
             </div>
         } child={
-            <MonthlyCalendar focus={prop.dates[0]} selfHider={setShowDropdown}/>
+            <MonthlyCalendar anchor={prop.dates[0]} selfHider={setShowDropdown}/>
         } show={showDropdown} onCancel={handleOnCancel}/>
     )
 

@@ -1,16 +1,19 @@
-import React, {JSX} from "react";
+import React, {JSX, useState} from "react";
 import {YearHint} from "@/app/elements/YearHint";
 import {Theme} from "@/app/theme";
-import {areSameDate, generatePaddedMonth, getDayId} from "@/app/utility/timeUtil";
+import {areSameDate, generatePaddedMonth, getDayId, getMonthBegin, rollDate} from "@/app/utility/timeUtil";
 import {DataWrapper} from "@/app/elements/inputs/helper/inputHelper";
 import {DisplayContextObj} from "@/app/model/displayContextObj";
+import {NavigationButtons} from "@/app/elements/ui/navigationButtons";
 
 export function MonthlyCalendar(prop: {
-    focus: Date,
+    anchor: Date,
     parentData?: DataWrapper<Date | undefined>,
     selfHider?: React.Dispatch<React.SetStateAction<boolean>>
 }): JSX.Element {
-    const dates: Date[] = generatePaddedMonth(prop.focus)
+    const [anchor, setAnchor] = useState(prop.anchor)
+
+    const dates: Date[] = generatePaddedMonth(anchor)
 
     function generateHandleOnDateClick(date: Date): () => void {
         return (
@@ -25,6 +28,15 @@ export function MonthlyCalendar(prop: {
                 }
             }
         )
+    }
+
+    function onNavigationButtonClick(next: boolean) {
+        const monthBegin = getMonthBegin(anchor)
+        if (next) {
+            setAnchor(rollDate(monthBegin, {month: 1}))
+        } else {
+            setAnchor(rollDate(monthBegin, {month: -1}))
+        }
     }
 
     const weekDayNameSlots: JSX.Element[] = dates.slice(0, 7).map((date) => {
@@ -42,7 +54,10 @@ export function MonthlyCalendar(prop: {
     })
     return (
         <div className={'bg-cyan-50 p-2 w-fit'}>
-            <YearHint dates={[prop.focus]} clickable={false}/>
+            <div className={'inline-flex flex-row items-center justify-between w-full'}>
+                <YearHint dates={[anchor]} clickable={false}/>
+                <NavigationButtons onClick={onNavigationButtonClick}/>
+            </div>
             <div className={'grid-cols-7 grid gap-x-10 w-fit overflow-auto'}>
                 {weekDayNameSlots}
                 {dateSlots}
