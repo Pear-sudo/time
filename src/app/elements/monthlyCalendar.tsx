@@ -58,7 +58,9 @@ export function MonthlyCalendar(prop: {
                 <YearHint dates={[anchor]} clickable={false}/>
                 <NavigationButtons onClick={onNavigationButtonClick}/>
             </div>
-            <div className={'grid-cols-7 grid gap-x-10 w-fit overflow-auto'}>
+            <div className={'grid gap-x-0.5 w-fit overflow-auto'}
+                 style={{gridTemplateColumns: 'repeat(7, 1fr)'}}
+            >
                 {weekDayNameSlots}
                 {dateSlots}
             </div>

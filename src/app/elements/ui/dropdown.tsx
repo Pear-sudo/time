@@ -14,8 +14,8 @@ export function Dropdown(prop: {
 
     const child = (
         <div className={'absolute top-full left-0 w-fit'}>
-            <div className={'relative z-50'}>
-                <div className={'z-50 relative'}>
+            <div className={'relative z-50 w-fit'}>
+                <div className={'z-50 relative w-fit'}>
                     {prop.child}
                 </div>
                 <div className={'z-40 fixed'}
@@ -25,7 +25,7 @@ export function Dropdown(prop: {
         </div>
     )
     return (
-        <div className={'relative h-fit'}>
+        <div className={'relative h-fit w-fit'}>
             {prop.parent}
             {prop.show ? child : undefined}
         </div>
