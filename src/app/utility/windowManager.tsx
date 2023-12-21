@@ -1,5 +1,6 @@
 import React, {JSX, useEffect, useMemo, useRef, useState} from "react";
 import {DisplayContextObj} from "@/app/model/displayContextObj";
+import {to} from "mathjs";
 
 // @ts-ignore
 export const DisplayContext = React.createContext<{ displayContextObj: DisplayContextObj, updateContext: React.Dispatch<React.SetStateAction<DisplayContextObj>> } >(undefined)
@@ -144,6 +145,8 @@ export class WindowManager {
 
     private registerWindowHeaderActivation() {
         const focused = Array.from(this.vMap.values()).pop()
+        let mouseCallback: (() => void) | undefined
+        let touchCallback: (() => void) | undefined
 
         if (focused && focused.windowHeaderActivation) {
             let activationRef = focused.windowHeaderActivation
@@ -164,11 +167,46 @@ export class WindowManager {
             window.addEventListener('mouseup', handleMouseUpGlobal);
             window.addEventListener('mousemove', handleOnMouseMoveGlobal)
 
-            return () => {
+            mouseCallback = () => {
                 window.removeEventListener('mouseup', handleMouseUpGlobal);
                 window.removeEventListener('mousemove', handleOnMouseMoveGlobal)
             };
         }
+
+        if (focused && focused.windowHeaderTouching) {
+            let touchingRef = focused.windowHeaderTouching
+
+            function handleTouchEndGlobal() {
+                if (touchingRef.current) {
+                    touchingRef.current = false
+                }
+            }
+
+            function handleTouchMoveGlobal(e: TouchEvent) {
+                if (touchingRef.current && focused) {
+                    const touch = e.touches[0]
+                    focused.setScreenX(touch.screenX)
+                    focused.setScreenY(touch.screenY)
+                }
+            }
+
+            window.addEventListener('touchend', handleTouchEndGlobal);
+            window.addEventListener('touchmove', handleTouchMoveGlobal)
+
+            touchCallback = () => {
+                window.removeEventListener('touchend', handleTouchEndGlobal);
+                window.removeEventListener('touchmove', handleTouchMoveGlobal)
+            };
+        }
+
+        return () => {
+            if (mouseCallback) {
+                mouseCallback()
+            }
+            if (touchCallback) {
+                touchCallback()
+            }
+        };
 
     }
 
@@ -246,6 +284,7 @@ class Win {
     }
 
     windowHeaderActivation: React.MutableRefObject<boolean> | undefined
+    windowHeaderTouching: React.MutableRefObject<boolean> | undefined
 
     private readonly _cTime: Date
     private readonly _op: CreateWindowOp
@@ -254,6 +293,9 @@ class Win {
     private _left: number = 0.5
     private _topSetter: React.Dispatch<React.SetStateAction<string>> | undefined
     private _leftSetter: React.Dispatch<React.SetStateAction<string>> | undefined
+
+    private screenY: number | undefined
+    private screenX: number | undefined
 
     get top(): string {
         return this._top * 100 + '%';
@@ -285,6 +327,24 @@ class Win {
     leftDelta(pixel: number) {
         const percentageDelta = pixel / window.innerWidth
         this.left = this._left + percentageDelta
+    }
+
+    setScreenY(y: number) {
+        if (this.screenY == undefined) {
+            this.screenY = y
+            return
+        }
+        this.topDelta(y - this.screenY)
+        this.screenY = y
+    }
+
+    setScreenX(x: number) {
+        if (this.screenX == undefined) {
+            this.screenX = x
+            return
+        }
+        this.leftDelta(x - this.screenX)
+        this.screenX = x
     }
 
     constructor(op: CreateWindowOp) {
@@ -343,16 +403,23 @@ function WindowView(prop: { win: Win, z: number, handleOutsideClick: (event: Rea
 
 function WindowHeader(prop: { win: Win }): JSX.Element {
     const isMouseDownRef = useRef(false)
+    const isTouching = useRef(false)
 
     const win = prop.win
     win.windowHeaderActivation = isMouseDownRef
+    win.windowHeaderTouching = isTouching
 
     function handleOnMouseDown() {
         isMouseDownRef.current = true
     }
 
+    function onTouchStart() {
+        isTouching.current = true
+    }
+
     return (
-        <div className={'w-full h-4 bg-gray-400 cursor-move'} onMouseDown={handleOnMouseDown}>
+        <div className={'w-full h-4 bg-gray-400 cursor-move'} onMouseDown={handleOnMouseDown}
+             onTouchStart={onTouchStart}>
         </div>
     )
 }
