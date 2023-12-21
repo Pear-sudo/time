@@ -6,7 +6,7 @@ import {Slot} from "@/app/elements/slot";
 import {isTail} from "@/app/utility/numberUtil";
 import {CurrentTimeLine} from "@/app/elements/currentTimeLine";
 import {DisplayContext} from "@/app/utility/windowManager";
-import {CalendarEvent} from "@/app/model/eventData";
+import {CalendarEvent, countOverlaps, IntervalStack, sortCalendarEvents} from "@/app/model/eventData";
 import {Theme} from "@/app/theme";
 import {Color} from "@/app/utility/color";
 import {CalendarEventCreatorWrapper} from "@/app/elements/calendarEventCreator";
@@ -136,7 +136,7 @@ export function DayContent(prop: {
         }
     }
 
-    function event2element(event: CalendarEvent, pending?: boolean): JSX.Element {
+    function event2element(event: CalendarEvent, pending?: boolean, overlapCount?: number, order?: number): JSX.Element {
         const height = getEventHeight(event)
         const topP = getEventTop(event)
         let color = event.color ? event.color : Theme.defaultEventColor
@@ -146,9 +146,24 @@ export function DayContent(prop: {
             // @ts-ignore
             color = Color.setColor(color._colorName)
         }
+
+        let width: string
+        overlapCount = overlapCount ? overlapCount : 1
+        width = 1 / overlapCount * 100 + "%"
+
+        let left: string
+        order = order ? order : 1
+        left = (order - 1) / overlapCount * 100 + "%"
+
         return (
-            <div className={'absolute w-full overflow-auto overscroll-contain'}
-                 style={{height: `${height}%`, top: `${topP}%`, backgroundColor: color.toCss()}}
+            <div className={'absolute overflow-auto overscroll-contain'}
+                 style={{
+                     height: `${height}%`,
+                     top: `${topP}%`,
+                     left: left,
+                     width: width,
+                     backgroundColor: color.toCss()
+                 }}
                  key={event.createTimestamp.valueOf()}
             >
                 <div className={'text-center text-sm'}>{event.title}</div>
@@ -160,9 +175,13 @@ export function DayContent(prop: {
     }
 
     function events2elements(events: CalendarEvent[]): JSX.Element[] {
+        const orderCounter = new IntervalStack()
         const elements: JSX.Element[] = []
-        for (const event of events) {
-            const element = event2element(event)
+        sortCalendarEvents(events)
+        const overlapCounts = countOverlaps(events)
+        for (const [index, event] of events.entries()) {
+            const order = orderCounter.countLayers(event)
+            const element = event2element(event, false, overlapCounts[index], order)
             elements.push(element)
         }
         return elements
@@ -187,7 +206,8 @@ export function DayContent(prop: {
 
     let slots: JSX.Element[] = []
     slots = repeatElements(24, (index) => <Slot id={index}
-                                                className={isTail(prop.index.index, prop.index.length) ? 'border-x' : 'border-l'} key={index}/>)
+                                                className={isTail(prop.index.index, prop.index.length) ? 'border-x' : 'border-l'}
+                                                key={index}/>)
 
     const timeLine: JSX.Element =
         <div className={'absolute left-0 w-full'} style={{top: '0%'}} ref={timeLineRef}>

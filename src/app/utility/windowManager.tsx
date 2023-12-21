@@ -1,6 +1,5 @@
 import React, {JSX, useEffect, useMemo, useRef, useState} from "react";
 import {DisplayContextObj} from "@/app/model/displayContextObj";
-import {to} from "mathjs";
 
 // @ts-ignore
 export const DisplayContext = React.createContext<{ displayContextObj: DisplayContextObj, updateContext: React.Dispatch<React.SetStateAction<DisplayContextObj>> } >(undefined)
