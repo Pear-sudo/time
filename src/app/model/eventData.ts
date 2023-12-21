@@ -160,9 +160,9 @@ export class CalendarEventCounter {
     processAll(events: CalendarEvent[]) {
         console.log(events.length)
         events = Array.from(events)
-        sortCalendarEvents(events, true)
+        sortCalendarEvents(events)
 
-        const first = events.pop()
+        const first = events.splice(0, 1)[0]
         if (!first) {
             return
         }
@@ -178,7 +178,6 @@ export class CalendarEventCounter {
             }
             this.wrappedEvents.push(newWe)
         }
-        console.log(this.wrappedEvents.length)
     }
 }
 
