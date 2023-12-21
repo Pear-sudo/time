@@ -179,6 +179,9 @@ export class WindowManager {
             function handleTouchEndGlobal() {
                 if (touchingRef.current) {
                     touchingRef.current = false
+                    if (focused) {
+                        focused.clearScreen()
+                    }
                 }
             }
 
@@ -345,6 +348,11 @@ class Win {
         }
         this.leftDelta(x - this.screenX)
         this.screenX = x
+    }
+
+    clearScreen() {
+        this.screenX = undefined
+        this.screenY = undefined
     }
 
     constructor(op: CreateWindowOp) {
