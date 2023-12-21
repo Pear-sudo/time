@@ -6,7 +6,13 @@ import {Slot} from "@/app/elements/slot";
 import {isTail} from "@/app/utility/numberUtil";
 import {CurrentTimeLine} from "@/app/elements/currentTimeLine";
 import {DisplayContext} from "@/app/utility/windowManager";
-import {CalendarEvent, countOverlaps, IntervalStack, sortCalendarEvents} from "@/app/model/eventData";
+import {
+    CalendarEvent,
+    CalendarEventCounter,
+    countOverlaps,
+    IntervalStack,
+    sortCalendarEvents
+} from "@/app/model/eventData";
 import {Theme} from "@/app/theme";
 import {Color} from "@/app/utility/color";
 import {CalendarEventCreatorWrapper} from "@/app/elements/calendarEventCreator";
@@ -175,13 +181,11 @@ export function DayContent(prop: {
     }
 
     function events2elements(events: CalendarEvent[]): JSX.Element[] {
-        const orderCounter = new IntervalStack()
         const elements: JSX.Element[] = []
-        sortCalendarEvents(events)
-        const overlapCounts = countOverlaps(events)
-        for (const [index, event] of events.entries()) {
-            const order = orderCounter.countLayers(event)
-            const element = event2element(event, false, overlapCounts[index], order)
+        const counter = new CalendarEventCounter()
+        counter.processAll(events)
+        for (const wrappedEvent of counter.wrappedEvents) {
+            const element = event2element(wrappedEvent.calendarEvent, false, wrappedEvent.counter.count, wrappedEvent.order)
             elements.push(element)
         }
         return elements

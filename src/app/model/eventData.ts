@@ -1,4 +1,5 @@
 import {Color} from "@/app/utility/color";
+import {number} from "fp-ts";
 
 export class CalendarEvent {
     // the standard iCalendar File Format: https://icalendar.org/
@@ -77,10 +78,15 @@ export function countOverlaps(events: CalendarEvent[]): number[] {
     return overlapCounts;
 }
 
-export function sortCalendarEvents(events: CalendarEvent[]) {
+export function sortCalendarEvents(events: CalendarEvent[], inverse?: boolean) {
     events.sort((a, b) => {
         // @ts-ignore
-        return a.begin.valueOf() - b.begin.valueOf()
+        const r = a.begin.valueOf() - b.begin.valueOf()
+        if (inverse) {
+            return -r
+        } else {
+            return r
+        }
     })
 }
 
@@ -107,6 +113,72 @@ export class IntervalStack {
         // @ts-ignore
         this.intervals.push(newInterval);
         return layers;
+    }
+}
+
+class OverlapCounter {
+    private _count: number
+
+    constructor(order: number) {
+        this._count = order
+    }
+
+    increment() {
+        this._count += 1
+    }
+
+    get count(): number {
+        return this._count;
+    }
+}
+
+export class CalendarEventWrapper {
+    calendarEvent: CalendarEvent
+    order = 1
+    counter = new OverlapCounter(1)
+
+    constructor(calendarEvent: CalendarEvent) {
+        this.calendarEvent = calendarEvent
+    }
+
+    isOverlap(wrapper: CalendarEventWrapper): boolean {
+        // @ts-ignore
+        if (!(wrapper.calendarEvent.end?.valueOf() <= this.calendarEvent.begin?.valueOf() || wrapper.calendarEvent.begin?.valueOf() >= this.calendarEvent.end?.valueOf())) {
+            wrapper.counter = this.counter
+            this.counter.increment()
+            wrapper.order = this.counter.count
+            return true
+        } else {
+            return false
+        }
+    }
+}
+
+export class CalendarEventCounter {
+    wrappedEvents: CalendarEventWrapper[] = []
+
+    processAll(events: CalendarEvent[]) {
+        console.log(events.length)
+        events = Array.from(events)
+        sortCalendarEvents(events, true)
+
+        const first = events.pop()
+        if (!first) {
+            return
+        }
+        this.wrappedEvents.push(new CalendarEventWrapper(first))
+
+        for (const e of events) {
+            const newWe = new CalendarEventWrapper(e)
+            for (const oldWe of this.wrappedEvents) {
+                const overlap = oldWe.isOverlap(newWe)
+                if (overlap) {
+                    break
+                }
+            }
+            this.wrappedEvents.push(newWe)
+        }
+        console.log(this.wrappedEvents.length)
     }
 }
 
