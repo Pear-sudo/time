@@ -13,7 +13,7 @@ export function Dropdown(prop: {
     }
 
     const child = (
-        <div className={'absolute top-full left-0 w-fit'}>
+        <div className={'absolute top-full left-0 w-fit rounded overflow-hidden'}>
             <div className={'relative z-50 w-fit'}>
                 <div className={'z-50 relative w-fit'}>
                     {prop.child}
