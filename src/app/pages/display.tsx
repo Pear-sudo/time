@@ -135,7 +135,7 @@ export function Display(): JSX.Element {
                 <NavigationButtons onClick={onNavigationButtonClick}/>
                 <YearHint dates={displayedDates} clickable={true}/>
             </div>
-            <div className={'mx-8 overflow-y-hidden'}>
+            <div className={'overflow-y-hidden'}>
                 <Calendar dates={displayedDates} events={{scrollToNow: selfEvents.current.onTodayButtonClick}}/>
             </div>
             <ControlButton/>

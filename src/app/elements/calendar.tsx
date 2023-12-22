@@ -87,7 +87,7 @@ export function Calendar(prop: {
     return (
         <div className={'flex-col inline-flex w-full h-full'}>
             <div
-                className={`flex-row inline-flex align-top grow-0 ${Theme.transition} ${changeHeaderBg ? Theme.headerBgScrolled : ''}`}>
+                className={`px-8 flex-row inline-flex align-top grow-0 ${Theme.transition} ${changeHeaderBg ? Theme.headerBgScrolled : ''}`}>
                 <div className={'invisible relative'}>
                     <div className={`${Theme.timeAxisAddonStyle}`}>
                         {<TimeAxisUnit time={hour2String(23)}/>}
@@ -100,7 +100,7 @@ export function Calendar(prop: {
                        mapData={mapDate2DayNumber}
                        hashData={getDayId} overScrollPercentage={overScrollPercentage}/>
             </div>
-            <div className={'flex-row inline-flex w-full overflow-y-auto grow'}
+            <div className={'px-8 flex-row inline-flex w-full overflow-y-auto grow'}
                  onScroll={handleOnScroll} ref={scrollableAreaRef}>
                 <div>
                     <TimeAxis height={height}/>
