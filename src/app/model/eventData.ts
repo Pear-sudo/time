@@ -158,7 +158,6 @@ export class CalendarEventCounter {
     wrappedEvents: CalendarEventWrapper[] = []
 
     processAll(events: CalendarEvent[]) {
-        console.log(events.length)
         events = Array.from(events)
         sortCalendarEvents(events)
 

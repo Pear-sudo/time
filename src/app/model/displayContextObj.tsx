@@ -2,6 +2,7 @@ import React from "react";
 import {cloneDeep} from "lodash"
 import {DataStore} from "@/app/model/DataStore";
 import {number} from "fp-ts";
+import {BehaviorSubject} from "rxjs";
 
 export class DisplayContextObj {
     get onDayCountOrAnchorChange(): ((count?: number, anchor?: Date) => void) | undefined {
@@ -86,11 +87,20 @@ export class DisplayContextObj {
     private _dataStore: DataStore = new DataStore()
     private _scrolledY: number = 0
     private _onDayCountOrAnchorChange: ((count?: number, anchor?: Date) => void) | undefined
+    private headerBgSubject: BehaviorSubject<boolean> = new BehaviorSubject<boolean>(false)
+
+    get headerBg$() {
+        return this.headerBgSubject.asObservable()
+    }
+
     get scrolledY(): number {
         return this._scrolledY;
     }
 
     set scrolledY(value: number) {
         this._scrolledY = value;
+        if (this.headerBgSubject.getValue() != value > 10) {
+            this.headerBgSubject.next(!this.headerBgSubject.getValue())
+        }
     }
 }

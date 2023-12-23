@@ -9,6 +9,7 @@ import {TimeAxis, TimeAxisUnit} from "@/app/elements/timeAxis";
 import {WeekNumber} from "@/app/elements/weekNumber";
 import {Pager} from "@/app/elements/ui/pager";
 import {DisplayContext} from "@/app/utility/windowManager";
+import {Subscription} from "rxjs";
 
 export function Calendar(prop: {
     dates: Date[],
@@ -26,14 +27,19 @@ export function Calendar(prop: {
     useEffect(() => {
         scrollToTimeline()
     }, []);
+    useEffect(() => {
+        const headerBgSubscription: Subscription = displayContextObj.headerBg$.subscribe(updateChangeHeaderBg)
+
+        return () => {
+            headerBgSubscription.unsubscribe()
+        }
+    }, [displayContextObj]);
 
     const height = 150
 
     const handleOnScroll = throttle((event: React.UIEvent<HTMLDivElement>): void => {
         const target = event.target as HTMLDivElement
-        const scrollTop = target.scrollTop
-        displayContextObj.scrolledY = scrollTop
-        updateChangeHeaderBg(scrollTop > 10)
+        displayContextObj.scrolledY = target.scrollTop
     }, 200)
 
     function mapDate2DayContent(date: Date, index: number, array: Date[], isInView: boolean): JSX.Element {
@@ -85,7 +91,7 @@ export function Calendar(prop: {
     }
 
     return (
-        <div className={'flex-col inline-flex w-full h-full'}>
+        <div className={'flex-col flex w-full h-full'}>
             <div
                 className={`px-8 flex-row inline-flex align-top grow-0 ${Theme.transition} ${changeHeaderBg ? Theme.headerBgScrolled : ''}`}>
                 <div className={'invisible relative'}>

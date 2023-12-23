@@ -1,6 +1,6 @@
 "use client"
 
-import React, {JSX, useEffect, useRef, useState} from "react";
+import React, {JSX, useContext, useEffect, useRef, useState} from "react";
 import '../index.css';
 import {throttle} from "lodash";
 import {YearHint} from "@/app/elements/YearHint";
@@ -13,14 +13,19 @@ import {Calendar} from "@/app/elements/calendar";
 import {Scheduler} from "@/app/utility/scheduler";
 import {CalendarEventExt} from "@/app/model/eventData";
 import {DisplayContextObj} from "@/app/model/displayContextObj";
+import {Theme} from "@/app/theme";
+import {DisplayContext} from "@/app/utility/windowManager";
+import {Subscription} from "rxjs";
 
 export function Display(): JSX.Element {
+    const {displayContextObj, updateContext} = useContext(DisplayContext)
     const [displayedDates, _updateDisplayedDates] = useState(generateFullWeekDays(new Date()))
     const displayedDatesRef = useRef(generateFullWeekDays(new Date()));
     const selfEvents = useRef({
         onTodayButtonClick: false
     });
     const selfRef = useRef<HTMLDivElement>(null);
+    const [changeHeaderBg, updateChangeHeaderBg,] = useState(false)
 
     useEffect(() => {
         window.addEventListener('resize', handleResizeThrottled)
@@ -36,8 +41,13 @@ export function Display(): JSX.Element {
     }, []);
 
     useEffect(() => {
+        const headerBgSubscription: Subscription = displayContextObj.headerBg$.subscribe(updateChangeHeaderBg)
 
-    }, []);
+        return () => {
+            headerBgSubscription.unsubscribe()
+        }
+        // the deps below is necessary
+    }, [displayContextObj]);
 
     useEffect(() => {
         // updateHeight()
@@ -129,7 +139,7 @@ export function Display(): JSX.Element {
     return (
         <div className={'w-full relative'} style={{display: 'grid', gridTemplateRows: 'auto 1fr', height: '100dvh'}}
              ref={selfRef}>
-            <div className={'inline-flex flex-row justify-center items-center'}>
+            <div className={`inline-flex flex-row justify-center items-center ${changeHeaderBg ? Theme.headerBgScrolled : ''}`}>
                 <DayCount onChange={onDayCountOrAnchorChange}/>
                 <TodayButton onClick={onTodayButtonClick}/>
                 <NavigationButtons onClick={onNavigationButtonClick}/>
