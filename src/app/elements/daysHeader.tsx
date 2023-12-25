@@ -9,7 +9,6 @@ import {DayNumber} from "@/app/elements/dayNumber";
 export function DaysHeader(prop: {
     dates: Date[],
     renderDates: Date[],
-    changeHeaderBg: boolean,
     overScrollPercentage: number
 }): JSX.Element {
     function mapDate2DayNumber(date: Date, index: number, array: Date[], isInView: boolean): JSX.Element {
@@ -20,7 +19,7 @@ export function DaysHeader(prop: {
 
     return (
         <div
-            className={`px-8 flex-row inline-flex align-top grow-0 ${Theme.transition} ${prop.changeHeaderBg ? Theme.headerBgScrolled : ''}`}>
+            className={`px-8 flex-row flex align-top grow-0 ${Theme.transition}`}>
             <div className={'invisible relative'}>
                 <div className={`${Theme.timeAxisAddonStyle}`}>
                     {<TimeAxisUnit time={hour2String(23)}/>}

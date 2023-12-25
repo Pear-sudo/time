@@ -16,6 +16,7 @@ import {DisplayContextObj} from "@/app/model/displayContextObj";
 import {Theme} from "@/app/theme";
 import {DisplayContext} from "@/app/utility/windowManager";
 import {Subscription} from "rxjs";
+import {DaysHeader} from "@/app/elements/daysHeader";
 
 export function Display(): JSX.Element {
     const {displayContextObj, updateContext} = useContext(DisplayContext)
@@ -56,7 +57,10 @@ export function Display(): JSX.Element {
     const displayContext = new DisplayContextObj()
 
     const scheduler = new Scheduler()
-    const rerenderTask: { date: Date, f: Function } = {date: new Date(new Date().setHours(23, 59, 59, 999)), f: taskRerender}
+    const rerenderTask: { date: Date, f: Function } = {
+        date: new Date(new Date().setHours(23, 59, 59, 999)),
+        f: taskRerender
+    }
 
     const tasks: { date: Date, f: Function }[] = [
         rerenderTask
@@ -134,23 +138,42 @@ export function Display(): JSX.Element {
         onDayCountOrAnchorChange(getDisplayedDates().length)
     }
 
+    function getRenderDates(dates: Date[]): Date[] {
+        return [...rollDates(dates, -1), ...dates, ...rollDates(dates, 1)]
+    }
+
     displayContext.onDayCountOrAnchorChange = onDayCountOrAnchorChange
 
+    const renderDates = getRenderDates(displayedDates)
+
+    let overScrollPercentage: number = -3 //-5
+    if (displayedDates.length === 1) {
+        overScrollPercentage = -0.5
+    }
+
     return (
-        <div className={'w-full relative'} style={{display: 'grid', gridTemplateRows: 'auto 1fr', height: '100dvh'}}
+        // the two overflow-y-hidden below have to be configured in that way; otherwise, either you won't be able to scroll or the drop-down menu is incomplete; why?
+        <div className={'w-full relative overflow-y-hidden'}
+             style={{display: 'grid', gridTemplateRows: 'auto 1fr', height: '100dvh'}}
              ref={selfRef}>
-            <div className={`inline-flex flex-row justify-center items-center ${changeHeaderBg ? Theme.headerBgScrolled : ''}`}>
-                <DayCount onChange={onDayCountOrAnchorChange}/>
-                <TodayButton onClick={onTodayButtonClick}/>
-                <NavigationButtons onClick={onNavigationButtonClick}/>
-                <YearHint dates={displayedDates} clickable={true}/>
+            <div className={`${changeHeaderBg ? Theme.headerBgScrolled : ''}`}>
+                <div
+                    className={`w-full inline-flex flex-row justify-center items-center`}>
+                    <DayCount onChange={onDayCountOrAnchorChange}/>
+                    <TodayButton onClick={onTodayButtonClick}/>
+                    <NavigationButtons onClick={onNavigationButtonClick}/>
+                    <YearHint dates={getDisplayedDates()} clickable={true}/>
+                </div>
+                <DaysHeader dates={getDisplayedDates()} renderDates={renderDates}
+                            overScrollPercentage={overScrollPercentage}/>
             </div>
             <div className={'overflow-y-hidden'}>
-                <Calendar dates={displayedDates} events={{scrollToNow: selfEvents.current.onTodayButtonClick}}/>
+                <Calendar dates={getDisplayedDates()} events={{scrollToNow: selfEvents.current.onTodayButtonClick}}
+                          overScrollPercentage={overScrollPercentage} renderDates={renderDates}/>
             </div>
             <ControlButton/>
         </div>
-)
+    )
 }
 
 function isMobileDevice() {
