@@ -154,7 +154,7 @@ export function Display(): JSX.Element {
     return (
         // the two overflow-y-hidden below have to be configured in that way; otherwise, either you won't be able to scroll or the drop-down menu is incomplete; why?
         <div className={'w-full relative overflow-y-hidden'}
-             style={{display: 'grid', gridTemplateRows: 'auto 1fr', height: '100dvh'}}
+             style={{display: 'grid', gridTemplateRows: 'auto 1fr', height: '100dvh', gridTemplateColumns: '100%'}}
              ref={selfRef}>
             <div className={`transition-colors ${changeHeaderBg ? Theme.headerBgScrolled : ''}`}>
                 <div
