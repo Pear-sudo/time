@@ -98,7 +98,7 @@ export class DisplayContextObj {
 
     set scrolledY(value: number) {
         this._scrolledY = value;
-        if (this.headerBgSubject.getValue() != value > 10) {
+        if (this.headerBgSubject.getValue() != value > 1) {
             this.headerBgSubject.next(!this.headerBgSubject.getValue())
         }
     }
