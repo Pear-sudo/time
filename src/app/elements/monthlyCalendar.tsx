@@ -75,7 +75,9 @@ function CircledSlot(prop: {
     handleOnClick?: () => void
 }): JSX.Element {
     return (
-        <button className={`w-fit ${prop.highlight ? Theme.todayHighlight : undefined} ${Theme.button}`} onClick={prop.handleOnClick}>
+        <button
+            className={`w-fit ${prop.highlight ? Theme.todayHighlight : undefined} ${prop.handleOnClick ? Theme.button : 'cursor-default px-2'}`}
+            onClick={prop.handleOnClick}>
             {prop.text}
         </button>
     )
