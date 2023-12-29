@@ -1,7 +1,7 @@
 import {CalendarEvent} from "@/app/model/eventData";
 import React, {JSX, useContext, useEffect, useRef, useState} from "react";
 import {DisplayContext, WindowController, WindowManager} from "@/app/utility/windowManager";
-import {Day, Time} from "@/app/utility/timeUtil";
+import {Day, rollDate, Time} from "@/app/utility/timeUtil";
 import {Color} from "@/app/utility/color";
 import {Theme} from "@/app/theme";
 import {ColorList, ColorRow} from "@/app/elements/colorList";
@@ -34,7 +34,7 @@ function CalendarEventCreator(prop: {
         if (prop.existingCE) {
             return prop.existingCE
         }
-        return new CalendarEvent()
+        return new CalendarEvent({begin: new Date(), end: rollDate(new Date(), {hour: 1})})
     }
 
     function handleOutsideClick(wc: WindowController, event: React.MouseEvent) {
