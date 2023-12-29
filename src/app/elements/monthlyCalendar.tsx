@@ -53,7 +53,7 @@ export function MonthlyCalendar(prop: {
         )
     })
     return (
-        <div className={'bg-cyan-50 p-2 w-fit'}>
+        <div className={'bg-cyan-50 p-2 w-full'}>
             <div className={'inline-flex flex-row items-center justify-between w-full'}>
                 <YearHint dates={[anchor]} clickable={false}/>
                 <NavigationButtons onClick={onNavigationButtonClick}/>
@@ -76,7 +76,7 @@ function CircledSlot(prop: {
 }): JSX.Element {
     return (
         <button
-            className={`w-fit ${prop.highlight ? Theme.todayHighlight : undefined} ${prop.handleOnClick ? Theme.button : 'cursor-default px-2'}`}
+            className={`max-w-full w-fit ${prop.highlight ? Theme.todayHighlight : undefined} ${prop.handleOnClick ? Theme.button : 'cursor-default px-2'}`}
             onClick={prop.handleOnClick}>
             {prop.text}
         </button>

@@ -159,10 +159,13 @@ export function Display(): JSX.Element {
             <div className={`transition-colors ${changeHeaderBg ? Theme.headerBgScrolled : ''}`}>
                 <div
                     className={`w-full inline-flex flex-row justify-center items-center`}>
+                    <div className={'flex-grow'}/>
                     <DayCount onChange={onDayCountOrAnchorChange}/>
                     <TodayButton onClick={onTodayButtonClick}/>
                     <NavigationButtons onClick={onNavigationButtonClick}/>
-                    <YearHint dates={getDisplayedDates()} clickable={true}/>
+                    <div className={'flex-grow'}>
+                        <YearHint dates={getDisplayedDates()} clickable={true}/>
+                    </div>
                 </div>
                 <DaysHeader dates={getDisplayedDates()} renderDates={renderDates}
                             overScrollPercentage={overScrollPercentage}/>

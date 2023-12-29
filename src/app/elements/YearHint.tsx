@@ -35,7 +35,7 @@ export function YearHint(prop: {
 
     const buttonView: JSX.Element = (
         <Dropdown parent={
-            <div className={`${Theme.button}`} onClick={handleOnClick}>
+            <div className={`${Theme.button} w-fit`} onClick={handleOnClick}>
                 {hint}
             </div>
         } child={
