@@ -3,11 +3,11 @@
 import React, {JSX, useContext, useEffect, useRef, useState} from "react";
 import '../index.css';
 import {throttle} from "lodash";
-import {YearHint} from "@/app/elements/YearHint";
+import {YearHint} from "@/app/elements/yearHint";
 import {generateDates, generateFullWeekDays, rollDates} from "@/app/utility/timeUtil";
 import {ControlButton} from "@/app/elements/ControlButton";
 import {DayCount} from "@/app/elements/dayCount";
-import {TodayButton} from "@/app/elements/todayButton";
+import {TextButton} from "@/app/elements/ui/buttons/textButton";
 import {NavigationButtons} from "@/app/elements/ui/navigationButtons";
 import {Calendar} from "@/app/elements/calendar";
 import {Scheduler} from "@/app/utility/scheduler";
@@ -161,7 +161,7 @@ export function Display(): JSX.Element {
                     className={`w-full inline-flex flex-row justify-center items-center`}>
                     <div className={'flex-grow'}/>
                     <DayCount onChange={onDayCountOrAnchorChange}/>
-                    <TodayButton onClick={onTodayButtonClick}/>
+                    <TextButton onClick={onTodayButtonClick} text={'Today'}/>
                     <NavigationButtons onClick={onNavigationButtonClick}/>
                     <div className={'flex-grow'}>
                         <YearHint dates={getDisplayedDates()} clickable={true}/>

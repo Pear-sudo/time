@@ -1,12 +1,13 @@
 import React, {JSX} from "react";
 import {Theme} from "@/app/theme";
 
-export function TodayButton(prop: {
+export function TextButton(prop: {
+    text: string,
     onClick?: () => void
 }): JSX.Element {
     return (
         <button onClick={prop.onClick} className={`${Theme.button}`}>
-            Today
+            {prop.text}
         </button>
     )
 }
