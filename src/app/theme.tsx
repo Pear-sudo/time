@@ -6,5 +6,5 @@ export class Theme {
     static transition: string = "transition-colors"
     static timeAxisAddonStyle: string = 'pr-1'
     static defaultEventColor: Color = Color.setColor("Banana")
-    static todayHighlight: string = "bg-sky-700 font-semibold text-white"
+    static buttonHighlighted: string = "bg-sky-700 font-semibold text-white px-2 hover:bg-sky-500 focus:ring focus:ring-gray-100 rounded active:bg-gray-300 focus:outline-none cursor-pointer"
 }
