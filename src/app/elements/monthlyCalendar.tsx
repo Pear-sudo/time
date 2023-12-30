@@ -1,5 +1,5 @@
-import React, {JSX, useState} from "react";
-import {YearHint} from "@/app/elements/YearHint";
+import React, {JSX, useEffect, useState} from "react";
+import {YearHint} from "@/app/elements/yearHint";
 import {Theme} from "@/app/theme";
 import {areSameDate, generatePaddedMonth, getDayId, getMonthBegin, rollDate} from "@/app/utility/timeUtil";
 import {DataWrapper} from "@/app/elements/inputs/helper/inputHelper";
@@ -12,6 +12,10 @@ export function MonthlyCalendar(prop: {
     selfHider?: React.Dispatch<React.SetStateAction<boolean>>
 }): JSX.Element {
     const [anchor, setAnchor] = useState(prop.anchor)
+    useEffect(() => {
+        // don't update in the main function, it will lead to infinite loop, since every update triggers a rerender, and this rerender will issue a new update
+        setAnchor(prop.anchor)
+    }, [prop.anchor]);
 
     const dates: Date[] = generatePaddedMonth(anchor)
 
