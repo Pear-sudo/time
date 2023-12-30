@@ -80,7 +80,7 @@ function CircledSlot(prop: {
 }): JSX.Element {
     return (
         <button
-            className={`max-w-full w-fit ${prop.highlight ? Theme.buttonHighlighted : Theme.button} ${prop.handleOnClick ? undefined : 'cursor-default px-2'}`}
+            className={`max-w-full w-fit ${prop.highlight ? Theme.buttonHighlighted : (prop.handleOnClick ? Theme.button : Theme.disabledButton)}`}
             onClick={prop.handleOnClick}>
             {prop.text}
         </button>
