@@ -44,7 +44,7 @@ export function YearHint(prop: {
     )
 
     const normalView: JSX.Element = (
-        <div className={`h-full`}>
+        <div className={`h-full select-none`}>
             {hint}
         </div>
     )

@@ -6,7 +6,7 @@ export function TimeAxisUnit(prop: {
     time: string
 }): JSX.Element {
     return (
-        <div className={'whitespace-nowrap text-xs w-fit'}>
+        <div className={'whitespace-nowrap text-xs w-fit select-none'}>
             {prop.time}
         </div>
     )
@@ -19,7 +19,7 @@ export function TimeAxis(prop: {
     for (let i = 0; i < 23; i++) {
         const s_time = hour2String(i + 1)
         elements.push(
-            <Slot id={i} className={'invisible'} time={<TimeAxisUnit time={s_time}/>} key={i}/>
+            <Slot id={i} className={'invisible select-none'} time={<TimeAxisUnit time={s_time}/>} key={i}/>
         )
     }
 
