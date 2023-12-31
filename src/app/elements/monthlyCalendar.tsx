@@ -57,7 +57,7 @@ export function MonthlyCalendar(prop: {
         )
     })
     return (
-        <div className={'bg-cyan-50 p-2 w-full'}>
+        <div className={`p-2 w-full`}>
             <div className={'inline-flex flex-row items-center justify-between w-full'}>
                 <YearHint dates={[anchor]} clickable={false}/>
                 <NavigationButtons onClick={onNavigationButtonClick}/>

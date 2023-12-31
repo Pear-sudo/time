@@ -1,4 +1,5 @@
 import React, {JSX, useEffect, useRef} from "react";
+import {Theme} from "@/app/theme";
 
 export function Dropdown(prop: {
     parent: JSX.Element,
@@ -45,7 +46,7 @@ export function Dropdown(prop: {
         <div ref={childRef}
              className={`absolute top-full w-fit rounded overflow-hidden ${prop.show ? 'visible' : 'hidden'}`}>
             <div className={'relative z-50 w-full'}>
-                <div className={'z-50 relative w-full'}>
+                <div className={`z-50 relative w-full ${Theme.bg2}`}>
                     {prop.child}
                 </div>
                 <div className={'z-40 fixed'}
