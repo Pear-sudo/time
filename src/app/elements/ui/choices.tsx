@@ -3,20 +3,14 @@ import {Theme} from "@/app/theme";
 
 export function Choices(prop: {
     elements: string[],
-    onIndexUpdate: (index: number) => void,
-    visible: boolean
+    onIndexUpdate: (index: number) => void
 }): JSX.Element {
     const elementsDivs: JSX.Element[] = []
-    let visible = prop.visible
 
     function onClick(index: number) {
         return (event: React.UIEvent<HTMLButtonElement>) => {
             prop.onIndexUpdate(index)
         }
-    }
-
-    function onCancel() {
-        prop.onIndexUpdate(-1)
     }
 
     for (let i = 0; i < prop.elements.length; i++) {
@@ -31,11 +25,8 @@ export function Choices(prop: {
 
     return (
         <div
-            className={`z-50 relative bg-cyan-50 rounded p-1 flex flex-col w-fit ${visible ? 'visible' : 'invisible'}`}>
+            className={`p-1 flex flex-col w-fit`}>
             {elementsDivs}
-            <div className={'z-40 fixed'}
-                 style={{width: '200vw', height: '200vh', left: '-100vw', top: '-100vh'}} onClick={onCancel}>
-            </div>
         </div>
     )
 }

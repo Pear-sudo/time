@@ -1,6 +1,7 @@
 import React, {JSX, useState} from "react";
 import {Theme} from "@/app/theme";
 import {Choices} from "@/app/elements/ui/choices";
+import {Dropdown} from "@/app/elements/ui/dropdown";
 
 export function DayCount(prop: {
     onChange: (count: number) => void
@@ -25,15 +26,17 @@ export function DayCount(prop: {
         prop.onChange(choicesN[index])
     }
 
+    const parent = (
+        <button className={`${Theme.button} h-full`} onClick={onClick}>
+            {choices[index]}
+        </button>
+    )
+
+    const child = (
+        <Choices elements={choices} onIndexUpdate={onIndexUpdate}/>
+    )
+
     return (
-        <div className={'h-full relative'}>
-            <button className={`${Theme.button} h-full`} onClick={onClick}>
-                {choices[index]}
-            </button>
-            {/* don't apply transform here, it will mess up z index in Choices */}
-            <div className={'absolute top-full left-0 w-fit'}>
-                <Choices elements={choices} onIndexUpdate={onIndexUpdate} visible={visible}/>
-            </div>
-        </div>
+        <Dropdown parent={parent} child={child} show={visible} onCancel={() => updateVisible(!visible)}/>
     )
 }
