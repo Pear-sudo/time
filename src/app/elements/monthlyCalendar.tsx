@@ -12,6 +12,7 @@ export function MonthlyCalendar(prop: {
     selfHider?: React.Dispatch<React.SetStateAction<boolean>>
 }): JSX.Element {
     const [anchor, setAnchor] = useState(prop.anchor)
+    const [focusedDate, setFocusedDate] = useState(new Date())
     useEffect(() => {
         // don't update in the main function, it will lead to infinite loop, since every update triggers a rerender, and this rerender will issue a new update
         setAnchor(prop.anchor)
@@ -19,9 +20,9 @@ export function MonthlyCalendar(prop: {
 
     const dates: Date[] = generatePaddedMonth(anchor)
 
-    function generateHandleOnDateClick(date: Date): () => void {
+    function generateHandleOnDateClick(date: Date): (event: React.MouseEvent<HTMLButtonElement>) => void {
         return (
-            function () {
+            function (event: React.MouseEvent<HTMLButtonElement>) {
                 prop.parentData?.setData(date)
                 const onDayCountOrAnchorChange = new DisplayContextObj().onDayCountOrAnchorChange
                 if (onDayCountOrAnchorChange) {
@@ -29,6 +30,8 @@ export function MonthlyCalendar(prop: {
                 }
                 if (prop.selfHider) {
                     prop.selfHider(false)
+                } else {
+                    setFocusedDate(date)
                 }
             }
         )
@@ -53,7 +56,7 @@ export function MonthlyCalendar(prop: {
         const highlight: boolean = areSameDate(date, new Date())
         return (
             <CircledSlot text={date.getDate().toString()} key={getDayId(date)}
-                         handleOnClick={generateHandleOnDateClick(date)} highlight={highlight}/>
+                         handleOnClick={generateHandleOnDateClick(date)} highlight={highlight} focused={areSameDate(date, focusedDate)}/>
         )
     })
     return (
@@ -75,12 +78,13 @@ export function MonthlyCalendar(prop: {
 function CircledSlot(prop: {
     text: string,
     highlight?: boolean,
+    focused?: boolean,
     hint?: string,
-    handleOnClick?: () => void
+    handleOnClick?: (event: React.MouseEvent<HTMLButtonElement>) => void
 }): JSX.Element {
     return (
         <button
-            className={`max-w-full w-fit ${prop.highlight ? Theme.buttonHighlighted : (prop.handleOnClick ? Theme.button : Theme.disabledButton)}`}
+            className={`max-w-full w-fit ${prop.highlight ? Theme.buttonHighlighted : (prop.handleOnClick ? Theme.button : Theme.disabledButton)} ${prop.focused ? Theme.highlightCircle : undefined}`}
             onClick={prop.handleOnClick}>
             {prop.text}
         </button>
