@@ -68,8 +68,8 @@ export function MonthlyCalendar(prop: {
         )
     })
     return (
-        <div className={`p-2 w-fit`}>
-            <div className={'inline-flex flex-row items-center justify-between w-full'}>
+        <div className={`w-fit`}>
+            <div className={'inline-flex flex-row items-center justify-between w-full px-2'}>
                 <div className={`flex ${prop.allowYearSelection ? Theme.button : undefined}`} onClick={handleYearSelectionClick}>
                     <YearHint dates={[anchor]} clickable={false}/>
                     <Image src={arrowDown} alt={"arrow down"}
@@ -77,7 +77,7 @@ export function MonthlyCalendar(prop: {
                 </div>
                 <NavigationButtons onClick={onNavigationButtonClick}/>
             </div>
-            <div className={'grid gap-x-0.5 w-fit overflow-auto'}
+            <div className={'grid gap-x-0.5 w-fit overflow-auto px-2 pb-2'}
                  style={{gridTemplateColumns: 'repeat(7, 1fr)'}}
             >
                 {weekDayNameSlots}
