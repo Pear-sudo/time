@@ -5,11 +5,14 @@ import {areSameDate, generatePaddedMonth, getDayId, getMonthBegin, rollDate} fro
 import {DataWrapper} from "@/app/elements/inputs/helper/inputHelper";
 import {DisplayContextObj} from "@/app/model/displayContextObj";
 import {NavigationButtons} from "@/app/elements/ui/navigationButtons";
+import Image from "next/image";
+import arrowDown from "@/app/icons/arrow-down.svg";
 
 export function MonthlyCalendar(prop: {
     anchor: Date,
     parentData?: DataWrapper<Date | undefined>,
-    selfHider?: React.Dispatch<React.SetStateAction<boolean>>
+    selfHider?: React.Dispatch<React.SetStateAction<boolean>>,
+    allowYearSelection?: boolean
 }): JSX.Element {
     const [anchor, setAnchor] = useState(prop.anchor)
     const [focusedDate, setFocusedDate] = useState(new Date())
@@ -46,6 +49,10 @@ export function MonthlyCalendar(prop: {
         }
     }
 
+    function handleYearSelectionClick() {
+
+    }
+
     const weekDayNameSlots: JSX.Element[] = dates.slice(0, 7).map((date) => {
         const text = new Intl.DateTimeFormat("en-US", {weekday: 'narrow'}).format(date)
         return (
@@ -56,13 +63,18 @@ export function MonthlyCalendar(prop: {
         const highlight: boolean = areSameDate(date, new Date())
         return (
             <CircledSlot text={date.getDate().toString()} key={getDayId(date)}
-                         handleOnClick={generateHandleOnDateClick(date)} highlight={highlight} focused={areSameDate(date, focusedDate)}/>
+                         handleOnClick={generateHandleOnDateClick(date)} highlight={highlight}
+                         focused={areSameDate(date, focusedDate)}/>
         )
     })
     return (
-        <div className={`p-2 w-full`}>
+        <div className={`p-2 w-fit`}>
             <div className={'inline-flex flex-row items-center justify-between w-full'}>
-                <YearHint dates={[anchor]} clickable={false}/>
+                <div className={`flex ${prop.allowYearSelection ? Theme.button : undefined}`} onClick={handleYearSelectionClick}>
+                    <YearHint dates={[anchor]} clickable={false}/>
+                    <Image src={arrowDown} alt={"arrow down"}
+                           className={`h-full ${prop.allowYearSelection ? undefined : 'hidden'}`}/>
+                </div>
                 <NavigationButtons onClick={onNavigationButtonClick}/>
             </div>
             <div className={'grid gap-x-0.5 w-fit overflow-auto'}
