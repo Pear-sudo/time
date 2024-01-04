@@ -1,6 +1,6 @@
 import {JSX} from "react";
 
-export function DateDisplay(prop: {date: Date}): JSX.Element {
+export function DateDisplay(prop: {date: Date}, year: boolean = true, month: boolean = true, day: boolean = false): JSX.Element {
     const date = prop.date
     const yearStr = new Intl.DateTimeFormat("en-US", {year: 'numeric'}).format(date)
     const monthStr = new Intl.DateTimeFormat("en-US", {month: 'short'}).format(date)
