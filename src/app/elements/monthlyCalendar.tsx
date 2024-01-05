@@ -10,15 +10,17 @@ import arrowDown from "@/app/icons/arrow-down.svg";
 
 export function MonthlyCalendar(prop: {
     anchor: Date,
-    parentData?: DataWrapper<Date | undefined>,
+    parentData?: DataWrapper<Date>,
     selfHider?: React.Dispatch<React.SetStateAction<boolean>>,
+    updateGlobalAnchor?: boolean,
     allowYearSelection?: boolean
 }): JSX.Element {
     const [anchor, setAnchor] = useState(prop.anchor)
-    const [focusedDate, setFocusedDate] = useState(new Date())
+    const [focusedDate, setSelectedDate] = useState(prop.anchor)
     useEffect(() => {
         // don't update in the main function, it will lead to infinite loop, since every update triggers a rerender, and this rerender will issue a new update
         setAnchor(prop.anchor)
+        setSelectedDate(prop.anchor)
     }, [prop.anchor]);
 
     const dates: Date[] = generatePaddedMonth(anchor)
@@ -28,13 +30,13 @@ export function MonthlyCalendar(prop: {
             function (event: React.MouseEvent<HTMLButtonElement>) {
                 prop.parentData?.setData(date)
                 const onDayCountOrAnchorChange = new DisplayContextObj().onDayCountOrAnchorChange
-                if (onDayCountOrAnchorChange) {
+                if (prop.updateGlobalAnchor && onDayCountOrAnchorChange) {
                     onDayCountOrAnchorChange(undefined, date)
                 }
                 if (prop.selfHider) {
                     prop.selfHider(false)
                 } else {
-                    setFocusedDate(date)
+                    setSelectedDate(date)
                 }
             }
         )

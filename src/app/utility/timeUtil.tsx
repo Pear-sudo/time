@@ -181,7 +181,7 @@ export function getDayId(date: Date): string {
     return id
 }
 
-function includeDate(date: Date, dates: Date[]): boolean {
+export function includeDate(date: Date, dates: Date[]): boolean {
     const ids = dates.map((d) => getDayId(d))
     return ids.includes(getDayId(date))
 }

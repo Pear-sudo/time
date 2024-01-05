@@ -2,6 +2,7 @@ import React, {JSX, useState} from "react";
 import {Theme} from "@/app/theme";
 import {Dropdown} from "@/app/elements/ui/dropdown";
 import {MonthlyCalendar} from "@/app/elements/monthlyCalendar";
+import {includeDate} from "@/app/utility/timeUtil";
 
 export function YearHint(prop: {
     dates: Date[],
@@ -39,7 +40,7 @@ export function YearHint(prop: {
                 {hint}
             </div>
         } child={
-            <MonthlyCalendar anchor={prop.dates[0]} selfHider={setShowDropdown}/>
+            <MonthlyCalendar anchor={includeDate(new Date(), prop.dates) ? new Date() : prop.dates[0]} selfHider={setShowDropdown} updateGlobalAnchor={true}/>
         } show={showDropdown} onCancel={handleOnCancel}/>
     )
 
