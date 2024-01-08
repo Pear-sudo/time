@@ -21,21 +21,37 @@ export class StateClass<T> implements DataWrapper<T>, DataInterception<T> {
     private readonly state: T
     private readonly stateSetter: React.Dispatch<React.SetStateAction<T>>
 
-    constructor(state: T, stateSetter: React.Dispatch<React.SetStateAction<T>>) {
+    constructor(state: T,
+                stateSetter: React.Dispatch<React.SetStateAction<T>>,
+                willSet?: (newValue: T, oldValue: T) => void | undefined | T,
+                didSet?: (newValue: T, oldValue: T) => void | undefined | T) {
         this.state = state
         this.stateSetter = stateSetter
+        if (willSet) {
+            this.willSet = willSet
+        }
+        if (didSet) {
+            this.didSet = didSet
+        }
     }
 
     getData(): T {
         return this.state;
     }
 
-    setData(data: T): void {
-        this.stateSetter(data)
-        this.afterSet(data)
+    setData(newValue: T): void {
+        const oldValue = this.state
+        this.willSet(newValue, oldValue)
+        this.stateSetter(newValue)
+        this.didSet(newValue, oldValue)
     }
 
-    afterSet(data: T): void {
+    didSet(newValue: T, oldValue: T): void | undefined | T {
+        return undefined;
+    }
+
+    willSet(newValue: T, oldValue: T): void | undefined | T {
+        return undefined;
     }
 }
 
@@ -45,7 +61,8 @@ export interface DataWrapper<T> {
 }
 
 export interface DataInterception<T> {
-    afterSet: (data: T) => void
+    willSet: (newValue: T, oldValue: T) => T | undefined | void,
+    didSet: (newValue: T, oldValue: T) => T | undefined | void
 }
 
 export enum PopupResult {
