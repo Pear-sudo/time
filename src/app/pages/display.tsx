@@ -164,7 +164,7 @@ export function Display(): JSX.Element {
                     <TextButton onClick={onTodayButtonClick} text={'Today'}/>
                     <NavigationButtons onClick={onNavigationButtonClick}/>
                     <div className={'flex-grow'}>
-                        <YearHint dates={getDisplayedDates()} clickable={true}/>
+                        <YearHint dates={getDisplayedDates()} hasMonthlyCalendar={true}/>
                     </div>
                 </div>
                 <DaysHeader dates={getDisplayedDates()} renderDates={renderDates}

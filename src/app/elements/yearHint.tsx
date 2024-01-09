@@ -6,7 +6,7 @@ import {includeDate} from "@/app/utility/timeUtil";
 
 export function YearHint(prop: {
     dates: Date[],
-    clickable?: boolean
+    hasMonthlyCalendar?: boolean
 }): JSX.Element {
     const [showDropdown, setShowDropdown] = useState(false)
     let hint: string = ''
@@ -34,13 +34,15 @@ export function YearHint(prop: {
         setShowDropdown(false)
     }
 
+    const initialSelection = includeDate(new Date(), prop.dates) ? new Date() : prop.dates[0]
+
     const buttonView: JSX.Element = (
         <Dropdown parent={
             <div className={`${Theme.button} w-fit`} onClick={handleOnClick}>
                 {hint}
             </div>
         } child={
-            <MonthlyCalendar anchor={includeDate(new Date(), prop.dates) ? new Date() : prop.dates[0]} selfHider={setShowDropdown} updateGlobalAnchor={true}/>
+            <MonthlyCalendar initialSelection={initialSelection} selfHider={setShowDropdown} updateGlobalAnchor={true} allowYearSelection={true}/>
         } show={showDropdown} onCancel={handleOnCancel}/>
     )
 
@@ -55,6 +57,6 @@ export function YearHint(prop: {
     }
 
     return (
-        prop.clickable ? buttonView : normalView
+        prop.hasMonthlyCalendar ? buttonView : normalView
     )
 }
