@@ -45,8 +45,12 @@ export function YearSelector(prop: {
     })
 
     return (
-        <div className={'grid justify-center'} style={{gridTemplateColumns: "repeat(auto-fill, 100px)"}}>
-            {yearElements}
+        // let the top level div height be constrained
+        <div className={'overflow-y-scroll h-full'}>
+            {/* let the following element overflow */}
+            <div className={'grid justify-center'} style={{gridTemplateColumns: "repeat(auto-fill, 100px)"}}>
+                {yearElements}
+            </div>
         </div>
     )
 }

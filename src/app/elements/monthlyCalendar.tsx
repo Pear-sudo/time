@@ -92,7 +92,8 @@ export function MonthlyCalendar(prop: {
                 {weekDayNameSlots}
                 {dateSlots}
             </div>
-            <div className={`${showYearSelector ? undefined : 'hidden'} flex-shrink min-h-0 overflow-y-scroll`}>
+            {/* You must set flexBasis below. Because its child's 100% height would refer to this element's basis (that is, full size of the child) if flexBasis is not set. If flexBasis is set to a fixed number, it would refer to the element's height after shrinkage. So weird. My fault or the browser's bug? */}
+            <div className={`${showYearSelector ? '' : 'hidden'} flex-shrink min-h-0`} style={{flexBasis: "1000px"}}>
                 <YearSelector selectedYear={selectedDate} parentData={new StateClass(selectedDate, setSelectedDate, undefined, didSet)}/>
             </div>
         </div>
