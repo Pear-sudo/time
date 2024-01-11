@@ -1,7 +1,8 @@
-import {JSX, useEffect, useState} from "react";
+import {JSX, useEffect, useRef, useState} from "react";
 import {rollDate} from "@/app/utility/timeUtil";
 import {TextButton} from "@/app/elements/ui/buttons/textButton";
 import {DataWrapper} from "@/app/elements/inputs/helper/inputHelper";
+import {isSafari} from "@/app/utility/userUtil";
 
 export function YearSelector(prop: {
     selectedYear: Date,
@@ -10,9 +11,19 @@ export function YearSelector(prop: {
     parentData?: DataWrapper<Date>
 }): JSX.Element {
     const [focusedYear, setFocusedYear] = useState(prop.selectedYear.getFullYear())
+    const selfRef = useRef<HTMLDivElement>(null);
     useEffect(() => {
         setFocusedYear(prop.selectedYear.getFullYear())
     }, [prop.selectedYear]);
+    useEffect(() => {
+        if (isSafari() && selfRef.current) {
+            const selfDiv = selfRef.current
+            const parentDiv = selfDiv.parentElement
+            if (parentDiv) {
+                selfDiv.style.height = parentDiv.getBoundingClientRect().height + 'px'
+            }
+        }
+    });
 
     const from = prop.from ?? new Date(1900, 1)
     const to = prop.to ?? new Date(2100, 1)
@@ -46,7 +57,7 @@ export function YearSelector(prop: {
 
     return (
         // let the top level div height be constrained
-        <div className={'overflow-y-scroll h-full'}>
+        <div className={'overflow-y-scroll h-full'} ref={selfRef}>
             {/* let the following element overflow */}
             <div className={'grid justify-center'} style={{gridTemplateColumns: "repeat(auto-fill, 100px)"}}>
                 {yearElements}

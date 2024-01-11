@@ -79,7 +79,8 @@ export function MonthlyCalendar(prop: {
     return (
         <div className={`w-fit flex flex-col`} style={{maxHeight: '50dvh'}}>
             <div className={'inline-flex flex-row items-center justify-between w-full px-2 flex-grow-0 flex-shrink-0'}>
-                <div className={`flex ${prop.allowYearSelection ? Theme.button : undefined}`} onClick={handleYearSelectionClick}>
+                <div className={`flex ${prop.allowYearSelection ? Theme.button : undefined}`}
+                     onClick={handleYearSelectionClick}>
                     <YearHint dates={[anchor]} hasMonthlyCalendar={false}/>
                     <Image src={arrowDown} alt={"arrow down"}
                            className={`h-full ${prop.allowYearSelection ? undefined : 'hidden'}`}/>
@@ -92,9 +93,16 @@ export function MonthlyCalendar(prop: {
                 {weekDayNameSlots}
                 {dateSlots}
             </div>
-            {/* You must set flexBasis below. Because its child's 100% height would refer to this element's basis (that is, full size of the child) if flexBasis is not set. If flexBasis is set to a fixed number, it would refer to the element's height after shrinkage. So weird. My fault or the browser's bug? */}
+            {/* You must set flexBasis below.
+                Because its child's 100% height would refer to this element's basis (that is, full size of the child) if flexBasis is not set.
+                If flexBasis is set to a fixed number, it would refer to the element's height after shrinkage. So weird.
+                My fault or the browser's bug?
+                This only works for firefox and chrome but not for Safari, I believe this is a bug in the web engine.
+                The project's layout is becoming increasingly complex!
+            */}
             <div className={`${showYearSelector ? '' : 'hidden'} flex-shrink min-h-0`} style={{flexBasis: "1000px"}}>
-                <YearSelector selectedYear={selectedDate} parentData={new StateClass(selectedDate, setSelectedDate, undefined, didSet)}/>
+                <YearSelector selectedYear={selectedDate}
+                              parentData={new StateClass(selectedDate, setSelectedDate, undefined, didSet)}/>
             </div>
         </div>
     )
