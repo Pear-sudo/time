@@ -45,7 +45,7 @@ export function YearSelector(prop: {
     })
 
     return (
-        <div className={'grid'} style={{gridTemplateColumns: "repeat(auto-fill, 100px)"}}>
+        <div className={'grid justify-center'} style={{gridTemplateColumns: "repeat(auto-fill, 100px)"}}>
             {yearElements}
         </div>
     )
