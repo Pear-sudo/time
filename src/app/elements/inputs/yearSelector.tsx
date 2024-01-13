@@ -12,6 +12,7 @@ export function YearSelector(prop: {
 }): JSX.Element {
     const [focusedYear, setFocusedYear] = useState(prop.selectedYear.getFullYear())
     const selfRef = useRef<HTMLDivElement>(null);
+    const scrollToYearRef = useRef<HTMLDivElement>(null);
     useEffect(() => {
         setFocusedYear(prop.selectedYear.getFullYear())
     }, [prop.selectedYear]);
@@ -22,6 +23,12 @@ export function YearSelector(prop: {
             if (parentDiv) {
                 selfDiv.style.height = parentDiv.getBoundingClientRect().height + 'px'
             }
+        }
+    });
+    useEffect(() => {
+        const currentYearButton = scrollToYearRef.current
+        if (currentYearButton) {
+            currentYearButton.scrollIntoView({behavior: 'instant', block: 'center'})
         }
     });
 
@@ -49,9 +56,20 @@ export function YearSelector(prop: {
     }
 
     const yearElements: JSX.Element[] = years.map(year => {
+        const scrollToYear = year == focusedYear
+        if (scrollToYear) {
+            return (
+                <div ref={scrollToYearRef} className={'w-fit'} key={year}>
+                    <TextButton text={year.toString()} highlight={year == new Date().getFullYear()}
+                                focused={year == focusedYear} onClick={generateHandleOnClick(year)}/>
+                </div>
+            )
+        }
         return (
-            <TextButton text={year.toString()} key={year} highlight={year == new Date().getFullYear()}
-                        focused={year == focusedYear} onClick={generateHandleOnClick(year)}/>
+            <div className={'w-fit'} key={year}>
+                <TextButton text={year.toString()} highlight={year == new Date().getFullYear()}
+                            focused={year == focusedYear} onClick={generateHandleOnClick(year)}/>
+            </div>
         )
     })
 
@@ -59,7 +77,8 @@ export function YearSelector(prop: {
         // let the top level div height be constrained
         <div className={'overflow-y-scroll h-full'} ref={selfRef}>
             {/* let the following element overflow */}
-            <div className={'grid justify-center'} style={{gridTemplateColumns: "repeat(auto-fill, 100px)"}}>
+            <div className={'grid justify-center justify-items-center'}
+                 style={{gridTemplateColumns: "repeat(auto-fill, 100px)"}}>
                 {yearElements}
             </div>
         </div>
