@@ -58,10 +58,6 @@ export function MonthlyCalendar(prop: {
         setShowYearSelector(!showYearSelector)
     }
 
-    function didSet(newValue: Date, oldValue: Date) {
-        setAnchor(newValue)
-    }
-
     const weekDayNameSlots: JSX.Element[] = dates.slice(0, 7).map((date) => {
         const text = new Intl.DateTimeFormat("en-US", {weekday: 'narrow'}).format(date)
         return (
@@ -101,8 +97,8 @@ export function MonthlyCalendar(prop: {
                 The project's layout is becoming increasingly complex!
             */}
             <div className={`${showYearSelector ? '' : 'hidden'} flex-shrink min-h-0`} style={{flexBasis: "1000px"}}>
-                <YearSelector selectedYear={selectedDate}
-                              parentData={new StateClass(selectedDate, setSelectedDate, undefined, didSet)}/>
+                <YearSelector selectedYear={anchor}
+                              parentData={new StateClass(anchor, setAnchor, undefined, undefined)}/>
             </div>
         </div>
     )
