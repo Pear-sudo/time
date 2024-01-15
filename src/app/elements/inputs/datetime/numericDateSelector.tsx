@@ -3,7 +3,7 @@ import React, {JSX, useRef} from "react";
 import {Day} from "@/app/utility/timeUtil";
 import {NumberInput} from "@/app/elements/inputs/numberInput";
 
-export function DateSelector(prop: {
+export function NumericDateSelector(prop: {
     callback?: (day: Date) => void,
     default?: Date,
     parentData?: DataWrapper<Date | undefined>

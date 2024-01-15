@@ -7,7 +7,7 @@ import {DisplayContextObj} from "@/app/model/displayContextObj";
 import {NavigationButtons} from "@/app/elements/ui/navigationButtons";
 import Image from "next/image";
 import arrowDown from "@/app/icons/arrow-down.svg";
-import {YearSelector} from "@/app/elements/inputs/yearSelector";
+import {YearSelector} from "@/app/elements/inputs/datetime/yearSelector";
 
 export function MonthlyCalendar(prop: {
     initialSelection: Date,

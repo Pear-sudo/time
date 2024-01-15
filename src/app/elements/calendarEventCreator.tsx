@@ -6,7 +6,7 @@ import {Color} from "@/app/utility/color";
 import {Theme} from "@/app/theme";
 import {ColorList, ColorRow} from "@/app/elements/colorList";
 import {TextInput} from "@/app/elements/inputs/textInput";
-import {DateTimeSelector} from "@/app/elements/inputs/datetimeSelector";
+import {DateTimeSelector} from "@/app/elements/inputs/datetime/datetimeSelector";
 
 import {PopupResult, RefClass, StateClass} from "@/app/elements/inputs/helper/inputHelper";
 

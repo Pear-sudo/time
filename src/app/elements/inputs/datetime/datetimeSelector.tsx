@@ -1,8 +1,8 @@
 import React, {JSX} from "react";
 
 import {DataWrapper} from "@/app/elements/inputs/helper/inputHelper";
-import {TimeSelector} from "@/app/elements/inputs/timeSelector";
-import {DateSelector} from "@/app/elements/inputs/dateSelector";
+import {TimeSelector} from "@/app/elements/inputs/datetime/timeSelector";
+import {NumericDateSelector} from "@/app/elements/inputs/datetime/numericDateSelector";
 
 export function DateTimeSelector(prop: {
     callback?: (time: Date) => void,
@@ -11,7 +11,7 @@ export function DateTimeSelector(prop: {
 }): JSX.Element {
     return (
         <span>
-            <DateSelector
+            <NumericDateSelector
                 default={prop.default}
                 callback={prop.callback}
                 parentData={prop.parentData}
