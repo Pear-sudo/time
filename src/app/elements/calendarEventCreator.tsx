@@ -9,6 +9,7 @@ import {TextInput} from "@/app/elements/inputs/textInput";
 import {DateTimeSelector} from "@/app/elements/inputs/datetime/datetimeSelector";
 
 import {PopupResult, RefClass, StateClass} from "@/app/elements/inputs/helper/inputHelper";
+import moment from "moment";
 
 function CalendarEventCreator(prop: {
     callback?: (result: PopupResult, data: any) => void,
@@ -68,6 +69,12 @@ function CalendarEventCreator(prop: {
             return
         } else {
             hint()
+        }
+
+        const delta = moment.duration(calendarEvent.end.valueOf() - calendarEvent.begin.valueOf())
+        if (delta.asWeeks() >= 1) {
+            hint(`Duration too long (${delta.asDays().toFixed(1)} days), max duration is a week.`)
+            return
         }
 
         displayContextObj.dataStore.update(calendarEvent)
