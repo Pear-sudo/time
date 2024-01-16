@@ -245,3 +245,11 @@ export function percentage2Date(date: Date, percentage: number) {
     const adjustedMilli = getBeginningOfDay(date).valueOf() + passedMilli
     return new Date(adjustedMilli)
 }
+
+export function set2SameDay(reference: Date, target: Date): Date {
+    // I intentionally choose not create a new date object. Use this function carefully !!!
+    reference.setFullYear(target.getFullYear())
+    reference.setMonth(target.getMonth())
+    reference.setDate(target.getDate())
+    return reference
+}

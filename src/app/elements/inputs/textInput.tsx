@@ -5,7 +5,7 @@ import {DataWrapper} from "@/app/elements/inputs/helper/inputHelper";
 export function TextInput(prop: {
     label?: string,
     placeholder?: string,
-    parentData?: DataWrapper<string | undefined>
+    parentData?: DataWrapper<string>
 }): JSX.Element {
     const id = useId()
     const inputRef = useRef<HTMLTextAreaElement>(null);

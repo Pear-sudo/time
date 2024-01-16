@@ -55,7 +55,9 @@ export function MonthlyCalendar(prop: {
     }
 
     function handleYearSelectionClick() {
-        setShowYearSelector(!showYearSelector)
+        if (prop.allowYearSelection) {
+            setShowYearSelector(!showYearSelector)
+        }
     }
 
     const weekDayNameSlots: JSX.Element[] = dates.slice(0, 7).map((date) => {
@@ -98,7 +100,7 @@ export function MonthlyCalendar(prop: {
             */}
             <div className={`${showYearSelector ? '' : 'hidden'} flex-shrink min-h-0`} style={{flexBasis: "1000px"}}>
                 <YearSelector selectedYear={anchor}
-                              parentData={new StateClass(anchor, setAnchor, undefined, undefined)}/>
+                              parentData={new StateClass(anchor, setAnchor)}/>
             </div>
         </div>
     )

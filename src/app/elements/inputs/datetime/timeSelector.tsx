@@ -4,9 +4,8 @@ import {Time} from "@/app/utility/timeUtil";
 import {NumberInput} from "@/app/elements/inputs/numberInput";
 
 export function TimeSelector(prop: {
-    callback?: (time: Date) => void,
     default?: Date,
-    parentData?: DataWrapper<Date | undefined>
+    parentData?: DataWrapper<Date> | DataWrapper<Date | undefined>
 }): JSX.Element {
     const timeRef = useRef<Date>(prop.default ? prop.default : new Date());
 
@@ -32,9 +31,6 @@ export function TimeSelector(prop: {
     function pass2Parent() {
         if (prop.parentData) {
             prop.parentData.setData(timeRef.current)
-        }
-        if (prop.callback) {
-            prop.callback(timeRef.current)
         }
     }
 

@@ -1,7 +1,7 @@
 import {CalendarEvent} from "@/app/model/eventData";
 import React, {JSX, useContext, useEffect, useRef, useState} from "react";
 import {DisplayContext, WindowController, WindowManager} from "@/app/utility/windowManager";
-import {Day, rollDate, Time} from "@/app/utility/timeUtil";
+import {rollDate} from "@/app/utility/timeUtil";
 import {Color} from "@/app/utility/color";
 import {Theme} from "@/app/theme";
 import {ColorList, ColorRow} from "@/app/elements/colorList";
@@ -20,6 +20,7 @@ function CalendarEventCreator(prop: {
 
     const calendarEventRef = useRef(initCalendarEvent());
 
+    // for this to work, you cannot assign a new data to it but change the value of the existing date object!
     const beginDTRef = useRef(calendarEventRef.current.begin);
     const endDTRef = useRef(calendarEventRef.current.end);
 
@@ -45,22 +46,6 @@ function CalendarEventCreator(prop: {
         if (prop.pending) {
             displayContextObj.dataStoreUpdatedTime = new Date()
         }
-    }
-
-    function handleTimeSelectorCallback(ref: React.MutableRefObject<Time | undefined>) {
-        return (
-            (time: Time) => {
-                ref.current = time
-            }
-        )
-    }
-
-    function handleDaySelectorCallback(ref: React.MutableRefObject<Day | undefined>) {
-        return (
-            (day: Day) => {
-                ref.current = day
-            }
-        )
     }
 
     function handleCreate(event: React.MouseEvent) {
@@ -155,7 +140,7 @@ function CalendarEventCreator(prop: {
             <span className={'whitespace-nowrap'}>
                     Begin:
                 <DateTimeSelector
-                    parentData={new RefClass<Date>(beginDTRef)}
+                    parentData={new RefClass(beginDTRef)}
                     default={beginDTRef.current}
                 />
                 </span>
@@ -163,7 +148,7 @@ function CalendarEventCreator(prop: {
             <span className={'whitespace-nowrap'}>
                     End:
                     <DateTimeSelector
-                        parentData={new RefClass<Date>(endDTRef)}
+                        parentData={new RefClass(endDTRef)}
                         default={endDTRef.current}
                     />
                 </span>
