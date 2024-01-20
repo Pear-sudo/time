@@ -1,7 +1,7 @@
 import React, {JSX} from "react";
 
 import {DataWrapper} from "@/app/elements/inputs/helper/inputHelper";
-import {TimeSelector} from "@/app/elements/inputs/datetime/timeSelector";
+import {NumericTimeSelector} from "@/app/elements/inputs/datetime/numericTimeSelector";
 import {DateSelector} from "@/app/elements/inputs/datetime/dateSelector";
 
 export function DateTimeSelector(prop: {
@@ -16,7 +16,7 @@ export function DateTimeSelector(prop: {
                 parentData={prop.parentData}
             />
             &nbsp;
-            <TimeSelector
+            <NumericTimeSelector
                 default={prop.default}
                 parentData={prop.parentData}
             />

@@ -3,7 +3,7 @@ import React, {JSX, useRef} from "react";
 import {Time} from "@/app/utility/timeUtil";
 import {NumberInput} from "@/app/elements/inputs/numberInput";
 
-export function TimeSelector(prop: {
+export function NumericTimeSelector(prop: {
     default?: Date,
     parentData?: DataWrapper<Date> | DataWrapper<Date | undefined>
 }): JSX.Element {
