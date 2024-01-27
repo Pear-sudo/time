@@ -1,8 +1,13 @@
-import {JSX} from "react";
+import React, {JSX, useRef, useState} from "react";
 import {Theme} from "@/app/theme";
 
 export function TimeSelector(prop: {}): JSX.Element {
-    const outerNumbers = circledElements({numbers: [...Array(12).keys()], onClick: new Array(12).fill(onNumberClick)})
+    const [armRotation, setArmRotation] = useState(-90)
+    const armRef = useRef<HTMLDivElement>(null);
+    const outerNumbers = circledElements({
+        numbers: [...Array(12).keys()],
+        onClick: new Array(12).fill(onNumberClick)
+    })
     const innerNumbers = circledElements({
         numbers: [...Array.from({length: 12},
             (_, i) => i + 12)],
@@ -14,11 +19,40 @@ export function TimeSelector(prop: {}): JSX.Element {
         console.log(n)
     }
 
+    function onMouseMove(e: React.MouseEvent<HTMLDivElement>) {
+        const arm = armRef.current
+        if (arm) {
+            const rect = arm.getBoundingClientRect()
+            const ox = rect.left
+            const oy = rect.right
+
+            const x = e.clientX
+            const y = e.clientY
+
+            const dx = x - ox
+            const dy = -(y - oy) // y is positive in browser coordination system
+
+            const rad = Math.atan2(dy, dx)
+            const deg = rad / Math.PI * 180
+            setArmRotation(-deg)
+            console.log(-deg)
+        }
+    }
+
     return (
         <div>
-            <div className={'rounded-full bg-gray-300 w-52 h-52 flex justify-center items-center relative'}>
+            <div className={'rounded-full bg-gray-300 w-52 h-52 flex justify-center items-center relative'}
+                 onMouseMove={onMouseMove}>
                 {outerNumbers}
                 {innerNumbers}
+                <div className={'h-1.5 bg-blue-500'}
+                     ref={armRef}
+                     style={{
+                         width: '100px',
+                         transformOrigin: '0 0',
+                         transform: `translate(50px) rotate(${armRotation}deg)`
+                     }}>
+                </div>
             </div>
         </div>
     )
