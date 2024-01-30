@@ -3,6 +3,8 @@ import {Theme} from "@/app/theme";
 
 export function TimeSelector(prop: {}): JSX.Element {
     const [armRotation, setArmRotation] = useState(-90)
+    const [armRadius, setArmRadius] = useState(100)
+    const centerRef = useRef<HTMLDivElement>(null);
     const armRef = useRef<HTMLDivElement>(null);
     const outerNumbers = circledElements({
         numbers: [...Array(12).keys()],
@@ -20,11 +22,11 @@ export function TimeSelector(prop: {}): JSX.Element {
     }
 
     function onMouseMove(e: React.MouseEvent<HTMLDivElement>) {
-        const arm = armRef.current
-        if (arm) {
-            const rect = arm.getBoundingClientRect()
+        const center = centerRef.current
+        if (center) {
+            const rect = center.getBoundingClientRect()
             const ox = rect.left
-            const oy = rect.right
+            const oy = rect.top
 
             const x = e.clientX
             const y = e.clientY
@@ -32,10 +34,16 @@ export function TimeSelector(prop: {}): JSX.Element {
             const dx = x - ox
             const dy = -(y - oy) // y is positive in browser coordination system
 
+            const radius = Math.sqrt(dx ** 2 + dy ** 2)
+
             const rad = Math.atan2(dy, dx)
             const deg = rad / Math.PI * 180
+
             setArmRotation(-deg)
-            console.log(-deg)
+            setArmRadius(radius)
+            // console.log(dx + ', ' + dy)
+            // console.log(deg)
+            // console.log(radius)
         }
     }
 
@@ -48,11 +56,12 @@ export function TimeSelector(prop: {}): JSX.Element {
                 <div className={'h-1.5 bg-blue-500'}
                      ref={armRef}
                      style={{
-                         width: '100px',
+                         width: `${armRadius}px`,
                          transformOrigin: '0 0',
-                         transform: `translate(50px) rotate(${armRotation}deg)`
+                         transform: `translate(${armRadius / 2}px) rotate(${armRotation}deg)`
                      }}>
                 </div>
+                <div className={'h-px w-px absolute'} ref={centerRef}></div>
             </div>
         </div>
     )
