@@ -1,5 +1,3 @@
-import {DayTime} from "@/app/utility/timeUtil";
-
 export function isUN(v: any): boolean {
     return v === null || v === undefined;
 }
@@ -42,4 +40,17 @@ export class StringWrapper {
     constructor(value: string) {
         this.value = value;
     }
+}
+
+export function genNums(op: { count: number, from?: number, step?: number, to?: number }): number[] {
+    let l: number[] = []
+    let count = op.count
+    if (op.count <= 0) {
+        return l
+    }
+    for (let i = op.from ?? 1; i <= (op.to ?? Number.MAX_SAFE_INTEGER) && count > 0; i += op.step ?? 1) {
+        l.push(i)
+        count--
+    }
+    return l
 }
