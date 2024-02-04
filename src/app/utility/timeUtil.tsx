@@ -1,4 +1,4 @@
-import {initObject, isUN} from "@/app/utility/lanUtil";
+import {genNums, initObject, isUN} from "@/app/utility/lanUtil";
 import {padNumber} from "@/app/utility/numberUtil";
 import * as math from 'mathjs';
 
@@ -192,7 +192,7 @@ export type Time = {
     second?: number
     millisecond?: number
 }
-export const timeKeys:Array<keyof Time> = ['hour', 'minute', 'second', 'millisecond']
+export const timeKeys: Array<keyof Time> = ['hour', 'minute', 'second', 'millisecond']
 
 export type Day = {
     year?: number,
@@ -252,4 +252,21 @@ export function set2SameDay(reference: Date, target: Date): Date {
     reference.setMonth(target.getMonth())
     reference.setDate(target.getDate())
     return reference
+}
+
+export function deg2Time(deg: number, mode: "hour" | "minute"): number {
+    if (deg < 0) {
+        deg = 360 + deg
+    }
+
+    let slides = mode == "hour" ? 12 : 60
+    let interval = 360 / slides
+    let half = interval / 2
+
+    let adjustment = 90 + half
+    deg = 360 - (((360 - adjustment) + deg) % 360)
+
+    let count = Math.floor(deg / interval)
+
+    return genNums({count: 12, from: 0})[count]
 }

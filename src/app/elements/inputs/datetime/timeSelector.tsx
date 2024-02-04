@@ -1,7 +1,9 @@
 import React, {JSX, useRef, useState} from "react";
 import {Theme} from "@/app/theme";
+import {DataWrapper} from "@/app/elements/inputs/helper/inputHelper";
+import {deg2Time} from "@/app/utility/timeUtil";
 
-export function TimeSelector(prop: {}): JSX.Element {
+export function TimeSelector(prop: { parentData?: DataWrapper<Date> | DataWrapper<Date | undefined> }): JSX.Element {
     const [armRotation, setArmRotation] = useState(-90)
     const [armRadius, setArmRadius] = useState(100)
     const centerRef = useRef<HTMLDivElement>(null);
@@ -49,6 +51,9 @@ export function TimeSelector(prop: {}): JSX.Element {
 
     return (
         <div>
+            <div>
+                <NumberInSquare number={deg2Time(-armRotation, "hour")}/>
+            </div>
             <div className={'rounded-full bg-gray-300 w-52 h-52 flex justify-center items-center relative'}
                  onMouseMove={onMouseMove}>
                 {outerNumbers}
@@ -69,6 +74,14 @@ export function TimeSelector(prop: {}): JSX.Element {
                 </div>
                 <div className={'h-px w-px absolute'} ref={centerRef}></div>
             </div>
+        </div>
+    )
+}
+
+function NumberInSquare(prop: { number: number }): JSX.Element {
+    return (
+        <div className={'rounded bg-gray-300'}>
+            {prop.number}
         </div>
     )
 }
