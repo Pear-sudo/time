@@ -57,8 +57,14 @@ export function TimeSelector(prop: {}): JSX.Element {
                      ref={armRef}
                      style={{
                          width: `${armRadius}px`,
-                         transformOrigin: '0 0',
-                         transform: `translate(${armRadius / 2}px) rotate(${armRotation}deg)`
+                         transformOrigin: '0 50%',
+                         transform: `translate(50%) rotate(${armRotation}deg)`
+                     }}>
+                </div>
+                <div className={'absolute rounded-full w-5 h-5 bg-blue-500'}
+                     style={{
+                         transformOrigin: '50% 50%',
+                         transform: `rotate(${armRotation}deg) translate(${armRadius}px)`
                      }}>
                 </div>
                 <div className={'h-px w-px absolute'} ref={centerRef}></div>
