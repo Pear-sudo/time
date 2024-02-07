@@ -1,13 +1,12 @@
 import React, {JSX, useRef, useState} from "react";
 import {DataWrapper} from "@/app/elements/inputs/helper/inputHelper";
-import {deg2Time, TimeMode} from "@/app/utility/timeUtil";
+import {deg2Time} from "@/app/utility/timeUtil";
 import {getDistance} from "@/app/utility/domUtil";
 import {genNums} from "@/app/utility/lanUtil";
 
 export function TimeSelector(prop: { parentData?: DataWrapper<Date> | DataWrapper<Date | undefined> }): JSX.Element {
     const [armRotation, setArmRotation] = useState(-90)
     const [armRadius, setArmRadius] = useState(100)
-    const [timeMode, setTimeMode] = useState<TimeMode>('hourAM')
     const [isSelectingHour, setIsSelectingHour] = useState(true)
     const [hour, setHour] = useState(0)
     const [minute, setMinute] = useState(0)
@@ -56,14 +55,14 @@ export function TimeSelector(prop: { parentData?: DataWrapper<Date> | DataWrappe
             if (isSelectingHour) {
                 if (inner && radius <= outerR) {
                     radius = getDistance(ox, oy, inner, {x: 'middle', y: 'middle'})
-                    setTimeMode('hourPM')
+                    setHour(deg2Time(-armRotation, 'hourPM'))
                 } else {
                     radius = getDistance(ox, oy, outer, {x: 'middle', y: 'middle'})
-                    setTimeMode('hourAM')
+                    setHour(deg2Time(-armRotation, 'hourAM'))
                 }
             } else {
                 radius = getDistance(ox, oy, outer, {x: 'middle', y: 'middle'})
-                setTimeMode('minute')
+                setMinute(deg2Time(-armRotation, 'minute'))
             }
 
             setArmRotation(-deg)
@@ -81,7 +80,8 @@ export function TimeSelector(prop: { parentData?: DataWrapper<Date> | DataWrappe
     return (
         <div>
             <div>
-                <NumberInSquare number={deg2Time(-armRotation, timeMode)}/>
+                <NumberInSquare number={hour}/>
+                <NumberInSquare number={minute}/>
             </div>
             <div className={'rounded-full bg-gray-300 w-52 h-52 flex justify-center items-center relative'}
                  onMouseMove={onMouseMove} onClick={onClick}>
