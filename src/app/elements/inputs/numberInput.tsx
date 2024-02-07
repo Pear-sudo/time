@@ -15,7 +15,8 @@ export function NumberInput(prop: {
     const hintRef = useRef<HTMLSpanElement>(null);
 
     useEffect(() => {
-        if (prop.value) {
+        if (prop.value != null) {
+            // never write if (prop.value); it will fail when prop.value is 0
             setValue(prop.value.toString())
         }
     }, [prop.value]);
