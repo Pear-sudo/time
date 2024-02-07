@@ -259,7 +259,7 @@ export function deg2Time(deg: number, mode: TimeMode): number {
         deg = 360 + deg
     }
 
-    let slides = mode == "hourAM" || "hourPM" ? 12 : 60
+    let slides = mode == ("hourAM" || "hourPM") ? 12 : 60
     let interval = 360 / slides
     let half = interval / 2
 

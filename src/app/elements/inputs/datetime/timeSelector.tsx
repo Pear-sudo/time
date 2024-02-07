@@ -2,11 +2,13 @@ import React, {JSX, useRef, useState} from "react";
 import {DataWrapper} from "@/app/elements/inputs/helper/inputHelper";
 import {deg2Time, TimeMode} from "@/app/utility/timeUtil";
 import {getDistance} from "@/app/utility/domUtil";
+import {genNums} from "@/app/utility/lanUtil";
 
 export function TimeSelector(prop: { parentData?: DataWrapper<Date> | DataWrapper<Date | undefined> }): JSX.Element {
     const [armRotation, setArmRotation] = useState(-90)
     const [armRadius, setArmRadius] = useState(100)
     const [timeMode, setTimeMode] = useState<TimeMode>('hourAM')
+    const [isSelectingHour, setIsSelectingHour] = useState(true)
 
     const centerRef = useRef<HTMLDivElement>(null);
     const armRef = useRef<HTMLDivElement>(null);
@@ -14,21 +16,21 @@ export function TimeSelector(prop: { parentData?: DataWrapper<Date> | DataWrappe
     const innerNumberRef = useRef<HTMLDivElement>(null);
 
     const outerNumbers = circledElements({
-        numbers: [...Array(12).keys()],
+        numbers: isSelectingHour ? [...Array(12).keys()] : genNums({from: 0, count: 12, step: 5}),
         ref: outerNumberRef
     })
-    const innerNumbers = circledElements({
+    const innerNumbers: JSX.Element[] | undefined = isSelectingHour ? circledElements({
         numbers: [...Array.from({length: 12},
             (_, i) => i + 12)],
         radius: 70,
         ref: innerNumberRef
-    })
+    }) : undefined
 
     function onMouseMove(e: React.MouseEvent<HTMLDivElement>) {
         const center = centerRef.current
         const outer = outerNumberRef.current
         const inner = innerNumberRef.current
-        if (center && outer && inner) {
+        if (center && outer && (inner || !isSelectingHour)) {
             const rect = center.getBoundingClientRect()
             const ox = rect.left
             const oy = rect.top
@@ -49,12 +51,12 @@ export function TimeSelector(prop: { parentData?: DataWrapper<Date> | DataWrappe
             // console.log(`Inner radius: ${innerR}`)
             // console.log(`Outer radius: ${outerR}`)
 
-            if (radius <= outerR) {
+            if (isSelectingHour && inner && radius <= outerR) {
                 radius = getDistance(ox, oy, inner, {x: 'middle', y: 'middle'})
                 setTimeMode('hourPM')
             } else {
                 radius = getDistance(ox, oy, outer, {x: 'middle', y: 'middle'})
-                setTimeMode('hourAM')
+                isSelectingHour ? setTimeMode('hourAM') : setTimeMode('minute')
             }
 
             setArmRotation(-deg)
@@ -65,13 +67,17 @@ export function TimeSelector(prop: { parentData?: DataWrapper<Date> | DataWrappe
         }
     }
 
+    function onClick() {
+        setIsSelectingHour(!isSelectingHour)
+    }
+
     return (
         <div>
             <div>
                 <NumberInSquare number={deg2Time(-armRotation, timeMode)}/>
             </div>
             <div className={'rounded-full bg-gray-300 w-52 h-52 flex justify-center items-center relative'}
-                 onMouseMove={onMouseMove}>
+                 onMouseMove={onMouseMove} onClick={onClick}>
                 {outerNumbers}
                 {innerNumbers}
                 <div className={'h-1.5 bg-blue-500'}
@@ -132,8 +138,8 @@ function circledElements(op: {
         }
     }
 
-    return op.numbers.map((n, index) => {
-        const rotation = 30 * index
+    return op.numbers.map((n, index, array) => {
+        const rotation = 360 / array.length * index
         return (
             <div style={{
                 transform: `rotate(${rotation}deg) translate(1px, -${op.radius}px) rotate(-${rotation}deg)`,
