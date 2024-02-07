@@ -33,7 +33,7 @@ export function TimeSelector(prop: {
         ref: innerNumberRef
     }) : undefined
 
-    function onMouseMove(e: React.MouseEvent<HTMLDivElement>) {
+    function onMove(clientX: number, clientY: number) {
         if (isLockedRef.current) {
             return
         }
@@ -45,8 +45,8 @@ export function TimeSelector(prop: {
             const ox = rect.left
             const oy = rect.top
 
-            const x = e.clientX
-            const y = e.clientY
+            const x = clientX
+            const y = clientY
 
             const dx = x - ox
             const dy = -(y - oy) // y is positive in browser coordination system
@@ -83,6 +83,15 @@ export function TimeSelector(prop: {
         }
     }
 
+    function onMouseMove(e: React.MouseEvent<HTMLDivElement>) {
+        onMove(e.clientX, e.clientY)
+    }
+
+    function onTouchMove(e: React.TouchEvent<HTMLDivElement>) {
+        const touch = e.touches[0]
+        onMove(touch.clientX, touch.clientY)
+    }
+
     function handleOnClockClick() {
         if (isLockedRef.current) {
             // the user decides to select the time again
@@ -112,7 +121,7 @@ export function TimeSelector(prop: {
                 parentData={prop.parentData}
             />
             <div className={'rounded-full bg-gray-300 w-52 h-52 flex justify-center items-center relative'}
-                 onMouseMove={onMouseMove} onClick={handleOnClockClick}>
+                 onMouseMove={onMouseMove} onClick={handleOnClockClick} onTouchMove={onTouchMove}>
                 {outerNumbers}
                 {innerNumbers}
                 <div className={'h-1.5 bg-blue-500'}
