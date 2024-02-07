@@ -14,20 +14,14 @@ export function TimeSelector(prop: { parentData?: DataWrapper<Date> | DataWrappe
 
     const outerNumbers = circledElements({
         numbers: [...Array(12).keys()],
-        onClick: new Array(12).fill(onNumberClick),
         ref: outerNumberRef
     })
     const innerNumbers = circledElements({
         numbers: [...Array.from({length: 12},
             (_, i) => i + 12)],
         radius: 70,
-        onClick: new Array(12).fill(onNumberClick),
         ref: innerNumberRef
     })
-
-    function onNumberClick(n: number) {
-        console.log(n)
-    }
 
     function onMouseMove(e: React.MouseEvent<HTMLDivElement>) {
         const center = centerRef.current
@@ -142,7 +136,7 @@ function circledElements(op: {
                 transform: `rotate(${rotation}deg) translate(1px, -${op.radius}px) rotate(-${rotation}deg)`,
                 transformOrigin: '0 0',
                 zIndex: '1'
-            }} key={n} className={`absolute`} onClick={generateOnClick(n, index)}
+            }} key={n} className={`absolute`} onClick={op.onClick ? generateOnClick(n, index) : undefined}
                  ref={index == 0 && op.ref ? op.ref : undefined}>
                 {n}
             </div>
