@@ -1,5 +1,4 @@
 import React, {JSX, useRef, useState} from "react";
-import {Theme} from "@/app/theme";
 import {DataWrapper} from "@/app/elements/inputs/helper/inputHelper";
 import {deg2Time} from "@/app/utility/timeUtil";
 
@@ -116,8 +115,9 @@ function circledElements(op: { numbers: number[], radius?: number, onClick?: ((n
         return (
             <div style={{
                 transform: `rotate(${rotation}deg) translate(1px, -${op.radius}px) rotate(-${rotation}deg)`,
-                transformOrigin: '0 0'
-            }} key={n} className={`absolute ${Theme.button}`} onClick={generateOnClick(n, index)}>
+                transformOrigin: '0 0',
+                zIndex: '1'
+            }} key={n} className={`absolute`} onClick={generateOnClick(n, index)}>
                 {n}
             </div>
         )
