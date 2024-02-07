@@ -254,12 +254,12 @@ export function set2SameDay(reference: Date, target: Date): Date {
     return reference
 }
 
-export function deg2Time(deg: number, mode: "hour" | "minute"): number {
+export function deg2Time(deg: number, mode: TimeMode): number {
     if (deg < 0) {
         deg = 360 + deg
     }
 
-    let slides = mode == "hour" ? 12 : 60
+    let slides = mode == "hourAM" || "hourPM" ? 12 : 60
     let interval = 360 / slides
     let half = interval / 2
 
@@ -268,5 +268,9 @@ export function deg2Time(deg: number, mode: "hour" | "minute"): number {
 
     let count = Math.floor(deg / interval)
 
-    return genNums({count: 12, from: 0})[count]
+    const from = mode == "hourPM" ? 12 : 0
+
+    return genNums({count: slides, from: from})[count]
 }
+
+export type TimeMode = "hourAM" | "hourPM" | "minute"

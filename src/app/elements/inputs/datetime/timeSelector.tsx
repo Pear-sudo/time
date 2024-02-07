@@ -1,11 +1,12 @@
 import React, {JSX, useRef, useState} from "react";
 import {DataWrapper} from "@/app/elements/inputs/helper/inputHelper";
-import {deg2Time} from "@/app/utility/timeUtil";
+import {deg2Time, TimeMode} from "@/app/utility/timeUtil";
 import {getDistance} from "@/app/utility/domUtil";
 
 export function TimeSelector(prop: { parentData?: DataWrapper<Date> | DataWrapper<Date | undefined> }): JSX.Element {
     const [armRotation, setArmRotation] = useState(-90)
     const [armRadius, setArmRadius] = useState(100)
+    const [timeMode, setTimeMode] = useState<TimeMode>('hourAM')
 
     const centerRef = useRef<HTMLDivElement>(null);
     const armRef = useRef<HTMLDivElement>(null);
@@ -43,15 +44,17 @@ export function TimeSelector(prop: { parentData?: DataWrapper<Date> | DataWrappe
             const rad = Math.atan2(dy, dx)
             const deg = rad / Math.PI * 180
 
-            const innerR = getDistance(ox, oy, inner, {x: 'middle', y: 'end'})
+            // const innerR = getDistance(ox, oy, inner, {x: 'middle', y: 'end'})
             const outerR = getDistance(ox, oy, outer, {x: 'middle', y: 'end'})
             // console.log(`Inner radius: ${innerR}`)
             // console.log(`Outer radius: ${outerR}`)
 
             if (radius <= outerR) {
                 radius = getDistance(ox, oy, inner, {x: 'middle', y: 'middle'})
+                setTimeMode('hourPM')
             } else {
                 radius = getDistance(ox, oy, outer, {x: 'middle', y: 'middle'})
+                setTimeMode('hourAM')
             }
 
             setArmRotation(-deg)
@@ -65,7 +68,7 @@ export function TimeSelector(prop: { parentData?: DataWrapper<Date> | DataWrappe
     return (
         <div>
             <div>
-                <NumberInSquare number={deg2Time(-armRotation, "hour")}/>
+                <NumberInSquare number={deg2Time(-armRotation, timeMode)}/>
             </div>
             <div className={'rounded-full bg-gray-300 w-52 h-52 flex justify-center items-center relative'}
                  onMouseMove={onMouseMove}>
