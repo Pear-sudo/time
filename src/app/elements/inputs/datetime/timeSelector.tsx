@@ -83,15 +83,24 @@ export function TimeSelector(prop: {
 
     function onClick() {
         if (isLockedRef.current) {
+            // the user decides to select the time again
             isLockedRef.current = false
             setIsSelectingHour(!isSelectingHour)
             return
         }
         if (!isLockedRef.current && !isSelectingHour) {
+            // time selection is finished
             isLockedRef.current = true
+            pass2Parent()
             return;
         }
         setIsSelectingHour(!isSelectingHour)
+    }
+
+    function pass2Parent() {
+        if (prop.parentData) {
+            prop.parentData.setData(timeRef.current)
+        }
     }
 
     return (
