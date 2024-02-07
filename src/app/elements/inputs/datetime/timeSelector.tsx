@@ -1,6 +1,6 @@
-import React, {JSX, useRef, useState} from "react";
+import React, {JSX, useEffect, useRef, useState} from "react";
 import {DataWrapper, StateClass} from "@/app/elements/inputs/helper/inputHelper";
-import {deg2Time, set2SameDate} from "@/app/utility/timeUtil";
+import {deg2Time, set2SameDate, time2Deg} from "@/app/utility/timeUtil";
 import {getDistance} from "@/app/utility/domUtil";
 import {genNums} from "@/app/utility/lanUtil";
 import {NumericTimeSelector} from "@/app/elements/inputs/datetime/numericTimeSelector";
@@ -22,6 +22,38 @@ export function TimeSelector(prop: {
     const timeRef = useRef<Date>(new Date(prop.parentData.getData().valueOf()));
     const isLockedRef = useRef(false);
 
+    useEffect(() => {
+        const time = timeRef.current
+        const hour = time.getHours()
+        const minute = time.getMinutes()
+
+        let r: number = 0
+        let deg = 0
+        let x: number = 0
+        let y: number = 0
+
+        if (isSelectingHour && hour >= 12) {
+            r = 1
+        } else {
+            r = 1_000_000
+        }
+
+        if (isSelectingHour) {
+            deg = time2Deg(hour, 'hourAM')
+        } else {
+            deg = time2Deg(minute, 'minute')
+        }
+
+        let rad = deg / 180 * Math.PI
+        x = Math.cos(rad) * r
+        y = Math.sin(rad) * r
+
+        console.log('hour: ' + hour)
+        console.log('rad: ' + rad)
+        console.log('x: ' + x)
+        onMove(0, 0, x, y)
+    }, [isSelectingHour]);
+
     const outerNumbers = circledElements({
         numbers: isSelectingHour ? [...Array(12).keys()] : genNums({from: 0, count: 12, step: 5}),
         ref: outerNumberRef
@@ -33,7 +65,8 @@ export function TimeSelector(prop: {
         ref: innerNumberRef
     }) : undefined
 
-    function onMove(clientX: number, clientY: number) {
+    function onMove(clientX: number, clientY: number, _dx?: number, _dy?: number) {
+        // _dx and _dy are for internal use only: to manually control the arm
         if (isLockedRef.current) {
             return
         }
@@ -48,8 +81,8 @@ export function TimeSelector(prop: {
             const x = clientX
             const y = clientY
 
-            const dx = x - ox
-            const dy = -(y - oy) // y is positive in browser coordination system
+            const dx = _dx ?? x - ox
+            const dy = _dy ?? -(y - oy) // y is positive in browser coordination system
 
             let radius = Math.sqrt(dx ** 2 + dy ** 2)
 
@@ -61,7 +94,7 @@ export function TimeSelector(prop: {
             // console.log(`Inner radius: ${innerR}`)
             // console.log(`Outer radius: ${outerR}`)
 
-            const time = timeRef.current
+            const time = (_dy || _dx) ? new Date(timeRef.current.valueOf()) : timeRef.current
             if (isSelectingHour) {
                 if (inner && radius <= outerR) {
                     radius = getDistance(ox, oy, inner, {x: 'middle', y: 'middle'})

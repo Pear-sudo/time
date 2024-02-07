@@ -286,4 +286,17 @@ export function deg2Time(deg: number, mode: TimeMode): number {
     return genNums({count: slides, from: from})[count]
 }
 
+export function time2Deg(time: number, mode: TimeMode): number {
+    let rank: number
+    let interval: number
+    if (mode == 'minute') {
+        rank = time
+        interval = 360 / 60
+    } else {
+        rank = time < 12 ? time : time - 12
+        interval = 360 / 12
+    }
+    return -(rank * interval) + 90
+}
+
 export type TimeMode = "hourAM" | "hourPM" | "minute"
