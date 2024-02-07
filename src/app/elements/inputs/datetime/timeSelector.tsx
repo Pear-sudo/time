@@ -104,7 +104,7 @@ export function TimeSelector(prop: {
     }
 
     return (
-        <div>
+        <div className={'flex flex-col items-center w-fit'}>
             <NumericTimeSelector
                 default={timeRef.current}
                 parentData={prop.parentData}
