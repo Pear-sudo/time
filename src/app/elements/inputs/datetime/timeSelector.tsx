@@ -9,6 +9,8 @@ export function TimeSelector(prop: { parentData?: DataWrapper<Date> | DataWrappe
     const [armRadius, setArmRadius] = useState(100)
     const [timeMode, setTimeMode] = useState<TimeMode>('hourAM')
     const [isSelectingHour, setIsSelectingHour] = useState(true)
+    const [hour, setHour] = useState(0)
+    const [minute, setMinute] = useState(0)
 
     const centerRef = useRef<HTMLDivElement>(null);
     const armRef = useRef<HTMLDivElement>(null);
@@ -51,12 +53,17 @@ export function TimeSelector(prop: { parentData?: DataWrapper<Date> | DataWrappe
             // console.log(`Inner radius: ${innerR}`)
             // console.log(`Outer radius: ${outerR}`)
 
-            if (isSelectingHour && inner && radius <= outerR) {
-                radius = getDistance(ox, oy, inner, {x: 'middle', y: 'middle'})
-                setTimeMode('hourPM')
+            if (isSelectingHour) {
+                if (inner && radius <= outerR) {
+                    radius = getDistance(ox, oy, inner, {x: 'middle', y: 'middle'})
+                    setTimeMode('hourPM')
+                } else {
+                    radius = getDistance(ox, oy, outer, {x: 'middle', y: 'middle'})
+                    setTimeMode('hourAM')
+                }
             } else {
                 radius = getDistance(ox, oy, outer, {x: 'middle', y: 'middle'})
-                isSelectingHour ? setTimeMode('hourAM') : setTimeMode('minute')
+                setTimeMode('minute')
             }
 
             setArmRotation(-deg)
