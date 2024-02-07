@@ -1,4 +1,4 @@
-import React, {JSX, useRef, useState} from "react";
+import React, {JSX, useEffect, useRef, useState} from "react";
 import {isUN} from "@/app/utility/lanUtil";
 import {toNumber} from "lodash";
 
@@ -13,6 +13,12 @@ export function NumberInput(prop: {
     const oldValueRef = useRef(prop.value == undefined ? "" : prop.value.toString());
     const [value, setValue] = useState(oldValueRef.current)
     const hintRef = useRef<HTMLSpanElement>(null);
+
+    useEffect(() => {
+        if (prop.value) {
+            setValue(prop.value.toString())
+        }
+    }, [prop.value]);
 
     let len = prop.len ? prop.len : 2
     let allowLeadingZero: boolean = isUN(prop.allowLeadingZero) ? true : prop.allowLeadingZero as boolean

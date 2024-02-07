@@ -3,18 +3,22 @@ import {DataWrapper} from "@/app/elements/inputs/helper/inputHelper";
 import {deg2Time} from "@/app/utility/timeUtil";
 import {getDistance} from "@/app/utility/domUtil";
 import {genNums} from "@/app/utility/lanUtil";
+import {NumericTimeSelector} from "@/app/elements/inputs/datetime/numericTimeSelector";
 
-export function TimeSelector(prop: { parentData?: DataWrapper<Date> | DataWrapper<Date | undefined> }): JSX.Element {
+export function TimeSelector(prop: {
+    default?: Date,
+    parentData?: DataWrapper<Date> | DataWrapper<Date | undefined>
+}): JSX.Element {
     const [armRotation, setArmRotation] = useState(-90)
     const [armRadius, setArmRadius] = useState(100)
     const [isSelectingHour, setIsSelectingHour] = useState(true)
-    const [hour, setHour] = useState(0)
-    const [minute, setMinute] = useState(0)
 
     const centerRef = useRef<HTMLDivElement>(null);
     const armRef = useRef<HTMLDivElement>(null);
     const outerNumberRef = useRef<HTMLDivElement>(null);
     const innerNumberRef = useRef<HTMLDivElement>(null);
+    const timeRef = useRef<Date>(prop.default ? prop.default : new Date());
+    const isLockedRef = useRef(false);
 
     const outerNumbers = circledElements({
         numbers: isSelectingHour ? [...Array(12).keys()] : genNums({from: 0, count: 12, step: 5}),
@@ -28,6 +32,9 @@ export function TimeSelector(prop: { parentData?: DataWrapper<Date> | DataWrappe
     }) : undefined
 
     function onMouseMove(e: React.MouseEvent<HTMLDivElement>) {
+        if (isLockedRef.current) {
+            return
+        }
         const center = centerRef.current
         const outer = outerNumberRef.current
         const inner = innerNumberRef.current
@@ -52,17 +59,18 @@ export function TimeSelector(prop: { parentData?: DataWrapper<Date> | DataWrappe
             // console.log(`Inner radius: ${innerR}`)
             // console.log(`Outer radius: ${outerR}`)
 
+            const time = timeRef.current
             if (isSelectingHour) {
                 if (inner && radius <= outerR) {
                     radius = getDistance(ox, oy, inner, {x: 'middle', y: 'middle'})
-                    setHour(deg2Time(-armRotation, 'hourPM'))
+                    time.setHours(deg2Time(-armRotation, 'hourPM'))
                 } else {
                     radius = getDistance(ox, oy, outer, {x: 'middle', y: 'middle'})
-                    setHour(deg2Time(-armRotation, 'hourAM'))
+                    time.setHours(deg2Time(-armRotation, 'hourAM'))
                 }
             } else {
                 radius = getDistance(ox, oy, outer, {x: 'middle', y: 'middle'})
-                setMinute(deg2Time(-armRotation, 'minute'))
+                time.setMinutes(deg2Time(-armRotation, 'minute'))
             }
 
             setArmRotation(-deg)
@@ -74,15 +82,24 @@ export function TimeSelector(prop: { parentData?: DataWrapper<Date> | DataWrappe
     }
 
     function onClick() {
+        if (isLockedRef.current) {
+            isLockedRef.current = false
+            setIsSelectingHour(!isSelectingHour)
+            return
+        }
+        if (!isLockedRef.current && !isSelectingHour) {
+            isLockedRef.current = true
+            return;
+        }
         setIsSelectingHour(!isSelectingHour)
     }
 
     return (
         <div>
-            <div>
-                <NumberInSquare number={hour}/>
-                <NumberInSquare number={minute}/>
-            </div>
+            <NumericTimeSelector
+                default={timeRef.current}
+                parentData={prop.parentData}
+            />
             <div className={'rounded-full bg-gray-300 w-52 h-52 flex justify-center items-center relative'}
                  onMouseMove={onMouseMove} onClick={onClick}>
                 {outerNumbers}
@@ -103,14 +120,6 @@ export function TimeSelector(prop: { parentData?: DataWrapper<Date> | DataWrappe
                 </div>
                 <div className={'h-px w-px absolute'} ref={centerRef}></div>
             </div>
-        </div>
-    )
-}
-
-function NumberInSquare(prop: { number: number }): JSX.Element {
-    return (
-        <div className={'rounded bg-gray-300'}>
-            {prop.number}
         </div>
     )
 }
