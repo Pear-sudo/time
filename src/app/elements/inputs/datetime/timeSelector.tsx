@@ -1,6 +1,6 @@
 import React, {JSX, useRef, useState} from "react";
-import {DataWrapper} from "@/app/elements/inputs/helper/inputHelper";
-import {deg2Time} from "@/app/utility/timeUtil";
+import {DataWrapper, StateClass} from "@/app/elements/inputs/helper/inputHelper";
+import {deg2Time, set2SameDate} from "@/app/utility/timeUtil";
 import {getDistance} from "@/app/utility/domUtil";
 import {genNums} from "@/app/utility/lanUtil";
 import {NumericTimeSelector} from "@/app/elements/inputs/datetime/numericTimeSelector";
@@ -9,8 +9,7 @@ import {WindowController, WindowManager} from "@/app/utility/windowManager";
 import {TimeDisplay} from "@/app/elements/presentation/timeDisplay";
 
 export function TimeSelector(prop: {
-    default?: Date,
-    parentData?: DataWrapper<Date> | DataWrapper<Date | undefined>
+    parentData: DataWrapper<Date>
 }): JSX.Element {
     const [armRotation, setArmRotation] = useState(-90)
     const [armRadius, setArmRadius] = useState(100)
@@ -20,7 +19,7 @@ export function TimeSelector(prop: {
     const armRef = useRef<HTMLDivElement>(null);
     const outerNumberRef = useRef<HTMLDivElement>(null);
     const innerNumberRef = useRef<HTMLDivElement>(null);
-    const timeRef = useRef<Date>(prop.default ? prop.default : new Date());
+    const timeRef = useRef<Date>(new Date(prop.parentData.getData().valueOf()));
     const isLockedRef = useRef(false);
 
     const outerNumbers = circledElements({
@@ -140,15 +139,32 @@ export function WrappedTimeSelector(prop: {
     default?: Date,
     parentData?: DataWrapper<Date> | DataWrapper<Date | undefined>
 }) {
-    const [date, setDate] = useState<Date>(prop.default ?? new Date());
+    const [date, setDate] = useState<Date>(prop.default ? new Date(prop.default.valueOf()) : new Date());
 
     const wm = new WindowManager()
     const wKey: string = "timeSelector"
     let wController: WindowController
 
+    function handleDidSet(newValue: Date, oldValue: Date) {
+        // we cannot pass the parent data wrapper directly to the child element; instead, we create our own wrapper,
+        // and intercept the data, do some additional work, then pass it back
+        if (prop.parentData) {
+            const reference = prop.parentData.getData()
+            if (reference) {
+                prop.parentData.setData(set2SameDate(reference, newValue))
+            } else {
+                console.log("You may notice something weird has happened, that's because I did not get the original date object for reference." +
+                    "beginDTRef and etc relies on this!")
+            }
+        }
+        // console.log("new value: " + newValue)
+        // console.log("parent data: " + prop.parentData?.getData())
+        wController.closeWindow()
+    }
+
     function handleOnClick() {
         wController = wm.createWindow({
-            view: <TimeSelector default={prop.default} parentData={prop.parentData}/>,
+            view: <TimeSelector parentData={new StateClass(date, setDate, {didSet: handleDidSet})}/>,
             key: wKey,
             handleOutSideClick: handleOutsideClick,
             header: true,

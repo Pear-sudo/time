@@ -4,7 +4,7 @@ import {Theme} from "@/app/theme";
 import {WindowController, WindowManager} from "@/app/utility/windowManager";
 import {MonthlyCalendar} from "@/app/elements/monthlyCalendar";
 import {DataWrapper, StateClass} from "@/app/elements/inputs/helper/inputHelper";
-import {set2SameDay} from "@/app/utility/timeUtil";
+import {set2SameDate} from "@/app/utility/timeUtil";
 
 export function DateSelector(prop: {
     defaultDate?: Date,
@@ -28,7 +28,7 @@ export function DateSelector(prop: {
         if (prop.parentData) {
             const reference = prop.parentData.getData()
             if (reference) {
-                prop.parentData.setData(set2SameDay(reference, newValue))
+                prop.parentData.setData(set2SameDate(reference, newValue))
             } else {
                 console.log("You may notice something weird has happened, that's because I did not get the original date object for reference." +
                     "beginDTRef and etc relies on this!")

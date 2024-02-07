@@ -66,6 +66,8 @@ function CalendarEventCreator(prop: {
 
         if (calendarEvent.begin.valueOf() >= calendarEvent.end.valueOf() && hintRef.current) {
             hint("End time is earlier than begin time.")
+            console.log("begin: " + calendarEvent.begin)
+            console.log("end: " + calendarEvent.end)
             return
         } else {
             hint()

@@ -246,11 +246,14 @@ export function percentage2Date(date: Date, percentage: number) {
     return new Date(adjustedMilli)
 }
 
-export function set2SameDay(reference: Date, target: Date): Date {
+export function set2SameDate(reference: Date, target: Date): Date {
     // I intentionally choose not create a new date object. Use this function carefully !!!
     reference.setFullYear(target.getFullYear())
     reference.setMonth(target.getMonth())
     reference.setDate(target.getDate())
+    reference.setHours(target.getHours())
+    reference.setMinutes(target.getMinutes())
+    reference.setMilliseconds(target.getMilliseconds())
     return reference
 }
 
