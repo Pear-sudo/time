@@ -120,8 +120,10 @@ export function TimeSelector(prop: {
                 default={timeRef.current}
                 parentData={prop.parentData}
             />
-            <div className={'rounded-full bg-gray-300 w-52 h-52 flex justify-center items-center relative'}
-                 onMouseMove={onMouseMove} onClick={handleOnClockClick} onTouchMove={onTouchMove}>
+            <div className={'rounded-full bg-gray-300 flex justify-center items-center relative'}
+                 onMouseMove={onMouseMove} onClick={handleOnClockClick} onTouchMove={onTouchMove}
+                 style={{width: '240px', height: '240px'}}
+            >
                 {outerNumbers}
                 {innerNumbers}
                 <div className={'h-1.5 bg-blue-500'}
