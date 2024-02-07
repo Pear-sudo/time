@@ -1,21 +1,28 @@
 import React, {JSX, useRef, useState} from "react";
 import {DataWrapper} from "@/app/elements/inputs/helper/inputHelper";
 import {deg2Time} from "@/app/utility/timeUtil";
+import {getDistance} from "@/app/utility/domUtil";
 
 export function TimeSelector(prop: { parentData?: DataWrapper<Date> | DataWrapper<Date | undefined> }): JSX.Element {
     const [armRotation, setArmRotation] = useState(-90)
     const [armRadius, setArmRadius] = useState(100)
+
     const centerRef = useRef<HTMLDivElement>(null);
     const armRef = useRef<HTMLDivElement>(null);
+    const outerNumberRef = useRef<HTMLDivElement>(null);
+    const innerNumberRef = useRef<HTMLDivElement>(null);
+
     const outerNumbers = circledElements({
         numbers: [...Array(12).keys()],
-        onClick: new Array(12).fill(onNumberClick)
+        onClick: new Array(12).fill(onNumberClick),
+        ref: outerNumberRef
     })
     const innerNumbers = circledElements({
         numbers: [...Array.from({length: 12},
             (_, i) => i + 12)],
         radius: 70,
-        onClick: new Array(12).fill(onNumberClick)
+        onClick: new Array(12).fill(onNumberClick),
+        ref: innerNumberRef
     })
 
     function onNumberClick(n: number) {
@@ -24,7 +31,9 @@ export function TimeSelector(prop: { parentData?: DataWrapper<Date> | DataWrappe
 
     function onMouseMove(e: React.MouseEvent<HTMLDivElement>) {
         const center = centerRef.current
-        if (center) {
+        const outer = outerNumberRef.current
+        const inner = innerNumberRef.current
+        if (center && outer && inner) {
             const rect = center.getBoundingClientRect()
             const ox = rect.left
             const oy = rect.top
@@ -35,10 +44,21 @@ export function TimeSelector(prop: { parentData?: DataWrapper<Date> | DataWrappe
             const dx = x - ox
             const dy = -(y - oy) // y is positive in browser coordination system
 
-            const radius = Math.sqrt(dx ** 2 + dy ** 2)
+            let radius = Math.sqrt(dx ** 2 + dy ** 2)
 
             const rad = Math.atan2(dy, dx)
             const deg = rad / Math.PI * 180
+
+            const innerR = getDistance(ox, oy, inner, {x: 'middle', y: 'end'})
+            const outerR = getDistance(ox, oy, outer, {x: 'middle', y: 'end'})
+            // console.log(`Inner radius: ${innerR}`)
+            // console.log(`Outer radius: ${outerR}`)
+
+            if (radius <= outerR) {
+                radius = getDistance(ox, oy, inner, {x: 'middle', y: 'middle'})
+            } else {
+                radius = getDistance(ox, oy, outer, {x: 'middle', y: 'middle'})
+            }
 
             setArmRotation(-deg)
             setArmRadius(radius)
@@ -85,7 +105,12 @@ function NumberInSquare(prop: { number: number }): JSX.Element {
     )
 }
 
-function circledElements(op: { numbers: number[], radius?: number, onClick?: ((n: number) => void)[] }) {
+function circledElements(op: {
+    numbers: number[],
+    radius?: number,
+    onClick?: ((n: number) => void)[],
+    ref?: React.RefObject<HTMLDivElement>
+}) {
 
     if (op.onClick && op.numbers.length != op.onClick.length) {
         throw new Error(`elements length (${op.numbers.length}) 
@@ -117,7 +142,8 @@ function circledElements(op: { numbers: number[], radius?: number, onClick?: ((n
                 transform: `rotate(${rotation}deg) translate(1px, -${op.radius}px) rotate(-${rotation}deg)`,
                 transformOrigin: '0 0',
                 zIndex: '1'
-            }} key={n} className={`absolute`} onClick={generateOnClick(n, index)}>
+            }} key={n} className={`absolute`} onClick={generateOnClick(n, index)}
+                 ref={index == 0 && op.ref ? op.ref : undefined}>
                 {n}
             </div>
         )
