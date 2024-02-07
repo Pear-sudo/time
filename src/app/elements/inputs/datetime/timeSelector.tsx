@@ -4,6 +4,9 @@ import {deg2Time} from "@/app/utility/timeUtil";
 import {getDistance} from "@/app/utility/domUtil";
 import {genNums} from "@/app/utility/lanUtil";
 import {NumericTimeSelector} from "@/app/elements/inputs/datetime/numericTimeSelector";
+import {Theme} from "@/app/theme";
+import {WindowController, WindowManager} from "@/app/utility/windowManager";
+import {TimeDisplay} from "@/app/elements/presentation/timeDisplay";
 
 export function TimeSelector(prop: {
     default?: Date,
@@ -81,7 +84,7 @@ export function TimeSelector(prop: {
         }
     }
 
-    function onClick() {
+    function handleOnClockClick() {
         if (isLockedRef.current) {
             // the user decides to select the time again
             isLockedRef.current = false
@@ -110,7 +113,7 @@ export function TimeSelector(prop: {
                 parentData={prop.parentData}
             />
             <div className={'rounded-full bg-gray-300 w-52 h-52 flex justify-center items-center relative'}
-                 onMouseMove={onMouseMove} onClick={onClick}>
+                 onMouseMove={onMouseMove} onClick={handleOnClockClick}>
                 {outerNumbers}
                 {innerNumbers}
                 <div className={'h-1.5 bg-blue-500'}
@@ -130,6 +133,37 @@ export function TimeSelector(prop: {
                 <div className={'h-px w-px absolute'} ref={centerRef}></div>
             </div>
         </div>
+    )
+}
+
+export function WrappedTimeSelector(prop: {
+    default?: Date,
+    parentData?: DataWrapper<Date> | DataWrapper<Date | undefined>
+}) {
+    const [date, setDate] = useState<Date>(prop.default ?? new Date());
+
+    const wm = new WindowManager()
+    const wKey: string = "timeSelector"
+    let wController: WindowController
+
+    function handleOnClick() {
+        wController = wm.createWindow({
+            view: <TimeSelector default={prop.default} parentData={prop.parentData}/>,
+            key: wKey,
+            handleOutSideClick: handleOutsideClick,
+            header: true,
+            rounded: true
+        })
+    }
+
+    function handleOutsideClick() {
+        wController.closeWindow()
+    }
+
+    return (
+        <span className={`${Theme.button}`} onClick={handleOnClick}>
+            <TimeDisplay date={date}/>
+        </span>
     )
 }
 
