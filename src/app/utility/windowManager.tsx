@@ -1,5 +1,6 @@
 import React, {JSX, useEffect, useMemo, useRef, useState} from "react";
 import {DisplayContextObj} from "@/app/model/displayContextObj";
+import {genNums} from "@/app/utility/lanUtil";
 
 // @ts-ignore
 export const DisplayContext = React.createContext<{ displayContextObj: DisplayContextObj, updateContext: React.Dispatch<React.SetStateAction<DisplayContextObj>> } >(undefined)
@@ -427,8 +428,21 @@ function WindowHeader(prop: { win: Win }): JSX.Element {
     }
 
     return (
-        <div className={'w-full h-4 bg-gray-400 cursor-move'} onMouseDown={handleOnMouseDown}
+        <div className={'w-full h-4 bg-gray-400 cursor-move flex justify-center items-center'}
+             onMouseDown={handleOnMouseDown}
              onTouchStart={onTouchStart}>
+            <ThreeDots/>
+        </div>
+    )
+}
+
+function ThreeDots(prop: {}): JSX.Element {
+    // mimic iOS's window manager
+    return (
+        <div className={'h-1/4 w-fit flex space-x-0.5'}>
+            {genNums({count: 3}).map((value) => (
+                <div className={'h-full aspect-square bg-gray-700 rounded-full'}></div>
+            ))}
         </div>
     )
 }
