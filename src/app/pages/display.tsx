@@ -5,7 +5,6 @@ import '../index.css';
 import {throttle} from "lodash";
 import {YearHint} from "@/app/elements/yearHint";
 import {generateDates, generateFullWeekDays, rollDates} from "@/app/utility/timeUtil";
-import {ControlButton} from "@/app/elements/ControlButton";
 import {DayCount} from "@/app/elements/dayCount";
 import {TextButton} from "@/app/elements/ui/buttons/textButton";
 import {NavigationButtons} from "@/app/elements/ui/navigationButtons";
@@ -174,7 +173,7 @@ export function Display(): JSX.Element {
                 <Calendar dates={getDisplayedDates()} events={{scrollToNow: selfEvents.current.onTodayButtonClick}}
                           overScrollPercentage={overScrollPercentage} renderDates={renderDates}/>
             </div>
-            <ControlButton/>
+            {/*<ControlButton/>*/}
         </div>
     )
 }
