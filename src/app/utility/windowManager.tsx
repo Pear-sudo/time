@@ -441,7 +441,7 @@ function ThreeDots(prop: {}): JSX.Element {
     return (
         <div className={'h-1/4 w-fit flex space-x-0.5'}>
             {genNums({count: 3}).map((value) => (
-                <div className={'h-full aspect-square bg-gray-700 rounded-full'}></div>
+                <div className={'h-full aspect-square bg-gray-700 rounded-full'} key={`dots-${value}`}></div>
             ))}
         </div>
     )
