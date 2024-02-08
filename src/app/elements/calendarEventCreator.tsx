@@ -153,7 +153,6 @@ function CalendarEventCreator(prop: {
                     default={beginDTRef.current}
                 />
                 </span>
-            <br/>
             <span className={'whitespace-nowrap'}>
                     End:
                     <DateTimeSelector

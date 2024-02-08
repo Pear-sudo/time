@@ -162,7 +162,7 @@ export function DayContent(prop: {
         left = (order - 1) / overlapCount * 100 + "%"
 
         return (
-            <div className={'absolute overflow-auto overscroll-contain'}
+            <div className={'absolute overflow-auto overscroll-contain rounded'}
                  style={{
                      height: `${height}%`,
                      top: `${topP}%`,
