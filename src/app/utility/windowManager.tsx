@@ -1,6 +1,7 @@
 import React, {JSX, useEffect, useMemo, useRef, useState} from "react";
 import {DisplayContextObj} from "@/app/model/displayContextObj";
 import {genNums} from "@/app/utility/lanUtil";
+import {KeyboardManager} from "@/app/utility/KeyboardManager";
 
 // @ts-ignore
 export const DisplayContext = React.createContext<{ displayContextObj: DisplayContextObj, updateContext: React.Dispatch<React.SetStateAction<DisplayContextObj>> } >(undefined)
@@ -24,6 +25,10 @@ export class WindowManager {
     private focusedWindow: Win | undefined
 
     private setUiDate: React.Dispatch<React.SetStateAction<Date>> | undefined
+
+    // I only need one global keyboard manager; though end user can init their own km.
+    // So singleton pattern is not at km level but here.
+    private static keyboardManager = new KeyboardManager()
 
     constructor() {
         if (!WindowManager._ins) {
@@ -131,17 +136,35 @@ export class WindowManager {
     }
 
     private Context(): JSX.Element {
+        const rootRef = useRef<HTMLDivElement>(null);
+        // This is used to update the whole window manager; its value is useless
         const [UiDate, setUiDate] = useState(new Date())
         useEffect(() => {
             return this.registerWindowHeaderActivation()
         });
+        useEffect(() => {
+            if (rootRef.current) {
+                // focus the root element to capture all keystrokes (it is not focused by default)
+                rootRef.current.focus()
+            }
+        }, []);
         this.setUiDate = setUiDate
 
+        /* handle all key events in the root element; do not intercept keystroke at each window level
+        * since the user can implement this easily by themselves */
         return (
-            <div>
+            <div tabIndex={0} onKeyDown={this.handleOnKeyDown} onKeyUp={this.handleOnKeyUp} ref={rootRef}>
                 {this.generateWindows()}
             </div>
         )
+    }
+
+    private handleOnKeyDown(e: React.KeyboardEvent) {
+        WindowManager.keyboardManager.keyDown(e)
+    }
+
+    private handleOnKeyUp(e: React.KeyboardEvent) {
+        WindowManager.keyboardManager.keyUp(e)
     }
 
     private registerWindowHeaderActivation() {
