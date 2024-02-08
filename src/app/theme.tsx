@@ -13,3 +13,5 @@ export class Theme {
     static bg2: string = "bg-blue-200"
     static bg1: string = "bg-cyan-50"
 }
+
+// todo support night mode

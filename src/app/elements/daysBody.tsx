@@ -57,6 +57,9 @@ export function DaysBody(prop: {dates: Date[], renderDates: Date[], overScrollPe
         // today button is clicked
         scrollToTimeline()
     }
+    // todo the first day in the view is not perfectly aligned, find a solution
+    // todo when a day is clicked, switch to day view
+    // todo support yearly view
 
     return (
         <div className={'px-8 flex-row inline-flex w-full overflow-y-auto grow'}

@@ -4,6 +4,7 @@ import {DisplayContextObj} from "@/app/model/displayContextObj";
 // @ts-ignore
 export const DisplayContext = React.createContext<{ displayContextObj: DisplayContextObj, updateContext: React.Dispatch<React.SetStateAction<DisplayContextObj>> } >(undefined)
 
+// todo add support for global and window wise keyboard shortcut management
 export class WindowManager {
     static get ins(): WindowManager {
         return this._ins;
@@ -383,6 +384,7 @@ export class WindowController {
 }
 
 function WindowView(prop: { win: Win, z: number, handleOutsideClick: (event: React.MouseEvent) => void }): JSX.Element {
+    // todo make window resizable, if that's what the user wants
     const [top, setTop] = useState(prop.win.top)
     const [left, setLeft] = useState(prop.win.left)
 

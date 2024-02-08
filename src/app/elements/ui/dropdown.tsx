@@ -7,6 +7,7 @@ export function Dropdown(prop: {
     show: boolean,
     onCancel?: () => void
 }): JSX.Element {
+    // todo add animation to dropdown
     const childRef = useRef<HTMLDivElement>(null);
     const parentRef = useRef<HTMLDivElement>(null);
     const windowWidthRef = useRef<number>(-1);

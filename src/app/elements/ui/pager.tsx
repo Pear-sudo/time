@@ -63,6 +63,7 @@ export function Pager<DT, PR = any>(prop: {
         }
 
         // first let's adjust the position to previous state (after inserting or removing columns)
+        // todo this method is not efficient, and performs terrible on safari
         containerRef.current?.scrollTo(oldPixelsBefore, 0)
 
         // second, start the animation
