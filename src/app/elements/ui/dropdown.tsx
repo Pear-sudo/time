@@ -7,7 +7,6 @@ export function Dropdown(prop: {
     show: boolean,
     onCancel?: () => void
 }): JSX.Element {
-    // todo add animation to dropdown
     const childRef = useRef<HTMLDivElement>(null);
     const parentRef = useRef<HTMLDivElement>(null);
     const windowWidthRef = useRef<number>(-1);
@@ -45,7 +44,7 @@ export function Dropdown(prop: {
 
     const child = (
         <div ref={childRef}
-             className={`absolute top-full w-fit rounded overflow-hidden ${prop.show ? 'visible' : 'hidden'}`}>
+             className={`absolute top-full w-fit rounded overflow-hidden ${prop.show ? 'visible max-h-screen' : 'invisible max-h-0 pointer-events-none'} transition-all duration-200 ease-in-out`}>
             <div className={'relative z-50 w-full'}>
                 <div className={`z-50 relative w-full ${Theme.bg2}`}>
                     {prop.child}
@@ -56,6 +55,7 @@ export function Dropdown(prop: {
             </div>
         </div>
     )
+    /*  click 'parent' to display the drop-down: the child element */
     return (
         <div className={'relative h-fit w-fit'}>
             <div ref={parentRef} className={'w-fit'}>
