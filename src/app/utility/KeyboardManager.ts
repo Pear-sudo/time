@@ -27,7 +27,7 @@ export class KeyboardManager {
             return
         }
         const keyHash = this.hashKeys(keys)
-        let subject = this.keyRegistry.get(keyHash)
+        let subject = this.getSubject(keys)
         if (subject == undefined) {
             subject = new Subject<any>()
             this.keyRegistry.set(keyHash, subject)
@@ -42,11 +42,14 @@ export class KeyboardManager {
     }
 
     private checkKeysAfterUp() {
-
+        // just ignore this for now since this use case does not make much sense in practice
     }
 
     private checkKeys() {
-
+        const subject = this.getSubject(this.activeKeys)
+        if (subject != undefined) {
+            subject.next(this.activeKeys)
+        }
     }
 
     verifyKeys(keys: string[]): boolean {
@@ -66,8 +69,14 @@ export class KeyboardManager {
         return validKeyRegex.test(key)
     }
 
-    hashKeys(keys: string[]): string {
+    hashKeys(keys: string[] | Set<string>): string {
+        keys = Array.isArray(keys) ? keys : Array.from(keys)
         return keys.sort().join('\n')
+    }
+
+    private getSubject(keys: string[] | Set<string>) {
+        const keyHash = this.hashKeys(keys)
+        return this.keyRegistry.get(keyHash)
     }
 }
 
