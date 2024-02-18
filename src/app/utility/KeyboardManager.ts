@@ -3,6 +3,7 @@ import {Observer, Subject, Subscription} from "rxjs";
 
 export class KeyboardManager {
     private activeKeys = new Set<string>
+    private keyRegistry: Map<string, Subject<any>> = new Map()
 
     constructor() {
         console.log('Initializing keyboard manager...')
@@ -25,7 +26,12 @@ export class KeyboardManager {
         if (!this.verifyKeys(keys)) {
             return
         }
-        const subject = new Subject<any>()
+        const keyHash = this.hashKeys(keys)
+        let subject = this.keyRegistry.get(keyHash)
+        if (subject == undefined) {
+            subject = new Subject<any>()
+            this.keyRegistry.set(keyHash, subject)
+        }
         return subject.subscribe(observer)
     }
 
@@ -58,6 +64,10 @@ export class KeyboardManager {
         }
         const validKeyRegex = /^[a-zA-Z0-9 `~!@#$%^&*()\-_=+\[\]{}\\|;:'",.<>\/?]+$/;
         return validKeyRegex.test(key)
+    }
+
+    hashKeys(keys: string[]): string {
+        return keys.sort().join('\n')
     }
 }
 
