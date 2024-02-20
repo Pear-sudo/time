@@ -3,7 +3,7 @@ import {Observer, Subject, Subscription} from "rxjs";
 
 export class KeyboardManager {
     private activeKeys = new Set<string>
-    private keyRegistry: Map<string, Subject<any>> = new Map()
+    private keyRegistry: Map<string, Subject<KeyProto>> = new Map()
 
     constructor() {
         console.log('Initializing keyboard manager...')
@@ -29,7 +29,7 @@ export class KeyboardManager {
         const keyHash = this.hashKeys(keys)
         let subject = this.getSubject(keys)
         if (subject == undefined) {
-            subject = new Subject<any>()
+            subject = new Subject<KeyProto>()
             this.keyRegistry.set(keyHash, subject)
         }
         return subject.subscribe(observer)
@@ -48,7 +48,7 @@ export class KeyboardManager {
     private checkKeys() {
         const subject = this.getSubject(this.activeKeys)
         if (subject != undefined) {
-            subject.next(this.activeKeys)
+            subject.next({keys: this.activeKeys})
         }
     }
 
@@ -78,6 +78,10 @@ export class KeyboardManager {
         const keyHash = this.hashKeys(keys)
         return this.keyRegistry.get(keyHash)
     }
+}
+
+interface KeyProto {
+    keys: Set<string>
 }
 
 export type SpecialKey =
