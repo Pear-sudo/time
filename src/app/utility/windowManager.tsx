@@ -49,6 +49,7 @@ export class WindowManager {
         const win = new Win(op)
 
         this.vMap.set(key, win)
+        this.focusedWindow = win
 
         this.updateUi()
         if (WindowManager.logMode) {
@@ -90,6 +91,10 @@ export class WindowManager {
         if (this.vMap.has(handle)) {
             this.vMap.delete(handle)
             this.updateUi()
+            const count = this.vMap.size
+            if (count > 0) {
+                this.focusedWindow = Array.from(this.vMap.values())[count - 1]
+            }
         }
     }
 
