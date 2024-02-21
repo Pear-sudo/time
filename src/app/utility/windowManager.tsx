@@ -2,6 +2,7 @@ import React, {JSX, useEffect, useMemo, useRef, useState} from "react";
 import {DisplayContextObj} from "@/app/model/displayContextObj";
 import {genNums} from "@/app/utility/lanUtil";
 import {KeyboardManager} from "@/app/utility/KeyboardManager";
+import {Observer, Subscription} from "rxjs";
 
 // @ts-ignore
 export const DisplayContext = React.createContext<{ displayContextObj: DisplayContextObj, updateContext: React.Dispatch<React.SetStateAction<DisplayContextObj>> } >(undefined)
@@ -100,6 +101,10 @@ export class WindowManager {
 
     private closeAll() {
 
+    }
+
+    registerKeys(controller: WindowController, keys: string[], observer: Partial<Observer<any>>): Subscription | void {
+        WindowManager.keyboardManager.registerKeys(keys, observer, controller.handle)
     }
 
     private generateWindows(): JSX.Element[] {
@@ -409,6 +414,10 @@ export class WindowController {
 
     closeWindow(): void {
         this.windowManager.closeWindow(this)
+    }
+
+    registerKeys(keys: string[], observer: Partial<Observer<any>>): Subscription | void {
+        this.windowManager.registerKeys(this, keys, observer)
     }
 }
 

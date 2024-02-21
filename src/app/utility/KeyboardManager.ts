@@ -22,7 +22,7 @@ export class KeyboardManager {
         this.checkKeysAfterUp()
     }
 
-    registerKeys(keys: string[], observer: Partial<Observer<any>>): Subscription | void {
+    registerKeys(keys: string[], observer: Partial<Observer<any>>, scope: string | undefined = undefined): Subscription | void {
         if (!this.verifyKeys(keys)) {
             return
         }
