@@ -4,9 +4,18 @@ import {Observer, Subject, Subscription} from "rxjs";
 export class KeyboardManager {
     private activeKeys = new Set<string>
     private keyRegistry: Map<string, Subject<KeyProto>> = new Map()
+    private _currentWindow: string = ''
 
     constructor() {
         console.log('Initializing keyboard manager...')
+    }
+
+    set currentWindow(key: string) {
+        this._currentWindow = key
+    }
+
+    get currentWindow(): string {
+        return this._currentWindow
     }
 
     keyDown(e: React.KeyboardEvent): void {

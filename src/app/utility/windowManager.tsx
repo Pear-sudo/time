@@ -23,7 +23,7 @@ export class WindowManager {
     private currentZ: number = this.baseZ
 
     private readonly vMap: Map<string, Win> = new Map()
-    private focusedWindow: Win | undefined
+    private _focusedWindow: Win | undefined
 
     private setUiDate: React.Dispatch<React.SetStateAction<Date>> | undefined
 
@@ -36,6 +36,15 @@ export class WindowManager {
             WindowManager._ins = this
         }
         return WindowManager._ins
+    }
+
+    private set focusedWindow(w: Win) {
+        this._focusedWindow = w
+        WindowManager.keyboardManager.currentWindow = w.key_s
+    }
+
+    private get focusedWindow(): Win | undefined {
+        return this._focusedWindow
     }
 
     /**
