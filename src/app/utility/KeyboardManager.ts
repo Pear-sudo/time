@@ -3,7 +3,7 @@ import {Observer, Subject, Subscription} from "rxjs";
 
 export class KeyboardManager {
     private activeKeys = new Set<string>
-    private keyRegistry: Map<string, Subject<KeyProto>> = new Map()
+    private keyRegistry: Map<MapKey, Subject<KeyProto>> = new Map()
     private _currentWindow: string = ''
 
     constructor() {
@@ -35,11 +35,14 @@ export class KeyboardManager {
         if (!this.verifyKeys(keys)) {
             return
         }
+
         const keyHash = this.hashKeys(keys)
+        const mapKey: MapKey = {keyHash: keyHash, scope: scope}
+
         let subject = this.getSubject(keys)
         if (subject == undefined) {
             subject = new Subject<KeyProto>()
-            this.keyRegistry.set(keyHash, subject)
+            this.keyRegistry.set(mapKey, subject)
         }
         return subject.subscribe(observer)
     }
@@ -84,13 +87,23 @@ export class KeyboardManager {
     }
 
     private getSubject(keys: string[] | Set<string>) {
+        const mapKey = this.constructMapKey(keys)
+        return this.keyRegistry.get(mapKey)
+    }
+
+    private constructMapKey(keys: string[] | Set<string>): MapKey {
         const keyHash = this.hashKeys(keys)
-        return this.keyRegistry.get(keyHash)
+        return {keyHash: keyHash, scope: this.currentWindow}
     }
 }
 
 interface KeyProto {
     keys: Set<string>
+}
+
+interface MapKey {
+    keyHash: string,
+    scope: string | undefined
 }
 
 export type SpecialKey =
