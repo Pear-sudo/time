@@ -13,9 +13,12 @@ import {Scheduler} from "@/app/utility/scheduler";
 import {CalendarEventExt} from "@/app/model/eventData";
 import {DisplayContextObj} from "@/app/model/displayContextObj";
 import {Theme} from "@/app/theme";
-import {DisplayContext} from "@/app/utility/windowManager";
+import {DisplayContext, WindowManager} from "@/app/utility/windowManager";
 import {Subscription} from "rxjs";
 import {DaysHeader} from "@/app/elements/daysHeader";
+import {ImageButton} from "@/app/elements/ui/buttons/imageButton";
+import settingsIcon from "@/app/icons/settings-svgrepo-com.svg"
+import {Settings} from "@/app/elements/settings";
 
 export function Display(): JSX.Element {
     const {displayContextObj, updateContext} = useContext(DisplayContext)
@@ -141,6 +144,17 @@ export function Display(): JSX.Element {
         return [...rollDates(dates, -1), ...dates, ...rollDates(dates, 1)]
     }
 
+    function onSettingsClick() {
+        const wm = new WindowManager()
+        const wc = wm.createWindow({
+            key: "settings",
+            view: <Settings/>,
+            fullScreen: true,
+            header: true,
+            rounded: true
+        })
+    }
+
     displayContext.onDayCountOrAnchorChange = onDayCountOrAnchorChange
 
     const renderDates = getRenderDates(displayedDates)
@@ -165,6 +179,7 @@ export function Display(): JSX.Element {
                     <div className={'flex-grow'}>
                         <YearHint dates={getDisplayedDates()} hasMonthlyCalendar={true}/>
                     </div>
+                    <ImageButton src={settingsIcon} onClick={onSettingsClick}/>
                 </div>
                 <DaysHeader dates={getDisplayedDates()} renderDates={renderDates}
                             overScrollPercentage={overScrollPercentage}/>
