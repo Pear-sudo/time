@@ -482,6 +482,40 @@ function WindowHeader(prop: { win: Win }): JSX.Element {
     )
 }
 
+function TrafficLights(prop: {}): JSX.Element {
+    return (
+        <div>
+            <TrafficLightRed/>
+            <TrafficLightYellow/>
+            <TrafficLightGreen/>
+        </div>
+    )
+}
+
+function TrafficLightRed(): JSX.Element {
+    return (
+        <div>
+
+        </div>
+    )
+}
+
+function TrafficLightYellow(): JSX.Element {
+    return (
+        <div>
+
+        </div>
+    )
+}
+
+function TrafficLightGreen(): JSX.Element {
+    return (
+        <div>
+
+        </div>
+    )
+}
+
 function ThreeDots(prop: {}): JSX.Element {
     // mimic iOS's window manager
     return (
