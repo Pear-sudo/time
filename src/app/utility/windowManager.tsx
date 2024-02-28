@@ -474,9 +474,10 @@ function WindowHeader(prop: { win: Win }): JSX.Element {
     }
 
     return (
-        <div className={'w-full h-4 bg-gray-400 cursor-move flex justify-center items-center'}
+        <div className={'w-full h-4 bg-gray-400 cursor-move grid grid-cols-3 items-center'}
              onMouseDown={handleOnMouseDown}
              onTouchStart={onTouchStart}>
+            <TrafficLights/>
             <ThreeDots/>
         </div>
     )
@@ -484,7 +485,7 @@ function WindowHeader(prop: { win: Win }): JSX.Element {
 
 function TrafficLights(prop: {}): JSX.Element {
     return (
-        <div>
+        <div className={'h-1/2 flex gap-0.5'}>
             <TrafficLightRed/>
             <TrafficLightYellow/>
             <TrafficLightGreen/>
@@ -494,7 +495,7 @@ function TrafficLights(prop: {}): JSX.Element {
 
 function TrafficLightRed(): JSX.Element {
     return (
-        <div>
+        <div className={'rounded-full bg-red-600 h-full aspect-square cursor-default'}>
 
         </div>
     )
@@ -502,7 +503,7 @@ function TrafficLightRed(): JSX.Element {
 
 function TrafficLightYellow(): JSX.Element {
     return (
-        <div>
+        <div className={'rounded-full bg-yellow-600 h-full aspect-square cursor-default'}>
 
         </div>
     )
@@ -510,7 +511,7 @@ function TrafficLightYellow(): JSX.Element {
 
 function TrafficLightGreen(): JSX.Element {
     return (
-        <div>
+        <div className={'rounded-full bg-green-600 h-full aspect-square cursor-default'}>
 
         </div>
     )
@@ -519,7 +520,7 @@ function TrafficLightGreen(): JSX.Element {
 function ThreeDots(prop: {}): JSX.Element {
     // mimic iOS's window manager
     return (
-        <div className={'h-1/4 w-fit flex space-x-0.5'}>
+        <div className={'h-1/4 w-fit flex space-x-0.5 justify-self-center'}>
             {genNums({count: 3}).map((value) => (
                 <div className={'h-full aspect-square bg-gray-700 rounded-full'} key={`dots-${value}`}></div>
             ))}
