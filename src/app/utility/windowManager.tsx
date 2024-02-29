@@ -289,6 +289,7 @@ export interface CreateWindowOp {
 }
 
 class Win {
+    // for internal use only
     get topSetter(): React.Dispatch<React.SetStateAction<string>> | undefined {
         return this._topSetter;
     }
@@ -407,9 +408,14 @@ class Win {
     get cTime(): Date {
         return this._cTime;
     }
+
+    getController() {
+        return new WindowController(this.key_s)
+    }
 }
 
 export class WindowController {
+    // for external control
     private readonly _handle: string
     private readonly windowManager: WindowManager = new WindowManager()
 
@@ -477,31 +483,39 @@ function WindowHeader(prop: { win: Win }): JSX.Element {
         <div className={'w-full h-4 bg-gray-400 cursor-move grid grid-cols-3 items-center'}
              onMouseDown={handleOnMouseDown}
              onTouchStart={onTouchStart}>
-            <TrafficLights/>
+            <TrafficLights win={win}/>
             <ThreeDots/>
         </div>
     )
 }
 
-function TrafficLights(prop: {}): JSX.Element {
+function TrafficLights(prop: { win: Win }): JSX.Element {
+    const win = prop.win
     return (
         <div className={'h-1/2 flex gap-0.5'}>
-            <TrafficLightRed/>
-            <TrafficLightYellow/>
-            <TrafficLightGreen/>
+            <TrafficLightRed win={win}/>
+            <TrafficLightYellow win={win}/>
+            <TrafficLightGreen win={win}/>
         </div>
     )
 }
 
-function TrafficLightRed(): JSX.Element {
+function TrafficLightRed(prop: { win: Win }): JSX.Element {
+    const win = prop.win
+
+    function handleOnClick() {
+        win.getController().closeWindow()
+    }
+
     return (
-        <div className={'rounded-full bg-red-600 h-full aspect-square cursor-default'}>
+        <div className={'rounded-full bg-red-600 h-full aspect-square cursor-default'} onClick={handleOnClick}>
 
         </div>
     )
 }
 
-function TrafficLightYellow(): JSX.Element {
+function TrafficLightYellow(prop: { win: Win }): JSX.Element {
+    const win = prop.win
     return (
         <div className={'rounded-full bg-yellow-600 h-full aspect-square cursor-default'}>
 
@@ -509,7 +523,8 @@ function TrafficLightYellow(): JSX.Element {
     )
 }
 
-function TrafficLightGreen(): JSX.Element {
+function TrafficLightGreen(prop: { win: Win }): JSX.Element {
+    const win = prop.win
     return (
         <div className={'rounded-full bg-green-600 h-full aspect-square cursor-default'}>
 
