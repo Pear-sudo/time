@@ -500,7 +500,7 @@ function TrafficLights(prop: { win: Win }): JSX.Element {
     )
 }
 
-function TrafficLightRed(prop: { win: Win }): JSX.Element {
+function TrafficLightRed(prop: { win: Win, disable?: boolean }): JSX.Element {
     const win = prop.win
 
     function handleOnClick() {
@@ -508,25 +508,29 @@ function TrafficLightRed(prop: { win: Win }): JSX.Element {
     }
 
     return (
-        <div className={'rounded-full bg-red-600 h-full aspect-square cursor-default'} onClick={handleOnClick}>
+        <div
+            className={`rounded-full ${prop.disable ? 'bg-gray-600' : 'bg-red-600'} h-full aspect-square cursor-default`}
+            onClick={handleOnClick}>
 
         </div>
     )
 }
 
-function TrafficLightYellow(prop: { win: Win }): JSX.Element {
+function TrafficLightYellow(prop: { win: Win, disable?: boolean }): JSX.Element {
     const win = prop.win
     return (
-        <div className={'rounded-full bg-yellow-600 h-full aspect-square cursor-default'}>
+        <div
+            className={`rounded-full ${prop.disable ? 'bg-gray-600' : 'bg-yellow-600'} h-full aspect-square cursor-default`}>
 
         </div>
     )
 }
 
-function TrafficLightGreen(prop: { win: Win }): JSX.Element {
+function TrafficLightGreen(prop: { win: Win, disable?: boolean }): JSX.Element {
     const win = prop.win
     return (
-        <div className={'rounded-full bg-green-600 h-full aspect-square cursor-default'}>
+        <div
+            className={`rounded-full ${prop.disable ? 'bg-gray-600' : 'bg-green-600'} h-full aspect-square cursor-default`}>
 
         </div>
     )
