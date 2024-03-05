@@ -44,7 +44,7 @@ export function DateSelector(prop: {
                                  parentData={new StateClass(date, setDate, {didSet: handleDateSelection})}/>
             ),
             key: wKey,
-            handleOutSideClick: handleOutsideClick,
+            onWindowClose: handleOutsideClick,
             header: true,
             rounded: true
         })
