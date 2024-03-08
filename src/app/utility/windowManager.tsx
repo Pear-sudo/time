@@ -76,10 +76,10 @@ export class WindowManager {
         }
     }
 
-    setOnWindowClose(key: string, f: (wc: WindowController, event: React.MouseEvent) => void): boolean {
+    setOnOutsideClick(key: string, f: (wc: WindowController, event: React.MouseEvent) => void): boolean {
         const win = this.vMap.get(key)
         if (win) {
-            win.onWindowClose = f
+            win.handleOutsideClick = f
             return true
         } else {
             return false
@@ -132,11 +132,11 @@ export class WindowManager {
         }
     }
 
-    private generateOnWindowClose(win: Win): (event: React.MouseEvent) => void {
+    private generateHandleOutsideClick(win: Win): (event: React.MouseEvent) => void {
         return function (event: React.MouseEvent) {
-            if (win.onWindowClose) {
+            if (win.handleOutsideClick) {
                 const controller = new WindowController(win.key_s)
-                win.onWindowClose(controller, event)
+                win.handleOutsideClick(controller, event)
             }
         }
     }
@@ -149,7 +149,7 @@ export class WindowManager {
             bg-white in the second div is important, otherwise the first div background will penetrate to some elements which does not have bg color
         * */
         return (
-            <WindowView win={win} z={this.currentZ} onWindowClose={this.generateOnWindowClose(win)}
+            <WindowView win={win} z={this.currentZ} handleOutsideClick={this.generateHandleOutsideClick(win)}
                         key={win.key_s}/>
         )
     }
@@ -281,7 +281,7 @@ export interface CreateWindowOp {
     view: JSX.Element,
     key: string
     priority?: number
-    onWindowClose?: (wc: WindowController, event: React.MouseEvent) => void,
+    handleOutSideClick?: (wc: WindowController, event: React.MouseEvent) => void,
     fullScreen?: boolean
     background?: string
     rounded?: boolean
@@ -310,12 +310,12 @@ class Win {
         return this._op;
     }
 
-    get onWindowClose(): ((wc: WindowController, event: React.MouseEvent) => void) | undefined {
-        return this.op.onWindowClose;
+    get handleOutsideClick(): ((wc: WindowController, event: React.MouseEvent) => void) | undefined {
+        return this.op.handleOutSideClick;
     }
 
-    set onWindowClose(value: ((wc: WindowController, event: React.MouseEvent) => void) | undefined) {
-        this.op.onWindowClose = value;
+    set handleOutsideClick(value: ((wc: WindowController, event: React.MouseEvent) => void) | undefined) {
+        this.op.handleOutSideClick = value;
     }
 
     get key_s(): string {
@@ -436,7 +436,7 @@ export class WindowController {
     }
 }
 
-function WindowView(prop: { win: Win, z: number, onWindowClose: (event: React.MouseEvent) => void }): JSX.Element {
+function WindowView(prop: { win: Win, z: number, handleOutsideClick: (event: React.MouseEvent) => void }): JSX.Element {
     // todo make window resizable, if that's what the user wants
     const [top, setTop] = useState(prop.win.top)
     const [left, setLeft] = useState(prop.win.left)
@@ -450,7 +450,7 @@ function WindowView(prop: { win: Win, z: number, onWindowClose: (event: React.Mo
         <div>
             <div style={{zIndex: z, width: '100dvw', height: '100dvh'}}
                  className={`fixed top-0 left-0 cursor-default bg-black opacity-50`}
-                 onClick={prop.onWindowClose}
+                 onClick={prop.handleOutsideClick}
             >
             </div>
             <div className={`-translate-x-1/2 -translate-y-1/2 fixed bg-white ${win.fullScreen ? 'w-full' : ''}

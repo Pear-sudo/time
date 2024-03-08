@@ -210,7 +210,7 @@ export function WrappedTimeSelector(prop: {
         wController = wm.createWindow({
             view: <TimeSelector parentData={new StateClass(date, setDate, {didSet: handleDidSet})}/>,
             key: wKey,
-            onWindowClose: handleOutsideClick,
+            handleOutSideClick: handleOutsideClick,
             header: true,
             rounded: true
         })

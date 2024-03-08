@@ -131,13 +131,13 @@ function CalendarEventCreator(prop: {
                 </div>,
             key: 'colorList',
             rounded: true,
-            onWindowClose: (wc: WindowController) => wc.closeWindow(),
+            handleOutSideClick: (wc: WindowController) => wc.closeWindow(),
             header: true
         })
     }
 
     const windowManager = new WindowManager()
-    windowManager.setOnWindowClose('logCreator', handleOutsideClick)
+    windowManager.setOnOutsideClick('logCreator', handleOutsideClick)
 
     const isNewCalendarEvent = !prop.existingCE || prop.pending
 
