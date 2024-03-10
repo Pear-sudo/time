@@ -98,7 +98,10 @@ export class WindowManager {
     }
 
     private closeW(handle: string) {
-        if (this.vMap.has(handle)) {
+        const win = this.vMap.get(handle)
+        if (win != undefined) {
+            win.onWindowClose?.()
+
             this.vMap.delete(handle)
             this.updateUi()
             const count = this.vMap.size
@@ -282,6 +285,7 @@ export interface CreateWindowOp {
     key: string
     priority?: number
     handleOutSideClick?: (wc: WindowController, event: React.MouseEvent) => void,
+    onWindowClose?: () => void,
     fullScreen?: boolean
     background?: string
     rounded?: boolean
@@ -290,6 +294,7 @@ export interface CreateWindowOp {
 
 class Win {
     // for internal use only
+    // serve as a data structure to store window related configurations
     get topSetter(): React.Dispatch<React.SetStateAction<string>> | undefined {
         return this._topSetter;
     }
@@ -316,6 +321,14 @@ class Win {
 
     set handleOutsideClick(value: ((wc: WindowController, event: React.MouseEvent) => void) | undefined) {
         this.op.handleOutSideClick = value;
+    }
+
+    get onWindowClose(): (() => void) | undefined {
+        return this.op.onWindowClose
+    }
+
+    set onWindowClose(f: (() => void) | undefined) {
+        this.op.onWindowClose = f
     }
 
     get key_s(): string {
