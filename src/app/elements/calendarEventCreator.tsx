@@ -41,6 +41,10 @@ function CalendarEventCreator(prop: {
 
     function handleOutsideClick(wc: WindowController, event: React.MouseEvent) {
         event.stopPropagation()
+        handleCancellation()
+    }
+
+    function handleCancellation() {
         if (prop.callback) {
             prop.callback(PopupResult.Cancelled, undefined)
         }
@@ -137,7 +141,9 @@ function CalendarEventCreator(prop: {
     }
 
     const windowManager = new WindowManager()
-    windowManager.setOnOutsideClick('logCreator', handleOutsideClick)
+    const key = 'logCreator'
+    windowManager.setOnOutsideClick(key, handleOutsideClick)
+    windowManager.setOnWindowClose(key, handleCancellation)
 
     const isNewCalendarEvent = !prop.existingCE || prop.pending
 
