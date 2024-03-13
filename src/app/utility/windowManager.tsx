@@ -100,9 +100,10 @@ export class WindowManager {
     private closeW(handle: string) {
         const win = this.vMap.get(handle)
         if (win != undefined) {
-            win.onWindowClose?.()
-
             this.vMap.delete(handle)
+            // this must come first, otherwise if the user maliciously call close window function in onWindowClose,
+            // an infinite loop will be created
+            win.onWindowClose?.()
             this.updateUi()
             const count = this.vMap.size
             if (count > 0) {
