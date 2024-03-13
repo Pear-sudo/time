@@ -13,7 +13,7 @@ import {Scheduler} from "@/app/utility/scheduler";
 import {CalendarEventExt} from "@/app/model/eventData";
 import {DisplayContextObj} from "@/app/model/displayContextObj";
 import {Theme} from "@/app/theme";
-import {DisplayContext, WindowManager} from "@/app/utility/windowManager";
+import {DisplayContext, WindowController, WindowManager} from "@/app/utility/windowManager";
 import {Subscription} from "rxjs";
 import {DaysHeader} from "@/app/elements/daysHeader";
 import {ImageButton} from "@/app/elements/ui/buttons/imageButton";
@@ -151,7 +151,10 @@ export function Display(): JSX.Element {
             view: <Settings/>,
             fullScreen: true,
             header: true,
-            rounded: true
+            rounded: true,
+            handleOutSideClick: (wc: WindowController, event: React.MouseEvent) => {
+                wc.closeWindow()
+            }
         })
     }
 
