@@ -86,6 +86,16 @@ export class WindowManager {
         }
     }
 
+    setOnWindowClose(key: string, f: () => void): boolean {
+        const win = this.vMap.get(key)
+        if (win) {
+            win.onWindowClose = f
+            return true
+        } else {
+            return false
+        }
+    }
+
     closeWindows(...controllers: WindowController[]) {
         for (const controller of controllers) {
             this.closeWindow(controller)
