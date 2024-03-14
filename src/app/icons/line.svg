@@ -1,0 +1,4 @@
+<svg width="200" height="100" xmlns="http://www.w3.org/2000/svg">
+    <!-- Transparent background is default for SVG, so no need to specify -->
+    <line x1="10" y1="50" x2="190" y2="50" stroke="#000" stroke-width="10"/>
+</svg>
