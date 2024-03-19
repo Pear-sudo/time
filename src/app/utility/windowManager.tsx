@@ -4,6 +4,11 @@ import {genNums} from "@/app/utility/lanUtil";
 import {KeyboardManager} from "@/app/utility/KeyboardManager";
 import {Observer, Subscription} from "rxjs";
 
+import crossIcon from "@/app/icons/cross.svg"
+import expandIcon from "@/app/icons/expand.svg"
+import lineIcon from "@/app/icons/line.svg"
+import Image from "next/image";
+
 // @ts-ignore
 export const DisplayContext = React.createContext<{ displayContextObj: DisplayContextObj, updateContext: React.Dispatch<React.SetStateAction<DisplayContextObj>> } >(undefined)
 
@@ -533,9 +538,9 @@ function TrafficLightRed(prop: { win: Win, disable?: boolean }): JSX.Element {
 
     return (
         <div
-            className={`rounded-full ${prop.disable ? 'bg-gray-600' : 'bg-red-600'} h-full aspect-square cursor-default`}
+            className={`rounded-full ${prop.disable ? 'bg-gray-600' : 'bg-red-600'} h-full aspect-square cursor-default flex justify-center items-center`}
             onClick={handleOnClick}>
-
+            <Image src={crossIcon} alt={''} width={5} height={5}/>
         </div>
     )
 }
@@ -544,8 +549,8 @@ function TrafficLightYellow(prop: { win: Win, disable?: boolean }): JSX.Element 
     const win = prop.win
     return (
         <div
-            className={`rounded-full ${prop.disable ? 'bg-gray-600' : 'bg-yellow-600'} h-full aspect-square cursor-default`}>
-
+            className={`rounded-full ${prop.disable ? 'bg-gray-600' : 'bg-yellow-600'} h-full aspect-square cursor-default flex justify-center items-center`}>
+            <Image src={lineIcon} alt={''} width={5} height={5}/>
         </div>
     )
 }
@@ -554,8 +559,8 @@ function TrafficLightGreen(prop: { win: Win, disable?: boolean }): JSX.Element {
     const win = prop.win
     return (
         <div
-            className={`rounded-full ${prop.disable ? 'bg-gray-600' : 'bg-green-600'} h-full aspect-square cursor-default`}>
-
+            className={`rounded-full ${prop.disable ? 'bg-gray-600' : 'bg-green-600'} h-full aspect-square cursor-default flex justify-center items-center`}>
+            <Image src={expandIcon} alt={''} width={5} height={5}/>
         </div>
     )
 }
