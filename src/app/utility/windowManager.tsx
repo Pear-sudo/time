@@ -530,37 +530,93 @@ function TrafficLights(prop: { win: Win }): JSX.Element {
 }
 
 function TrafficLightRed(prop: { win: Win, disable?: boolean }): JSX.Element {
+    const [isImageVisible, setIsImageVisible] = useState(false)
     const win = prop.win
 
     function handleOnClick() {
         win.getController().closeWindow()
     }
 
+    function handleOnMouseOver() {
+        if (!isImageVisible) {
+            setIsImageVisible(true)
+        }
+    }
+
+    function handleOnMouseLeave() {
+        if (isImageVisible) {
+            setIsImageVisible(false)
+        }
+    }
+
     return (
         <div
             className={`rounded-full ${prop.disable ? 'bg-gray-600' : 'bg-red-600'} h-full aspect-square cursor-default flex justify-center items-center`}
             onClick={handleOnClick}>
-            <Image src={crossIcon} alt={''} width={5} height={5}/>
+            <div className={'w-full h-full flex justify-center items-center'} onMouseOver={handleOnMouseOver}
+                 onMouseLeave={handleOnMouseLeave}>
+                {/* wrap image in a div so that hover works independently with image size*/}
+                <Image src={crossIcon} alt={''} width={5} height={5}
+                       style={{opacity: isImageVisible ? 1 : 0, transition: 'opacity 0.5s ease'}}/>
+            </div>
         </div>
     )
 }
 
 function TrafficLightYellow(prop: { win: Win, disable?: boolean }): JSX.Element {
+    const [isImageVisible, setIsImageVisible] = useState(false)
     const win = prop.win
+
+    function handleOnMouseOver() {
+        if (!isImageVisible) {
+            setIsImageVisible(true)
+        }
+    }
+
+    function handleOnMouseLeave() {
+        if (isImageVisible) {
+            setIsImageVisible(false)
+        }
+    }
+
     return (
         <div
             className={`rounded-full ${prop.disable ? 'bg-gray-600' : 'bg-yellow-600'} h-full aspect-square cursor-default flex justify-center items-center`}>
-            <Image src={lineIcon} alt={''} width={5} height={5}/>
+            <div className={'w-full h-full flex justify-center items-center'} onMouseOver={handleOnMouseOver}
+                 onMouseLeave={handleOnMouseLeave}>
+                {/* wrap image in a div so that hover works independently with image size*/}
+                <Image src={lineIcon} alt={''} width={5} height={5}
+                       style={{opacity: isImageVisible ? 1 : 0, transition: 'opacity 0.5s ease'}}/>
+            </div>
         </div>
     )
 }
 
 function TrafficLightGreen(prop: { win: Win, disable?: boolean }): JSX.Element {
+    const [isImageVisible, setIsImageVisible] = useState(false)
     const win = prop.win
+
+    function handleOnMouseOver() {
+        if (!isImageVisible) {
+            setIsImageVisible(true)
+        }
+    }
+
+    function handleOnMouseLeave() {
+        if (isImageVisible) {
+            setIsImageVisible(false)
+        }
+    }
+
     return (
         <div
             className={`rounded-full ${prop.disable ? 'bg-gray-600' : 'bg-green-600'} h-full aspect-square cursor-default flex justify-center items-center`}>
-            <Image src={expandIcon} alt={''} width={5} height={5}/>
+            <div className={'w-full h-full flex justify-center items-center'} onMouseOver={handleOnMouseOver}
+                 onMouseLeave={handleOnMouseLeave}>
+                {/* wrap image in a div so that hover works independently with image size*/}
+                <Image src={expandIcon} alt={''} width={5} height={5}
+                       style={{opacity: isImageVisible ? 1 : 0, transition: 'opacity 0.5s ease'}}/>
+            </div>
         </div>
     )
 }
